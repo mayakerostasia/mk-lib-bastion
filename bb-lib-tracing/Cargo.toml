@@ -7,11 +7,6 @@ edition = "2021"
 # name = "metric_test"
 # metric_test = "metric_test/main.rs"
 
-[lib]
-name = "rs_nico_tracing"
-path = "src/lib.rs"
-
-
 [dependencies]
 anyhow = { workspace = true }
 # color-eyre = "0.6.2"
