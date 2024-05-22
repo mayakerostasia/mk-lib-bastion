@@ -1,0 +1,24 @@
+[package]
+name = "bb-lib-config"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { workspace = true, features = ["derive"] }
+config = "0.14.0"
+serde = {  workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+
+[features]
+dev = []
+surreal = []
+swimlane = []
+jira = []
+autotask = []
+
+[dev-dependencies]
+cargo-make = { workspace = true }
+
+# [workspace]
+# resolver = "2"
+# members = [ "cfg_creator" ]
