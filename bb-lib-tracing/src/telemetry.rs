@@ -64,14 +64,14 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
     // let log_trace_bridge = OpenTelemetryTracingBridge::new(log_provider);
 
     // TODO: Logs directory should be configurable
-    let debug_file = rolling::daily("./logs", "debug");
+    // let debug_file = rolling::daily("./logs", "debug");
     // Log warnings and errors to a separate file. Since we expect these events
     // to occur less frequently, roll that file on a daily basis instead.
     // TODO: Logs directory should be configurable
-    let warn_file = rolling::daily("./logs", "warnings").with_max_level(tracing::Level::WARN);
+    // let warn_file = rolling::daily("./logs", "warnings").with_max_level(tracing::Level::WARN);
     //
     // TODO: Logs directory should be configurable
-    let all_files = debug_file.and(warn_file);
+    // let all_files = debug_file.and(warn_file);
 
     tracing_subscriber::registry()
         // .with(logging_bridge)
