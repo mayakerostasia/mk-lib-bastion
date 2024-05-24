@@ -187,8 +187,8 @@ pub async fn test_rest_call(client: &TestClient) {
 
 pub async fn test_paged_call(client: &TestClient) {
     let rest = Rest::new(client);
-    let (mut paged, paged_control) = gen_echo_call(0);   
-    let (mut call, call_control) = gen_echo_call(0); 
+    let (paged, _paged_control) = gen_echo_call(0);   
+    let (mut call, _call_control) = gen_echo_call(0); 
 
     let paged_response = rest.paged_call(client, &paged, Some(100), Some(10)).await.unwrap();
     assert_eq!(paged_response.0, StatusCode::OK);
