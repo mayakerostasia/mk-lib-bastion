@@ -5,11 +5,11 @@ use std::ops::{Add, AddAssign};
 
 use futures::stream::FuturesOrdered;
 use futures::StreamExt;
-use tracing::{debug, warn};
-use serde::{ self, Deserialize, Serialize };
 use reqwest::header::{self, HeaderMap};
 use reqwest::StatusCode;
+use serde::{self, Deserialize, Serialize};
 use serde_json::Value;
+use tracing::{debug, warn};
 
 use crate::traits::{RestCall, RestClient};
 use crate::{paged::Paged, RestSvcError};
@@ -33,10 +33,16 @@ impl Add for IntermediateResponse {
 
     fn add(self, other: Self) -> Self {
         let mut new = self.clone();
-        let mut _resp = serde_json::from_value::<HashMap<String, Value>>(self.response.clone()).unwrap();
-        let _other = serde_json::from_value::<HashMap<String, Value>>(other.response.clone()).unwrap();
-        _resp.get_mut("response").expect(" Failed to unwrap response during add").as_array_mut().unwrap().extend(
-            _other["response"].as_array().unwrap().clone());
+        let mut _resp =
+            serde_json::from_value::<HashMap<String, Value>>(self.response.clone()).unwrap();
+        let _other =
+            serde_json::from_value::<HashMap<String, Value>>(other.response.clone()).unwrap();
+        _resp
+            .get_mut("response")
+            .expect(" Failed to unwrap response during add")
+            .as_array_mut()
+            .unwrap()
+            .extend(_other["response"].as_array().unwrap().clone());
         new.response = serde_json::to_value(_resp).unwrap();
         new.paged = other.paged;
         new
@@ -48,13 +54,11 @@ impl AddAssign for IntermediateResponse {
         let mut _resp = serde_json::from_value::<Vec<Value>>(self.response.clone()).unwrap();
         let _other = serde_json::from_value::<Vec<Value>>(other.response.clone()).unwrap();
 
-        _resp.extend( _other );
+        _resp.extend(_other);
         self.response = serde_json::to_value(_resp).unwrap();
         self.paged = other.paged;
     }
-
 }
-
 
 fn rest_ok(response: &reqwest::Response) -> bool {
     response.status().is_success()
@@ -87,18 +91,16 @@ pub struct Rest {
 impl Rest {
     fn _build_headers(headers: Option<HeaderMap>) -> header::HeaderMap {
         let mut headers = headers.unwrap_or_else(HeaderMap::new);
-        headers.insert(
-            header::ACCEPT,
-            "application/json".parse().unwrap(),
-        );
-        headers.insert(
-            header::CONTENT_TYPE,
-            "application/json".parse().unwrap(),
-        );
+        headers.insert(header::ACCEPT, "application/json".parse().unwrap());
+        headers.insert(header::CONTENT_TYPE, "application/json".parse().unwrap());
         headers
     }
 
-    pub async fn call(&self, client: &impl RestClient, call: &impl RestCall) -> Result<RestSvcResp, RestSvcError> {
+    pub async fn call(
+        &self,
+        client: &impl RestClient,
+        call: &impl RestCall,
+    ) -> Result<RestSvcResp, RestSvcError> {
         let url = format!("{}{}", client.base_url(), call.path());
         let mut req = client.auth(self.client.request(call.method(), &url));
 
@@ -115,25 +117,45 @@ impl Rest {
         debug!("<-- Response: {:#?}", &resp);
 
         if contentful_ok(&resp) {
-            Ok(RestSvcResp(resp.status(), resp.json::<Value>().await.expect("Whoops!")))
+            Ok(RestSvcResp(
+                resp.status(),
+                resp.json::<Value>().await.expect("Whoops!"),
+            ))
         } else if contentless_ok(&resp) {
             Ok(RestSvcResp(resp.status(), Value::Null))
         } else {
-            Err(RestSvcError::OtherError(format!("Failed Request: (status={}) (Content-length={:?}) content={:?}", resp.status(), resp.content_length(), resp.text().await?)))
+            Err(RestSvcError::OtherError(format!(
+                "Failed Request: (status={}) (Content-length={:?}) content={:?}",
+                resp.status(),
+                resp.content_length(),
+                resp.text().await?
+            )))
         }
     }
 
-    pub async fn paged_call(&self, client: &impl RestClient, call: &impl RestCall, abs_limit: Option<usize>, page_size: Option<usize>) -> Result<RestSvcResp, RestSvcError> {
-        let resp: IntermediateResponse = serde_json::from_value::<IntermediateResponse>(self.call(client, call).await?.1)?;
+    pub async fn paged_call(
+        &self,
+        client: &impl RestClient,
+        call: &impl RestCall,
+        abs_limit: Option<usize>,
+        page_size: Option<usize>,
+    ) -> Result<RestSvcResp, RestSvcError> {
+        let resp: IntermediateResponse =
+            serde_json::from_value::<IntermediateResponse>(self.call(client, call).await?.1)?;
         let new_rest_call = call.clone();
         // eprintln!("Resp: {:?}", resp);
         // eprintln!("New Call: {:?}", new_call);
         let mut ret_resp = resp.clone();
 
-        let calls = new_rest_call.paged(resp.clone(), abs_limit, page_size).unwrap_or_else(|| {
-            warn!("Failed to unwrap calls from paged call: {:?} \n Continuing!", resp.paged);
-            vec![]
-        });
+        let calls = new_rest_call
+            .paged(resp.clone(), abs_limit, page_size)
+            .unwrap_or_else(|| {
+                warn!(
+                    "Failed to unwrap calls from paged call: {:?} \n Continuing!",
+                    resp.paged
+                );
+                vec![]
+            });
         // eprintln!("Calls: {:?}", calls);
 
         // let mut page_iter = resp.paged.clone();
@@ -148,7 +170,7 @@ impl Rest {
             if let StatusCode::OK = new_resp.0 {
                 ret_resp += serde_json::from_value::<IntermediateResponse>(new_resp.1)?;
             }
-        };
+        }
 
         // todo!(r#"
         //     // let new_resp = self.call(client, &call).await?;
@@ -156,15 +178,18 @@ impl Rest {
         //     //     ret_resp += serde_json::from_value::<IntermediateResponse>(new_resp.1)?;
         //     // }
         // "#);
-        Ok(RestSvcResp(StatusCode::OK, serde_json::to_value(ret_resp).unwrap()))
-
-    } 
+        Ok(RestSvcResp(
+            StatusCode::OK,
+            serde_json::to_value(ret_resp).unwrap(),
+        ))
+    }
 
     pub fn new(client: &impl RestClient) -> Self {
-        Rest { client: reqwest::Client::builder()
-            .default_headers(Self::_build_headers(client.headers()))
-            .build()
-            .expect("Failed to create reqwest client")
+        Rest {
+            client: reqwest::Client::builder()
+                .default_headers(Self::_build_headers(client.headers()))
+                .build()
+                .expect("Failed to create reqwest client"),
         }
     }
 }

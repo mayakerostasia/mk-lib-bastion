@@ -11,23 +11,23 @@
 //! first subject name ( e.g. "greet.sue" )
 
 mod core;
-mod kong;
-mod kingkong;
-mod monkey;
 mod error;
+mod kingkong;
+mod kong;
+mod monkey;
 mod util;
 
 pub use anyhow::Error;
-pub use error::NSLibError; 
+pub use error::NSLibError;
 
-pub use kong::Kong;
-pub use kingkong::KingKong;
-pub use monkey::Monkey;
 pub use core::{
-    encoder::{Decoder, Encoder}, 
+    encoder::{Decoder, Encoder},
     frames::Frame,
     // BastionRequest, BastionReply,
 };
+pub use kingkong::KingKong;
+pub use kong::Kong;
+pub use monkey::Monkey;
 
 use util::boxed_future_generator;
-pub use util::{PinnedFuture, BoxedFutureFn, annotate};
+pub use util::{annotate, BoxedFutureFn, PinnedFuture};

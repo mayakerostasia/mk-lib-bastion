@@ -1,12 +1,12 @@
-use crate::{ ConfigType, get_export_config, resource };
-use opentelemetry_otlp::WithExportConfig;
-use tonic::transport::channel::ClientTlsConfig;
-use opentelemetry_sdk::trace::BatchConfig;
+use crate::{get_export_config, resource, ConfigType};
 use opentelemetry::trace::TraceError;
+use opentelemetry_otlp::WithExportConfig;
+use opentelemetry_sdk::trace::BatchConfig;
 use opentelemetry_sdk::{
     runtime,
     trace::{RandomIdGenerator, Sampler, SpanLimits, Tracer},
 };
+use tonic::transport::channel::ClientTlsConfig;
 // use sentry::Client;
 
 // fn http_exporter(endpoint: String) -> HttpExporterBuilder {
@@ -26,7 +26,7 @@ pub fn init_tracer(endpoint: String) -> anyhow::Result<Tracer, TraceError> {
         .with_tls_config(ClientTlsConfig::default())
         .with_protocol(opentelemetry_otlp::Protocol::Grpc)
         .with_export_config(get_export_config(endpoint, ConfigType::Traces));
-    
+
     opentelemetry_otlp::new_pipeline()
         .tracing()
         .with_trace_config(

@@ -2,14 +2,10 @@
 
 use opentelemetry::logs::LogError;
 
-use crate::{ get_export_config, resource, ConfigType };
+use crate::{get_export_config, resource, ConfigType};
 use opentelemetry_otlp::{HttpExporterBuilder, WithExportConfig};
 
-use opentelemetry_sdk::{
-    logs::Logger,
-    runtime,
-    trace::Tracer,
-};
+use opentelemetry_sdk::{logs::Logger, runtime, trace::Tracer};
 use tracing_appender::rolling;
 // use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
 use tracing_opentelemetry::OpenTelemetryLayer;
@@ -33,7 +29,7 @@ fn _http_exporter(endpoint: String) -> HttpExporterBuilder {
     exporter
 }
 
-fn init_logger(endpoint: String) -> anyhow::Result<Logger, LogError> {
+fn _nit_logger(endpoint: String) -> anyhow::Result<Logger, LogError> {
     // // HTTP exporter
     // let exporter = http_exporter(endpoint);
     // // GRPC exporter
@@ -132,12 +128,12 @@ pub fn initialize() -> anyhow::Result<OtelGuard> {
     println!("Initializing telemetry");
     let collector_endpoint: String =
         std::env::var("COLLECTOR_ENDPOINT").unwrap_or("http://localhost:4317".to_string());
-    let logs_endpoint: String =
-        std::env::var("LOGGER_ENDPOINT").unwrap_or(collector_endpoint.clone());
+    // let _logs_endpoint: String =
+    //     std::env::var("LOGGER_ENDPOINT").unwrap_or(collector_endpoint.clone());
     let tracer_endpoint: String =
         std::env::var("TRACER_ENDPOINT").unwrap_or(collector_endpoint.clone());
-    let _metrics_endpoint: String =
-        std::env::var("METRICS_ENDPOINT").unwrap_or(collector_endpoint.clone());
+    // let _metrics_endpoint: String =
+    //     std::env::var("METRICS_ENDPOINT").unwrap_or(collector_endpoint.clone());
 
     let endpoints = Endpoints {
         // logger: logs_endpoint,

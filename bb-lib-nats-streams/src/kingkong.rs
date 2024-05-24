@@ -1,15 +1,14 @@
 // use crate::Error;
 use crate::Kong;
 use anyhow::{anyhow, Error};
-use bytes::Bytes;
 use bb_lib_http_listener::Server;
+use bytes::Bytes;
 use petname::Generator;
 use rand::thread_rng;
 use tokio::task::JoinHandle;
 use tokio::task::{AbortHandle, JoinSet};
 use tracing::info;
 use tracing::{debug, error, instrument};
-
 
 #[derive(Debug)]
 pub struct KingKong {
@@ -38,7 +37,7 @@ impl KingKong {
             listeners: JoinSet::new(),
             abort_handles: Vec::new(),
             _http_listener: Some(server),
-            _http_started: false
+            _http_started: false,
         }
     }
 
@@ -86,13 +85,13 @@ impl KingKong {
 
     pub async fn wait(&self) -> Result<(), Error> {
         let fut1 = async {
-                match tokio::signal::ctrl_c().await {
+            match tokio::signal::ctrl_c().await {
                 Ok(()) => Ok(()),
                 Err(err) => Err(anyhow!("Unable to listen for shutdown signal: {}", err)),
             }
         };
 
-        let fut2 = async { self._http_listener.clone().unwrap().listen().await } ;
+        let fut2 = async { self._http_listener.clone().unwrap().listen().await };
         tokio::select! {
             _ = fut1 => {}
             _ = fut2 => {}

@@ -8,7 +8,6 @@ pub fn read_config<'de, T: Configuration + Deserialize<'de>>(
     prefix: &str,
     list_separator: &str,
 ) -> Result<T, ConfigError> {
-
     let config = Config::builder()
         .add_source(
             Environment::default()
@@ -18,8 +17,7 @@ pub fn read_config<'de, T: Configuration + Deserialize<'de>>(
         .build()
         .expect("Failed to Initialize Configuration Builder");
 
-    let config: Result<T, _> = config
-        .try_deserialize();
+    let config: Result<T, _> = config.try_deserialize();
 
     config
 }

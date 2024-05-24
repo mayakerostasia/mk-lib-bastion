@@ -5,10 +5,10 @@
 //!     you can store and retrieve your struct from the SurrealDB database.
 //!
 //! ## Example
-//! ```norun
 //! // Define your object that you want to store in the database
 //! // We recommend avoiding fields called "id" and "table" in your struct
 //! // You can use serde::skip() to skip these fields in serialization
+//! ```ignore
 //! #[derive(Debug, Deserialize, Serialize, Clone)]
 //! struct Person {
 //!     name: String,
@@ -42,15 +42,11 @@ mod creds;
 mod deserialize_id;
 mod error;
 mod ident;
-// mod live;
 mod record;
 mod storable;
 
-mod record_value;
-
-use core::panic;
-
 pub use config::{setup, DbConfig};
+use core::panic;
 pub use error::Error;
 use error::SurrealClientError;
 pub use ident::SurrealId;
@@ -152,19 +148,18 @@ where
     T: DBThings + Send + 'static,
 {
     let data = record.data();
-    let updated: Option<Record<Value>> = DB.update((record.tb(), record.id()?))
-        .content(data)
-        .await?;
+    let updated: Option<Record<Value>> =
+        DB.update((record.tb(), record.id()?)).content(data).await?;
 
     match updated {
         Some(record) => Ok(record),
-        None => {
-            Err(SurrealClientError::UpdateFailed.into())
-        }
+        None => Err(SurrealClientError::UpdateFailed.into()),
     }
 }
 
-pub async fn select<'a, T: Send + Clone>(record: &'a mut Record<T>) -> Result<Record<Value>, Error> {
+pub async fn select<'a, T: Send + Clone>(
+    record: &'a mut Record<T>,
+) -> Result<Record<Value>, Error> {
     let selected: Option<Record<Value>> = DB.select((record.tb(), record.id()?)).await?;
     // let bux = Box::new(selected);
     // record.set_data(bux);

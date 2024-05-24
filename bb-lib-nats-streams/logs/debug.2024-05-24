@@ -1,0 +1,61 @@
+[2m2024-05-24T11:15:45.399308700-04:00[0m [34mDEBUG[0m [1mnew_client[0m: [2mbb-lib-nats-streams\src\core\mod.rs[0m[2m:[0m[2m100[0m[2m:[0m Creating a new client for Nats @ nats://10.2.4.106:4222 [2m[3murl[0m[2m=[0m"nats://10.2.4.106:4222"[0m
+[2m2024-05-24T11:15:45.400174500-04:00[0m [34mDEBUG[0m [1mnew_client[0m: [2mC:\Users\njtwi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\async-nats-0.35.1\src\lib.rs[0m[2m:[0m[2m931[0m[2m:[0m retry on initial connect failure is disabled [2m[3murl[0m[2m=[0m"nats://10.2.4.106:4222"[0m
+[2m2024-05-24T11:15:45.400240900-04:00[0m [34mDEBUG[0m [1mnew_client[0m: [2mC:\Users\njtwi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\async-nats-0.35.1\src\connector.rs[0m[2m:[0m[2m132[0m[2m:[0m connecting [2m[3murl[0m[2m=[0m"nats://10.2.4.106:4222"[0m
+[2m2024-05-24T11:15:45.553399800-04:00[0m [34mDEBUG[0m [1mnew_client[0m: [2mC:\Users\njtwi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\async-nats-0.35.1\src\connector.rs[0m[2m:[0m[2m285[0m[2m:[0m connected to 4222 [2m[3murl[0m[2m=[0m"nats://10.2.4.106:4222"[0m
+[2m2024-05-24T11:15:45.553854200-04:00[0m [32m INFO[0m [1mnew_echo_responder[0m: [2mbb-lib-nats-streams\src\core\mod.rs[0m[2m:[0m[2m23[0m[2m:[0m Starting responder @ greet [2m[3mclient[0m[2m=[0mClient { info: Receiver { shared: Shared { value: RwLock { data: ServerInfo { server_id: "NB4FIFLN2GQUTSZOH3CX7SLKQXLVBATGAWMGCF4GWFFVYVRIWJGXBZSY", server_name: "NB4FIFLN2GQUTSZOH3CX7SLKQXLVBATGAWMGCF4GWFFVYVRIWJGXBZSY", host: "0.0.0.0", port: 4222, version: "2.10.14", auth_required: false, tls_required: false, max_payload: 1048576, proto: 1, client_id: 681, go: "go1.21.9", nonce: "", connect_urls: [], client_ip: "10.251.251.22", headers: true, lame_duck_mode: false }, poisoned: false, .. }, version: Version(0), is_closed: false, ref_count_rx: 1 }, version: Version(0) }, state: Receiver { shared: Shared { value: RwLock { data: Connected, poisoned: false, .. }, version: Version(2), is_closed: false, ref_count_rx: 1 }, version: Version(0) }, sender: Sender { chan: Tx { inner: Chan { tx: Tx { block_tail: 0x223a4ec0090, tail_position: 0 }, semaphore: Semaphore { semaphore: Semaphore { permits: 2048 }, bound: 2048 }, rx_waker: AtomicWaker, tx_count: 1, rx_fields: "..." } } }, next_subscription_id: 1, subscription_capacity: 65536, inbox_prefix: "_INBOX", request_timeout: Some(10s), max_payload: 1048576 } [3mname[0m[2m=[0m"greet"[0m
+[2m2024-05-24T11:15:45.553937600-04:00[0m [32m INFO[0m [1mnew_echo_responder[0m: [2mbb-lib-nats-streams\src\core\mod.rs[0m[2m:[0m[2m34[0m[2m:[0m listening to greet.* [2m[3mclient[0m[2m=[0mClient { info: Receiver { shared: Shared { value: RwLock { data: ServerInfo { server_id: "NB4FIFLN2GQUTSZOH3CX7SLKQXLVBATGAWMGCF4GWFFVYVRIWJGXBZSY", server_name: "NB4FIFLN2GQUTSZOH3CX7SLKQXLVBATGAWMGCF4GWFFVYVRIWJGXBZSY", host: "0.0.0.0", port: 4222, version: "2.10.14", auth_required: false, tls_required: false, max_payload: 1048576, proto: 1, client_id: 681, go: "go1.21.9", nonce: "", connect_urls: [], client_ip: "10.251.251.22", headers: true, lame_duck_mode: false }, poisoned: false, .. }, version: Version(0), is_closed: false, ref_count_rx: 1 }, version: Version(0) }, state: Receiver { shared: Shared { value: RwLock { data: Connected, poisoned: false, .. }, version: Version(2), is_closed: false, ref_count_rx: 1 }, version: Version(0) }, sender: Sender { chan: Tx { inner: Chan { tx: Tx { block_tail: 0x223a4ec0090, tail_position: 0 }, semaphore: Semaphore { semaphore: Semaphore { permits: 2048 }, bound: 2048 }, rx_waker: AtomicWaker, tx_count: 1, rx_fields: "..." } } }, next_subscription_id: 1, subscription_capacity: 65536, inbox_prefix: "_INBOX", request_timeout: Some(10s), max_payload: 1048576 } [3mname[0m[2m=[0m"greet"[0m
+[2m2024-05-24T11:15:45.554180500-04:00[0m [32m INFO[0m [2mC:\Users\njtwi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\async-nats-0.35.1\src\lib.rs[0m[2m:[0m[2m952[0m[2m:[0m event: connected
+[2m2024-05-24T11:15:45.590677800-04:00[0m [34mDEBUG[0m [2mbb-lib-nats-streams\src\core\mod.rs[0m[2m:[0m[2m28[0m[2m:[0m Request -> Message {
+    subject: Subject {
+        bytes: b"greet.sue",
+    },
+    reply: Some(
+        Subject {
+            bytes: b"_INBOX.oRHptsv8kwbdDb8X3LpZoy.oRHptsv8kwbdDb8X3LpZmK",
+        },
+    ),
+    payload: b"",
+    headers: None,
+    status: None,
+    description: None,
+    length: 61,
+}
+[2m2024-05-24T11:15:45.590941100-04:00[0m [32m INFO[0m [1mecho_request[0m: [2mbb-lib-nats-streams\src\core\responders.rs[0m[2m:[0m[2m12[0m[2m:[0m Received from greet.sue
+[2m2024-05-24T11:15:45.591013300-04:00[0m [32m INFO[0m [1mecho_request[0m: [2mbb-lib-nats-streams\src\core\responders.rs[0m[2m:[0m[2m13[0m[2m:[0m Received payload: b""
+[2m2024-05-24T11:15:45.630802300-04:00[0m [34mDEBUG[0m [1mmake_request[0m: [2mbb-lib-nats-streams\src\core\mod.rs[0m[2m:[0m[2m112[0m[2m:[0m got a response: Message { subject: Subject { bytes: b"_INBOX.oRHptsv8kwbdDb8X3LpZoy.oRHptsv8kwbdDb8X3LpZmK" }, reply: None, payload: b"", headers: None, status: None, description: None, length: 52 } [2m[3mclient[0m[2m=[0mClient { info: Receiver { shared: Shared { value: RwLock { data: ServerInfo { server_id: "NB4FIFLN2GQUTSZOH3CX7SLKQXLVBATGAWMGCF4GWFFVYVRIWJGXBZSY", server_name: "NB4FIFLN2GQUTSZOH3CX7SLKQXLVBATGAWMGCF4GWFFVYVRIWJGXBZSY", host: "0.0.0.0", port: 4222, version: "2.10.14", auth_required: false, tls_required: false, max_payload: 1048576, proto: 1, client_id: 681, go: "go1.21.9", nonce: "", connect_urls: [], client_ip: "10.251.251.22", headers: true, lame_duck_mode: false }, poisoned: false, .. }, version: Version(0), is_closed: false, ref_count_rx: 3 }, version: Version(0) }, state: Receiver { shared: Shared { value: RwLock { data: Connected, poisoned: false, .. }, version: Version(2), is_closed: false, ref_count_rx: 3 }, version: Version(0) }, sender: Sender { chan: Tx { inner: Chan { tx: Tx { block_tail: 0x223a4ec0090, tail_position: 1 }, semaphore: Semaphore { semaphore: Semaphore { permits: 2047 }, bound: 2048 }, rx_waker: AtomicWaker, tx_count: 4, rx_fields: "..." } } }, next_subscription_id: 2, subscription_capacity: 65536, inbox_prefix: "_INBOX", request_timeout: Some(10s), max_payload: 1048576 } [3maddr[0m[2m=[0m"greet.sue"[0m
+[2m2024-05-24T11:15:45.670744100-04:00[0m [34mDEBUG[0m [2mbb-lib-nats-streams\src\core\mod.rs[0m[2m:[0m[2m28[0m[2m:[0m Request -> Message {
+    subject: Subject {
+        bytes: b"greet.johnny",
+    },
+    reply: Some(
+        Subject {
+            bytes: b"_INBOX.oRHptsv8kwbdDb8X3LpZoy.oRHptsv8kwbdDb8X3LpZrc",
+        },
+    ),
+    payload: b"",
+    headers: None,
+    status: None,
+    description: None,
+    length: 64,
+}
+[2m2024-05-24T11:15:45.670927100-04:00[0m [32m INFO[0m [1mecho_request[0m: [2mbb-lib-nats-streams\src\core\responders.rs[0m[2m:[0m[2m12[0m[2m:[0m Received from greet.johnny
+[2m2024-05-24T11:15:45.670988800-04:00[0m [32m INFO[0m [1mecho_request[0m: [2mbb-lib-nats-streams\src\core\responders.rs[0m[2m:[0m[2m13[0m[2m:[0m Received payload: b""
+[2m2024-05-24T11:15:45.711920700-04:00[0m [34mDEBUG[0m [1mmake_request[0m: [2mbb-lib-nats-streams\src\core\mod.rs[0m[2m:[0m[2m112[0m[2m:[0m got a response: Message { subject: Subject { bytes: b"_INBOX.oRHptsv8kwbdDb8X3LpZoy.oRHptsv8kwbdDb8X3LpZrc" }, reply: None, payload: b"", headers: None, status: None, description: None, length: 52 } [2m[3mclient[0m[2m=[0mClient { info: Receiver { shared: Shared { value: RwLock { data: ServerInfo { server_id: "NB4FIFLN2GQUTSZOH3CX7SLKQXLVBATGAWMGCF4GWFFVYVRIWJGXBZSY", server_name: "NB4FIFLN2GQUTSZOH3CX7SLKQXLVBATGAWMGCF4GWFFVYVRIWJGXBZSY", host: "0.0.0.0", port: 4222, version: "2.10.14", auth_required: false, tls_required: false, max_payload: 1048576, proto: 1, client_id: 681, go: "go1.21.9", nonce: "", connect_urls: [], client_ip: "10.251.251.22", headers: true, lame_duck_mode: false }, poisoned: false, .. }, version: Version(0), is_closed: false, ref_count_rx: 3 }, version: Version(0) }, state: Receiver { shared: Shared { value: RwLock { data: Connected, poisoned: false, .. }, version: Version(2), is_closed: false, ref_count_rx: 3 }, version: Version(0) }, sender: Sender { chan: Tx { inner: Chan { tx: Tx { block_tail: 0x223a4ec0090, tail_position: 3 }, semaphore: Semaphore { semaphore: Semaphore { permits: 2048 }, bound: 2048 }, rx_waker: AtomicWaker, tx_count: 4, rx_fields: "..." } } }, next_subscription_id: 2, subscription_capacity: 65536, inbox_prefix: "_INBOX", request_timeout: Some(10s), max_payload: 1048576 } [3maddr[0m[2m=[0m"greet.johnny"[0m
+[2m2024-05-24T11:15:45.752482900-04:00[0m [34mDEBUG[0m [2mbb-lib-nats-streams\src\core\mod.rs[0m[2m:[0m[2m28[0m[2m:[0m Request -> Message {
+    subject: Subject {
+        bytes: b"greet.bobby",
+    },
+    reply: Some(
+        Subject {
+            bytes: b"_INBOX.oRHptsv8kwbdDb8X3LpZoy.oRHptsv8kwbdDb8X3LpZuG",
+        },
+    ),
+    payload: b"",
+    headers: None,
+    status: None,
+    description: None,
+    length: 63,
+}
+[2m2024-05-24T11:15:45.752608200-04:00[0m [32m INFO[0m [1mecho_request[0m: [2mbb-lib-nats-streams\src\core\responders.rs[0m[2m:[0m[2m12[0m[2m:[0m Received from greet.bobby
+[2m2024-05-24T11:15:45.752656700-04:00[0m [32m INFO[0m [1mecho_request[0m: [2mbb-lib-nats-streams\src\core\responders.rs[0m[2m:[0m[2m13[0m[2m:[0m Received payload: b""
+[2m2024-05-24T11:15:45.788033900-04:00[0m [34mDEBUG[0m [1mmake_request[0m: [2mbb-lib-nats-streams\src\core\mod.rs[0m[2m:[0m[2m112[0m[2m:[0m got a response: Message { subject: Subject { bytes: b"_INBOX.oRHptsv8kwbdDb8X3LpZoy.oRHptsv8kwbdDb8X3LpZuG" }, reply: None, payload: b"", headers: None, status: None, description: None, length: 52 } [2m[3mclient[0m[2m=[0mClient { info: Receiver { shared: Shared { value: RwLock { data: ServerInfo { server_id: "NB4FIFLN2GQUTSZOH3CX7SLKQXLVBATGAWMGCF4GWFFVYVRIWJGXBZSY", server_name: "NB4FIFLN2GQUTSZOH3CX7SLKQXLVBATGAWMGCF4GWFFVYVRIWJGXBZSY", host: "0.0.0.0", port: 4222, version: "2.10.14", auth_required: false, tls_required: false, max_payload: 1048576, proto: 1, client_id: 681, go: "go1.21.9", nonce: "", connect_urls: [], client_ip: "10.251.251.22", headers: true, lame_duck_mode: false }, poisoned: false, .. }, version: Version(0), is_closed: false, ref_count_rx: 3 }, version: Version(0) }, state: Receiver { shared: Shared { value: RwLock { data: Connected, poisoned: false, .. }, version: Version(2), is_closed: false, ref_count_rx: 3 }, version: Version(0) }, sender: Sender { chan: Tx { inner: Chan { tx: Tx { block_tail: 0x223a4ec0090, tail_position: 5 }, semaphore: Semaphore { semaphore: Semaphore { permits: 2048 }, bound: 2048 }, rx_waker: AtomicWaker, tx_count: 4, rx_fields: "..." } } }, next_subscription_id: 2, subscription_capacity: 65536, inbox_prefix: "_INBOX", request_timeout: Some(10s), max_payload: 1048576 } [3maddr[0m[2m=[0m"greet.bobby"[0m

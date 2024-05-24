@@ -1,14 +1,13 @@
-use std::fmt::Debug;
 use async_trait::async_trait;
 use lazy_static::lazy_static;
 use serde::{de::DeserializeOwned, Serialize};
+use std::fmt::Debug;
 
 use crate::DbConfig;
 use crate::Error;
 use crate::{connect, setup, Record};
-use crate::{create_record, delete_record, get_record, update_record, select};
+use crate::{create_record, delete_record, select, update_record};
 use serde_json::Value;
-use surrealdb::sql::Thing;
 
 pub trait DBThings: Debug + Serialize + DeserializeOwned + Sized + Clone {}
 
@@ -27,7 +26,7 @@ lazy_static! {
 /// - data: Should return the data that you want to store in the database.
 ///
 /// Example:
-/// ```no_run
+/// ```ignore
 /// impl Storable<Person> for Person {
 ///     fn thing(&self) -> Thing {
 ///         Thing::from((self.table().unwrap(), self.id().unwrap()))

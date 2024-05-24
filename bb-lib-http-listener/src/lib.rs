@@ -1,16 +1,16 @@
-use anyhow::Error;
-use tokio::sync::watch;
 use crate::handlers::{healthz_handler, readyz_handler};
-use tower_service::Service;
-use hyper_util::rt::TokioIo;
-use shutdown::shutdown_signal;
-use tracing::{debug, instrument};
-use hyper::body::Incoming;
-use timer::TokioTimer;
+use anyhow::Error;
 use axum::{
     http::Request,
     routing::{get, Router},
 };
+use hyper::body::Incoming;
+use hyper_util::rt::TokioIo;
+use shutdown::shutdown_signal;
+use timer::TokioTimer;
+use tokio::sync::watch;
+use tower_service::Service;
+use tracing::debug;
 mod handlers;
 mod shutdown;
 mod timer;
@@ -31,7 +31,9 @@ impl Server {
         let app = Router::new()
             .route("/healthz", get(healthz_handler))
             .route("/readyz", get(readyz_handler));
-        let listener = tokio::net::TcpListener::bind(self._bind.clone()).await.unwrap();
+        let listener = tokio::net::TcpListener::bind(self._bind.clone())
+            .await
+            .unwrap();
 
         let (close_tx, close_rx) = watch::channel(());
 
@@ -55,9 +57,10 @@ impl Server {
             tokio::spawn(async move {
                 let socket = TokioIo::new(socket);
 
-                let hyper_service = hyper::service::service_fn(move |request: Request<Incoming>| {
-                    tower_service.clone().call(request)
-                });
+                let hyper_service =
+                    hyper::service::service_fn(move |request: Request<Incoming>| {
+                        tower_service.clone().call(request)
+                    });
 
                 let conn = hyper::server::conn::http1::Builder::new()
                     .header_read_timeout(tokio::time::Duration::from_millis(200))

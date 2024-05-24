@@ -1,10 +1,18 @@
-use std::{collections::HashMap, ops::Add};
 use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, ops::Add};
 
-fn default_start_at() -> usize { 0_usize }
-fn default_total() -> usize { 0_usize }
-fn default_abs_limit() -> usize { 100_usize }
-fn default_page_size() -> usize { 10_usize }
+fn default_start_at() -> usize {
+    0_usize
+}
+fn default_total() -> usize {
+    0_usize
+}
+fn default_abs_limit() -> usize {
+    100_usize
+}
+fn default_page_size() -> usize {
+    10_usize
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Paged {
@@ -30,7 +38,7 @@ impl Add for Paged {
     }
 }
 
-impl Iterator for Paged where {
+impl Iterator for Paged {
     type Item = Paged;
 
     fn next(&mut self) -> Option<Self> {

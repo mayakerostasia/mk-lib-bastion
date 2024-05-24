@@ -4,23 +4,26 @@ use std::pin::Pin;
 
 // pub type Incrementer = Box<dyn FnOnce(u32) -> Pin<Box<dyn Future<Output = u32>>>>;
 
-// pub fn force_boxed<T>(f: fn(u32) -> T) -> Incrementer 
+// pub fn force_boxed<T>(f: fn(u32) -> T) -> Incrementer
 // where
 //     T: Future<Output = u32> + 'static
 // {
 //     Box::new(move |n| Box::pin(f(n)))
 // }
 
-pub fn annotate<T, F>(f: F) -> F where F: Fn(T) -> T {  
-    f  
-}  
+pub fn annotate<T, F>(f: F) -> F
+where
+    F: Fn(T) -> T,
+{
+    f
+}
 
 // async fn async_hello_string() -> Result<String, Error> {
 //     Ok(async { "Hello".to_string() }.await)
 // }
 
 pub type PinnedFuture<F> = Pin<Box<dyn Future<Output = F> + Send>>;
-pub type BoxedFutureFn<B> = Box<dyn Fn() ->PinnedFuture<B> + Send>;
+pub type BoxedFutureFn<B> = Box<dyn Fn() -> PinnedFuture<B> + Send>;
 
 pub fn boxed_future_generator<F, Fut, O>(f: F) -> BoxedFutureFn<O>
 where

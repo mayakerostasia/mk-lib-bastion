@@ -1,7 +1,5 @@
 use crate::boxed_future_generator;
-use crate::core::{
-    new_client, new_echo_responder, new_object_responder, new_service_responder,
-};
+use crate::core::{new_client, new_echo_responder, new_object_responder, new_service_responder};
 // use crate::NSLibError;
 use crate::Error;
 use bytes::Bytes;
@@ -22,7 +20,9 @@ pub struct Kong {
 impl Kong {
     pub async fn new(subject: &str, nats_url: &str) -> Self {
         let mut rng = thread_rng();
-        let name = petname::Petnames::default().generate(&mut rng, 2, "-").expect("Petname Failed");
+        let name = petname::Petnames::default()
+            .generate(&mut rng, 2, "-")
+            .expect("Petname Failed");
         Kong {
             name,
             subject: subject.to_string(),
@@ -34,9 +34,7 @@ impl Kong {
     pub fn client(&self) -> Result<async_nats::Client, Error> {
         Ok(self.client.clone())
     }
-    pub async fn listen(
-        &self,
-    ) -> Result<tokio::task::JoinHandle<Result<(), Error>>, Error> {
+    pub async fn listen(&self) -> Result<tokio::task::JoinHandle<Result<(), Error>>, Error> {
         Ok(new_echo_responder(&self.client, &self.subject).await?)
     }
 
@@ -50,13 +48,19 @@ impl Kong {
     #[instrument(skip(self, func), fields( kong_name = %self.name, kong_subject = %self.subject))]
     pub async fn service<T, U>(
         &self,
-        func: fn() ->T,
+        func: fn() -> T,
     ) -> Result<tokio::task::JoinHandle<Result<(), Error>>, Error>
     where
         T: Send + futures::Future<Output = U> + 'static,
-        U: Send + 'static + Into<Bytes> + std::fmt::Debug
+        U: Send + 'static + Into<Bytes> + std::fmt::Debug,
     {
-        Ok(new_service_responder(&self.client, &self.name, &self.subject, boxed_future_generator(func)).await?)
+        Ok(new_service_responder(
+            &self.client,
+            &self.name,
+            &self.subject,
+            boxed_future_generator(func),
+        )
+        .await?)
     }
 }
 

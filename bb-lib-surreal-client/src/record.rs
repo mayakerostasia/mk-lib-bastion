@@ -1,6 +1,6 @@
-use serde::{Serialize, Deserialize};
-use surrealdb::sql::Id;
 use crate::{error::SurrealClientError, storable::DBThings, Storable};
+use serde::{Deserialize, Serialize};
+use surrealdb::sql::Id;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Record<D: Send + Clone> {
@@ -21,11 +21,11 @@ pub struct Record<D: Send + Clone> {
 
 impl<D: Send + Clone> Record<D> {
     pub fn new(tb: &str, id: Option<Id>, data: Option<Box<D>>, meta: Option<Box<D>>) -> Self {
-        Self { 
+        Self {
             _tb: tb.to_string(),
             _id: id,
             _data: data,
-            _meta: meta
+            _meta: meta,
         }
     }
 
@@ -52,22 +52,19 @@ impl<D: Send + Clone> Record<D> {
     pub fn id(&self) -> Result<Id, SurrealClientError> {
         match &self._id {
             Some(id) => Ok(Id::from(id.clone())),
-            None => Err(SurrealClientError::NoID) 
+            None => Err(SurrealClientError::NoID),
         }
     }
-
 
     pub fn tb(&self) -> &str {
         &self._tb.as_str()
     }
 
-    pub fn data(&self) ->Box<D> {
+    pub fn data(&self) -> Box<D> {
         self._data.clone().expect("No Data!")
     }
 }
 
-
 impl<D: DBThings + Send> DBThings for Record<D> {}
 
-impl<D> Storable<D> for Record<D> where D: DBThings + Send + 'static { }
-
+impl<D> Storable<D> for Record<D> where D: DBThings + Send + 'static {}

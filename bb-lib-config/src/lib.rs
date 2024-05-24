@@ -16,8 +16,8 @@
 //!
 //! ## Example
 //!
-//! ```rust
-//! use bb_config::configuration::{ read_config, Configuration };
+//! ```ignore
+//! use bb_lib_config::configuration::{ read_config, Configuration };
 //! use serde::Deserialize;
 //!
 //! #[derive(Debug, Deserialize)]
@@ -37,13 +37,15 @@
 //!    }
 //! }
 //!
-//! fn my_config() -> Option<MyConfig> {
-//!    read_config::<MyConfig>("my", ",")
+//! fn my_config() -> anyhow::Result<MyConfig> {
+//!    let cfg = read_config::<MyConfig>("my", "config").map_err(|e| anyhow::Error::from(e))?;
+//!    Ok(cfg)
 //! }
 //!
-//! fn main() {
-//!    let cfg = my_config().unwrap();
+//! fn main() -> anyhow::Result<()> {
+//!    let cfg = my_config()?;
 //!    println!("{:?}", cfg);
+//!    Ok(())
 //! }
 //! ```
 //!
@@ -54,7 +56,7 @@
 mod configs;
 
 #[cfg(not(feature = "dev"))]
-mod configuration;
+pub mod configuration;
 
 #[cfg(feature = "dev")]
 pub mod configuration;

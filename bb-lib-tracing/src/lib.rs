@@ -1,19 +1,14 @@
 pub use crate::telemetry::initialize;
 pub use crate::telemetry::OtelGuard;
 
-use opentelemetry_sdk::resource::Resource;
 use opentelemetry::KeyValue;
-use opentelemetry_otlp::{ExportConfig, Protocol}; 
+use opentelemetry_otlp::{ExportConfig, Protocol};
+use opentelemetry_sdk::resource::Resource;
 
 pub mod prelude {
     pub use tracing::{
-        trace, trace_span,
-        debug, debug_span, 
-        info, info_span, 
-        warn, warn_span, 
-        error, error_span, 
-        instrument, span, 
-        Instrument, Level, Span,
+        debug, debug_span, error, error_span, info, info_span, instrument, span, trace, trace_span,
+        warn, warn_span, Instrument, Level, Span,
     };
 }
 pub use prelude::*;
@@ -29,6 +24,7 @@ mod telemetry;
 // mod sentry_layer;
 mod tracer;
 
+#[allow(dead_code)]
 enum ConfigType {
     Logs,
     Traces,
@@ -69,10 +65,7 @@ fn resource() -> Resource {
     )
 }
 
-fn get_export_config(
-    endpoint: String,
-    config_type: ConfigType,
-) -> ExportConfig {
+fn get_export_config(endpoint: String, config_type: ConfigType) -> ExportConfig {
     match config_type {
         ConfigType::Logs => ExportConfig {
             endpoint,

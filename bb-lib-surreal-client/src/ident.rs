@@ -12,7 +12,10 @@ impl SurrealId {
     }
 
     pub fn random(tb: &str) -> Self {
-        SurrealId(Thing { tb: tb.to_string(), id: surrealdb::sql::Id::rand() })
+        SurrealId(Thing {
+            tb: tb.to_string(),
+            id: surrealdb::sql::Id::rand(),
+        })
     }
 
     pub fn get_thing(&self) -> surrealdb::sql::Thing {

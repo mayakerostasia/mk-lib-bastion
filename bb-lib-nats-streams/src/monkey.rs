@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
-use bytes::Bytes;
-use crate::Error;
 use crate::core::{make_header_request, make_request, new_client};
+use crate::Error;
 use async_nats::{HeaderMap, HeaderName, HeaderValue};
+use bytes::Bytes;
 use petname::Generator;
 use rand::thread_rng;
 use tracing::instrument;
@@ -19,12 +19,14 @@ pub struct Monkey {
 impl Monkey {
     pub async fn new(subject: &str, nats_url: &str) -> Self {
         let mut rng = thread_rng();
-        let name = petname::Petnames::default().generate(&mut rng, 2, "-").expect("Petname Failed");
+        let name = petname::Petnames::default()
+            .generate(&mut rng, 2, "-")
+            .expect("Petname Failed");
         Monkey {
             name,
-            subject: subject.to_string(), 
+            subject: subject.to_string(),
             headers: HeaderMap::new(),
-            _client: new_client(nats_url).await.unwrap()
+            _client: new_client(nats_url).await.unwrap(),
         }
     }
 
@@ -32,7 +34,7 @@ impl Monkey {
         Ok(self._client.clone())
     }
 
-    pub fn set_header(&mut self, key:&str, val:&str) -> Result<(), Error> {
+    pub fn set_header(&mut self, key: &str, val: &str) -> Result<(), Error> {
         let name: HeaderName = HeaderName::from_str(key)?;
         let value: HeaderValue = HeaderValue::from_str(val)?;
         self.headers.insert(name, value);
@@ -40,13 +42,19 @@ impl Monkey {
     }
 
     #[instrument(skip(payload, self), fields(monkey_name = %self.name, monkey_subject = %self.subject))]
-    pub async fn msg(&self, payload: impl Into<Bytes> ) -> Result<async_nats::Message, Error> {
+    pub async fn msg(&self, payload: impl Into<Bytes>) -> Result<async_nats::Message, Error> {
         Ok(make_request(self.client()?, self.subject.to_string(), payload.into()).await?)
     }
 
     #[instrument(skip(payload, self), fields(monkey_name = %self.name, monkey_subject = %self.subject))]
-    pub async fn hmsg(&self, payload: impl Into<Bytes> ) -> Result<async_nats::Message, Error> {
-        Ok(make_header_request(self.client()?, self.subject.to_string(), payload.into(), self.headers.clone()).await?)
+    pub async fn hmsg(&self, payload: impl Into<Bytes>) -> Result<async_nats::Message, Error> {
+        Ok(make_header_request(
+            self.client()?,
+            self.subject.to_string(),
+            payload.into(),
+            self.headers.clone(),
+        )
+        .await?)
     }
 }
 

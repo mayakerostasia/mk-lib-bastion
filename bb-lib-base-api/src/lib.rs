@@ -1,7 +1,7 @@
 use std::fmt::Display;
 pub mod client;
-pub mod traits;
 pub mod paged;
+pub mod traits;
 
 use thiserror::Error;
 #[derive(Error, Debug)]
@@ -18,10 +18,7 @@ pub enum RestSvcError {
 
 #[derive(Error, Debug)]
 pub enum RestSvcExpandedError {
-    SerdeExpandedError {
-        source: RestSvcError,
-        extra: String,
-    },
+    SerdeExpandedError { source: RestSvcError, extra: String },
     OtherError(String),
 }
 
