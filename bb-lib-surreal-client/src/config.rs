@@ -1,13 +1,24 @@
 use bb_lib_config::{srql_config, SurrealCfg};
 // use std::env;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct DbConfig {
     pub path: String,
     pub ns: String,
     pub db: String,
     pub user: String,
     pub pass: String,
+}
+
+impl std::fmt::Debug for DbConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DbConfig")
+            .field("path", &self.path)
+            .field("ns", &self.ns)
+            .field("db", &self.db)
+            .field("user", &self.user)
+            .finish()
+    }
 }
 
 pub fn setup() -> DbConfig {
