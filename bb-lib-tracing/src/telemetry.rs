@@ -64,29 +64,17 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
     // let log_trace_bridge = OpenTelemetryTracingBridge::new(log_provider);
 
     // TODO: Logs directory should be configurable
-    // let debug_file = rolling::daily("./logs", "debug");
+    let debug_file = rolling::daily("./logs", "debug").with_max_level(tracing::Level::DEBUG);
     // Log warnings and errors to a separate file. Since we expect these events
     // to occur less frequently, roll that file on a daily basis instead.
     // TODO: Logs directory should be configurable
-    // let warn_file = rolling::daily("./logs", "warnings").with_max_level(tracing::Level::WARN);
+    let warn_file = rolling::daily("./logs", "warnings").with_max_level(tracing::Level::WARN);
     //
     // TODO: Logs directory should be configurable
-    // let all_files = debug_file.and(warn_file);
+    let all_files = debug_file.and(warn_file);
 
     tracing_subscriber::registry()
-        // .with(logging_bridge)
         .with(tracing_subscriber::EnvFilter::from_default_env())
-        // .with(
-        //     tracing_subscriber::fmt::layer()
-        //         .json()
-        //         .with_thread_ids(true)
-        //         .with_thread_names(true)
-        //         .with_file(true)
-        //         .with_line_number(true)
-        //         .with_timer(ChronoLocal::rfc_3339())
-        //         .with_current_span(true)
-        //         .with_writer(all_files),
-        // )
         .with(
             tracing_subscriber::fmt::layer()
                 // .pretty()
@@ -96,12 +84,10 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
                 .with_target(false)
                 .with_file(true)
                 .with_line_number(true)
-                .with_timer(ChronoLocal::rfc_3339()),
+                .with_timer(ChronoLocal::rfc_3339())
+                .with_writer(all_files),
         )
-        // .with(sentry_tracing::layer())
         .with(OpenTelemetryLayer::new(tracer.clone()))
-        // .with(MetricsLayer::new(meter_provider.clone()))
-        // .with(log_trace_bridge)
         .init();
 
     let _guard = OtelGuard {
