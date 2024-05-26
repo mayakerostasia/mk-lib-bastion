@@ -1,5 +1,6 @@
 use crate::{get_export_config, resource, ConfigType};
-use opentelemetry::trace::TraceError;
+use opentelemetry::trace::{TraceError, TracerProvider as _};
+use opentelemetry_sdk::trace::TracerProvider;
 use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::trace::BatchConfig;
 use opentelemetry_sdk::{
@@ -16,10 +17,10 @@ use tonic::transport::channel::ClientTlsConfig;
 //         .with_export_config(get_export_config(endpoint, ConfigType::Traces));
 //     exporter
 // }
+//
 
 // Construct Tracer for OpenTelemetryLayer
 pub fn init_tracer(endpoint: String) -> anyhow::Result<Tracer, TraceError> {
-    // let exporter = http_exporter(endpoint);
 
     let exporter = opentelemetry_otlp::new_exporter()
         .tonic()
@@ -37,8 +38,6 @@ pub fn init_tracer(endpoint: String) -> anyhow::Result<Tracer, TraceError> {
                 .with_span_limits(SpanLimits::default()),
         )
         .with_batch_config(BatchConfig::default())
-        // .with_batch_config(batch_config)
-        // .with_exporter(opentelemetry_stdout::LogExporter::default())
         .with_exporter(exporter)
         .install_batch(runtime::Tokio)
 }

@@ -1,6 +1,13 @@
 use crate::boxed_future_generator;
-use crate::core::{new_client, new_echo_responder, new_object_responder, new_service_responder};
+use crate::core::{
+    new_client, new_echo_responder, new_object_responder, new_service_future_responder,
+    new_service_responder,
+};
+use tokio_util::sync::CancellationToken;
+use tracing::instrument::Instrumented;
 // use crate::NSLibError;
+use core::future::Future;
+use crate::Frame;
 use crate::Error;
 use bytes::Bytes;
 use petname::Generator;
@@ -14,8 +21,16 @@ pub struct Kong {
     pub name: String,
     subject: String,
     client: async_nats::Client,
+    token: CancellationToken,
     // bastion: Option<Bastion>,
 }
+
+// impl Drop for Kong {
+//     fn drop(&mut self) {
+//         self.token.cancel();
+//         let _ = *self;
+//     }
+// }
 
 impl Kong {
     pub async fn new(subject: &str, nats_url: &str) -> Self {
@@ -27,6 +42,7 @@ impl Kong {
             name,
             subject: subject.to_string(),
             client: new_client(nats_url).await.unwrap(),
+            token: CancellationToken::new(),
             // bastion: None,
         }
     }
@@ -49,7 +65,7 @@ impl Kong {
     pub async fn service<T, U>(
         &self,
         func: fn() -> T,
-    ) -> Result<tokio::task::JoinHandle<Result<(), Error>>, Error>
+    ) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), Error>>>, Error>
     where
         T: Send + futures::Future<Output = U> + 'static,
         U: Send + 'static + Into<Bytes> + std::fmt::Debug,
@@ -59,6 +75,27 @@ impl Kong {
             &self.name,
             &self.subject,
             boxed_future_generator(func),
+            self.token.clone(),
+        )
+        .await?)
+    }
+
+    #[instrument(skip(self, func), fields( kong_name = %self.name, kong_subject = %self.subject))]
+    pub async fn service_future<O, T>(
+        &self,
+        func: fn(Frame) -> O,
+        // func: fn() -> T,
+    ) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), Error>>>, Error>
+    where
+        O: Future<Output = Result<T, Error>> + Send + 'static,
+        T: Into<Bytes> + std::fmt::Debug + Send + 'static,
+    {
+        Ok(new_service_future_responder::<O, T>(
+            &self.client,
+            &self.name,
+            &self.subject,
+            func,
+            self.token.clone(),
         )
         .await?)
     }

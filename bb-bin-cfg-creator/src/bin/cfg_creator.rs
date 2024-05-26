@@ -1,8 +1,8 @@
 use clap::{self, Args, Parser, Subcommand};
 use serde::Serialize;
 use std::path::PathBuf;
-
-use bb_config::{configuration::Configuration, AutotaskCfg, JiraCfg, SurrealCfg, SwimlaneCfg};
+#[allow(unused)]
+use bb_lib_config::{configuration::Configuration, AutotaskCfg, JiraCfg, SurrealCfg, SwimlaneCfg};
 
 #[derive(Parser, Debug)]
 #[command(version = "0.1.0")]
@@ -65,14 +65,14 @@ pub struct SwimlaneArgs {
     api_key: String,
 }
 
-fn write_yaml<T: Configuration + Serialize>(
-    cfg: T,
-    output_file: PathBuf,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let yaml = serde_yaml::to_string(&cfg)?;
-    std::fs::write(output_file, yaml)?;
-    Ok(())
-}
+// fn write_yaml<T: Configuration + Serialize>(
+//     cfg: T,
+//     output_file: PathBuf,
+// ) -> Result<(), Box<dyn std::error::Error>> {
+//     let yaml = serde_yaml::to_string(&cfg)?;
+//     std::fs::write(output_file, yaml)?;
+//     Ok(())
+// }
 
 fn write_json<T: Configuration + Serialize>(
     cfg: T,

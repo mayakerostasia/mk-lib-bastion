@@ -38,9 +38,9 @@ struct ServiceNames {
 impl ServiceNames {
     fn new() -> Self {
         Self {
-            service_name: std::env::var("CARGO_PKG_NAME").unwrap_or("default".into()),
-            service_version: std::env::var("CARGO_PKG_VERSION").unwrap_or("0.1.0".into()),
-            deployment_environment: std::env::var("ENV").unwrap_or("dev".into()),
+            service_name: std::env::var("SERVICE_NAME").unwrap_or("default".into()),
+            service_version: std::env::var("SERVICE_VERSION").unwrap_or("0.1.0".into()),
+            deployment_environment: std::env::var("SERVICE_ENV").unwrap_or("dev".into()),
         }
     }
 
@@ -79,7 +79,7 @@ fn get_export_config(endpoint: String, config_type: ConfigType) -> ExportConfig 
         // },
         ConfigType::Traces => ExportConfig {
             endpoint,
-            protocol: Protocol::HttpBinary,
+            protocol: Protocol::Grpc,
             timeout: std::time::Duration::from_secs(3),
         },
         // _ => panic!("Invalid config type"),

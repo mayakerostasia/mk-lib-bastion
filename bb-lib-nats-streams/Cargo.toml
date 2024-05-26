@@ -13,10 +13,13 @@ bb-lib-http-listener = { path = "../bb-lib-http-listener", version = "0.1.0" }
 petname = "2.0.2"
 rand = { workspace = true }
 serde = {  workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
-tokio = { version = "1.37.0", features = ["rt-multi-thread", "macros", "signal"] }
+tokio = { version = "1.37.0", features = ["rt-multi-thread", "macros", "signal", "sync"] }
 tower = "0.4.13"
 tracing = { workspace = true }
+opentelemetry = "0.23.0"
+tokio-util = "0.7.11"
 
 [dev-dependencies]
 bb-lib-tracing = { path = "../bb-lib-tracing", version = "0.1.0" }

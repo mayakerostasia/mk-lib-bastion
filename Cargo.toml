@@ -1,12 +1,14 @@
 [workspace]
 resolver = "2"
 members = [
+  "bb-bin-cfg-creator",
   "bb-lib-base-api",
   "bb-lib-config",
   "bb-lib-http-listener",
   "bb-lib-nats-streams", 
   "bb-lib-surreal-client",
   "bb-lib-tracing",
+  "bb-lib-event",
 ]
 
 [workspace.dependencies]

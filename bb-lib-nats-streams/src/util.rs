@@ -24,6 +24,7 @@ where
 
 pub type PinnedFuture<F> = Pin<Box<dyn Future<Output = F> + Send>>;
 pub type BoxedFutureFn<B> = Box<dyn Fn() -> PinnedFuture<B> + Send>;
+pub type BoxedParamFutureFn<I, O> = Box<dyn Fn(I) ->PinnedFuture<O> + Send>;
 
 pub fn boxed_future_generator<F, Fut, O>(f: F) -> BoxedFutureFn<O>
 where

@@ -23,6 +23,7 @@ pub use error::NSLibError;
 pub use core::{
     encoder::{Decoder, Encoder},
     frames::Frame,
+    match_frame,
     // BastionRequest, BastionReply,
 };
 pub use kingkong::KingKong;

@@ -2,16 +2,24 @@ mod bastion;
 pub mod encoder;
 pub mod frames;
 mod responders;
+mod operations;
 
+// use bb_lib_tracing::instrument::Instrumented;
+// use std::pin::Pin;
+use tracing::instrument::Instrumented;
 use crate::Error;
 use async_nats::HeaderMap;
 use bytes::Bytes;
 use futures::StreamExt;
+use core::future::Future;
 use std::env;
-use tracing::{debug, info, instrument, trace};
+use tokio_util::sync::CancellationToken;
+use tracing::{debug, info, info_span, instrument, trace, Instrument};
+pub use operations::match_frame;
 
 use crate::util::BoxedFutureFn;
-use responders::{echo_request, reply_with_object};
+use crate::Frame;
+use responders::{echo_request, reply_with_object, reply_with_future};
 
 #[instrument]
 pub async fn new_echo_responder(
@@ -29,7 +37,7 @@ pub async fn new_echo_responder(
                 echo_request(request, &client).await?;
             }
             Ok::<(), Error>(())
-        }
+        }.instrument(info_span!("Kong"))
     });
     info!("listening to {name}.*");
 
@@ -62,43 +70,99 @@ pub async fn new_object_responder<T>(
     Ok(handle)
 }
 
-#[instrument(skip_all, fields(kong_name = %name, kong_subject = %subject))]
+#[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
 pub async fn new_service_responder<T: Send + std::fmt::Debug + Into<Bytes> + 'static>(
     client: &async_nats::Client,
     name: &str,
     subject: &str,
     func: BoxedFutureFn<T>,
-) -> Result<tokio::task::JoinHandle<Result<(), Error>>, Error> {
+    cancel_token: CancellationToken
+) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), Error>>>, Error> {
     let mut requests = client
         .clone()
         .subscribe(format!("{}", subject))
         .await
         .unwrap();
     // let func = Arc::new(func);
+    let span = info_span!("ServiceResponder");
     let handle = tokio::spawn({
         let client = client.clone();
-        // let span = info_span!("Service Responder {}", &client.);
-        async move {
-            while let Some(request) = requests.next().await {
-                info!("Request @ {}", &request.subject);
-                debug!("Request -> {:#?}", request);
-                trace!("Service calling Function");
-                let result: T = func().await;
-                debug!("Caller is {:#?}", &result);
-                reply_with_object::<T>(request, &client, result).await?;
-                // drop(span);
-            }
-            Ok::<(), Error>(())
-        }
-    });
-    info!("Service Up! {name} listening to {subject}");
+        async move { 
+            tokio::select! {
+                _ = cancel_token.cancelled() => {
+                        Ok::<(), Error>(())
+                    },
+
+                _ = async move {
+                    while let Some(request) = requests.next().await {
+                        info!(?request.subject, ?request.payload);
+                        let result: T = func().await;
+                        debug!("Result is {:#?}", &result);
+                        reply_with_object::<T>(request, &client, result).await?;
+                        };
+                        Ok::<(), Error>(())
+                    }// .instrument(info_span!("request"))
+                    => {
+                        Ok::<(), Error>(())
+
+                    }
+            }// .instrument(info_span!("select"))
+        }// .instrument(info_span!("async"))
+    }).instrument(span);
+    Ok(handle)
+}
+
+#[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
+pub async fn new_service_future_responder<O, T>(
+    client: &async_nats::Client,
+    name: &str,
+    subject: &str,
+    // func: fn(Frame) -> T,
+    // func: BoxedFutureFn<T>,
+    func: fn(Frame) -> O,
+    cancel_token: CancellationToken
+) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), Error>>>, Error> 
+where
+    T: std::fmt::Debug + Into<Bytes> + Send + 'static,
+    O: Future<Output = Result<T, Error>> + Send + 'static
+{
+    let mut requests = client
+        .clone()
+        .subscribe(format!("{}", subject))
+        .await
+        .unwrap();
+    // let func = Arc::new(func);
+    let span = info_span!("ServiceResponder");
+    let handle = tokio::spawn({
+        let client = client.clone();
+        // let func = Box::new(func);
+        async move { 
+            tokio::select! {
+                _ = cancel_token.cancelled() => {
+                        Ok::<(), Error>(())
+                    },
+
+                _ = async move {
+                    while let Some(request) = requests.next().await {
+                        info!(?request.subject, ?request.payload);
+                        reply_with_future(request, &client, func).await?;
+                        };
+                        Ok::<(), Error>(())
+                    }// .instrument(info_span!("request"))
+                    => {
+                        Ok::<(), Error>(())
+
+                    }
+            }// .instrument(info_span!("select"))
+        }// .instrument(info_span!("async"))
+    }).instrument(span);
     Ok(handle)
 }
 
 #[instrument]
 pub async fn new_client(url: &str) -> Result<async_nats::Client, Error> {
-    debug!("Creating a new client for Nats @ {url}");
-    let nats_url = env::var("NATS_URL").unwrap_or_else(|_| url.to_string());
+    info!(url = url, "New Nats Client");
+    let nats_url = env::var("NATS_ADDR").unwrap_or_else(|_| url.to_string());
     Ok(async_nats::connect(nats_url).await?)
 }
 
