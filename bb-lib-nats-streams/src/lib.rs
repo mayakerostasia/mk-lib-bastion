@@ -22,7 +22,7 @@ pub use error::NSLibError;
 
 pub use core::{
     encoder::{Decoder, Encoder},
-    frames::Frame,
+    frames::{Frame, Proc},
     match_frame,
     // BastionRequest, BastionReply,
 };

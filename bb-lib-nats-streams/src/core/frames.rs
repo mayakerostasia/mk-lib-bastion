@@ -2,20 +2,20 @@ use crate::core::encoder::{Decoder, Encoder};
 use bytes::Bytes;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Proc {
-    cmd: String,
-    args: Vec<String>,
+    pub cmd: String,
+    pub args: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SendBox {
     pub from: String,
     pub addr: String,
     pub data: Box<[u8]>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Frame {
     Ping,
     Pong,

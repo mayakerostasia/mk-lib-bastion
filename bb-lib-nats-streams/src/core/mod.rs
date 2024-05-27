@@ -1,25 +1,25 @@
-mod bastion;
-pub mod encoder;
-pub mod frames;
-mod responders;
-mod operations;
-
 // use bb_lib_tracing::instrument::Instrumented;
 // use std::pin::Pin;
-use tracing::instrument::Instrumented;
 use crate::Error;
 use async_nats::HeaderMap;
 use bytes::Bytes;
-use futures::StreamExt;
 use core::future::Future;
+use futures::StreamExt;
+pub use operations::match_frame;
 use std::env;
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, info, info_span, instrument, trace, Instrument};
-pub use operations::match_frame;
+use tracing::instrument::Instrumented;
+use tracing::{debug, info, info_span, instrument, Instrument};
 
 use crate::util::BoxedFutureFn;
 use crate::Frame;
-use responders::{echo_request, reply_with_object, reply_with_future};
+use responders::{echo_request, reply_with_future, reply_with_object};
+
+mod bastion;
+pub mod encoder;
+pub mod frames;
+mod operations;
+mod responders;
 
 #[instrument]
 pub async fn new_echo_responder(
@@ -37,7 +37,8 @@ pub async fn new_echo_responder(
                 echo_request(request, &client).await?;
             }
             Ok::<(), Error>(())
-        }.instrument(info_span!("Kong"))
+        }
+        .instrument(info_span!("Kong"))
     });
     info!("listening to {name}.*");
 
@@ -76,7 +77,7 @@ pub async fn new_service_responder<T: Send + std::fmt::Debug + Into<Bytes> + 'st
     name: &str,
     subject: &str,
     func: BoxedFutureFn<T>,
-    cancel_token: CancellationToken
+    cancel_token: CancellationToken,
 ) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), Error>>>, Error> {
     let mut requests = client
         .clone()
@@ -87,7 +88,7 @@ pub async fn new_service_responder<T: Send + std::fmt::Debug + Into<Bytes> + 'st
     let span = info_span!("ServiceResponder");
     let handle = tokio::spawn({
         let client = client.clone();
-        async move { 
+        async move {
             tokio::select! {
                 _ = cancel_token.cancelled() => {
                         Ok::<(), Error>(())
@@ -106,9 +107,10 @@ pub async fn new_service_responder<T: Send + std::fmt::Debug + Into<Bytes> + 'st
                         Ok::<(), Error>(())
 
                     }
-            }// .instrument(info_span!("select"))
-        }// .instrument(info_span!("async"))
-    }).instrument(span);
+            } // .instrument(info_span!("select"))
+        } // .instrument(info_span!("async"))
+    })
+    .instrument(span);
     Ok(handle)
 }
 
@@ -120,11 +122,11 @@ pub async fn new_service_future_responder<O, T>(
     // func: fn(Frame) -> T,
     // func: BoxedFutureFn<T>,
     func: fn(Frame) -> O,
-    cancel_token: CancellationToken
-) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), Error>>>, Error> 
+    cancel_token: CancellationToken,
+) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), Error>>>, Error>
 where
     T: std::fmt::Debug + Into<Bytes> + Send + 'static,
-    O: Future<Output = Result<T, Error>> + Send + 'static
+    O: Future<Output = Result<T, Error>> + Send + 'static,
 {
     let mut requests = client
         .clone()
@@ -136,7 +138,7 @@ where
     let handle = tokio::spawn({
         let client = client.clone();
         // let func = Box::new(func);
-        async move { 
+        async move {
             tokio::select! {
                 _ = cancel_token.cancelled() => {
                         Ok::<(), Error>(())
@@ -153,9 +155,10 @@ where
                         Ok::<(), Error>(())
 
                     }
-            }// .instrument(info_span!("select"))
-        }// .instrument(info_span!("async"))
-    }).instrument(span);
+            } // .instrument(info_span!("select"))
+        } // .instrument(info_span!("async"))
+    })
+    .instrument(span);
     Ok(handle)
 }
 

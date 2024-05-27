@@ -196,9 +196,9 @@ dependencies = [
 
 [[package]]
 name = "async-executor"
-version = "1.11.0"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b10202063978b3351199d68f8b22c4e47e4b1b822f8d43fd862d5ea8c006b29a"
+checksum = "c8828ec6e544c02b0d6691d21ed9f9218d0384a82542855073c2a3f58304aaf0"
 dependencies = [
  "async-task",
  "concurrent-queue",
@@ -550,6 +550,7 @@ dependencies = [
  "opentelemetry 0.23.0",
  "petname",
  "rand",
+ "reqwest 0.12.4",
  "serde",
  "serde_json",
  "thiserror",
@@ -557,6 +558,25 @@ dependencies = [
  "tokio-util",
  "tower",
  "tracing",
+]
+
+[[package]]
+name = "bb-lib-reactor"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bb-lib-nats-streams",
+ "bb-lib-tracing",
+ "bytes",
+ "chrono",
+ "lazy_static",
+ "metrics",
+ "petname",
+ "rand",
+ "reqwest 0.12.4",
+ "serde_json",
+ "tokio",
+ "tower",
 ]
 
 [[package]]
@@ -5906,9 +5926,9 @@ dependencies = [
 
 [[package]]
 name = "zeroize"
-version = "1.7.0"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "525b4ec142c6b68a2d10f01f7bbf6755599ca3f81ea53b8431b7dd348f5fdb2d"
+checksum = "ced3678a2879b30306d323f4542626697a464a97c0a07c9aebf7ebca65cd4dde"
 
 [[package]]
 name = "zip"
