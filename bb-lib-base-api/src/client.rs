@@ -22,7 +22,7 @@ pub struct RestSvcResp(pub StatusCode, pub Value);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct IntermediateResponse {
-    #[serde(alias = "issues")]
+    #[serde(alias = "issues", alias = "objects")]
     pub response: Value,
     #[serde(flatten)]
     pub paged: Paged,
