@@ -30,7 +30,7 @@ pub mod server {
     use hyper_util::rt::TokioIo;
     use reqwest::{Method, Url};
 
-    use base_api::{client::Rest, paged::Paged, traits::RestClient};
+    use bb_lib_base_api::{client::Rest, paged::Paged, traits::RestClient};
 
     // use super::calls::{TestCall, TestEchoCall};
 
