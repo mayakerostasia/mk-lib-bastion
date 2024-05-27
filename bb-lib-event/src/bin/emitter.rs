@@ -1,7 +1,7 @@
 use anyhow::Error;
 use bb_lib_event::Emitter;
-use bb_lib_nats_streams::{KingKong, Frame};
-use tracing::{info, info_span};
+use bb_lib_nats_streams::{Frame};
+use tracing::{info_span};
 
 const NATS_ADDR: &str = "nats://10.0.0.27:4222";
 
