@@ -1,6 +1,5 @@
 use crate::{get_export_config, resource, ConfigType};
-use opentelemetry::trace::{TraceError, TracerProvider as _};
-use opentelemetry_sdk::trace::TracerProvider;
+use opentelemetry::trace::{TraceError};
 use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::trace::BatchConfig;
 use opentelemetry_sdk::{
