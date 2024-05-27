@@ -10,10 +10,13 @@ const BASE_URL: &str = "http://worldtimeapi.org/api/timezone";
 async fn call_time(args: Vec<String>) -> Result<Frame, Error> {
     assert_eq!(args.len(), 1);
     let endpoint = &args[0];
+
     println!("Endpoint is : {}", endpoint.as_str());
     let request = reqwest::get(format!("{}/{}", BASE_URL, endpoint)).await?;
+
     println!("Status: {}", request.status());
     let val: Value = request.json().await?;
+
     Ok(Frame::message(serde_json::to_string(&val)?))
 }
 
