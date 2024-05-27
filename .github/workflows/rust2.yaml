@@ -1,5 +1,9 @@
-on: [push, pull_request]
-
+on: 
+  push:
+    # tags:
+    #   - "v*.*.*"
+  pull_request:
+    
 name: Rust Check/Test/Fmt
 
 jobs:
