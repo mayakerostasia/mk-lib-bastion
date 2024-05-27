@@ -1,5 +1,3 @@
-use std::future::poll_fn;
-
 use bb_lib_reactor::FramedFuture;
 use anyhow::Error;
 use bb_lib_reactor::ArcReactor;
@@ -19,7 +17,6 @@ async fn call_time(args: Vec<String>) -> Result<Frame, Error> {
     Ok(Frame::message(serde_json::to_string(&val)?))
 }
 
-// type FramedFuture<O> = Pin<Box<dyn Future<Output = Result<O, Error>> + Send + 'static>>;
 fn call_time_future(args: Vec<String>) -> FramedFuture<Frame> {
     Box::pin(call_time(args))
 }
@@ -27,7 +24,7 @@ fn call_time_future(args: Vec<String>) -> FramedFuture<Frame> {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mako = ArcReactor::new(1, 1);
-    mako.register_service("hi", call_time_future).await?;
+    mako.register_function("hi", call_time_future).await?;
 
     let mut _mako = mako.clone();
 

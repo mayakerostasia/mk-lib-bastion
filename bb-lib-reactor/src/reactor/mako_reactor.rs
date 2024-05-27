@@ -34,21 +34,21 @@ impl ArcReactor
         ))))
     }
 
-    pub async fn get_service(&self, service_name: &str) -> Result<fn(Vec<String>) -> FramedFuture<Frame>, Error> {
-        self.0.lock().await.get_service(service_name)
+    pub async fn get_function(&self, service_name: &str) -> Result<fn(Vec<String>) -> FramedFuture<Frame>, Error> {
+        self.0.lock().await.get_function(service_name)
     }
 
-    pub async fn register_service(
+    pub async fn register_function(
         &self,
         service_name: &str,
         func: fn(Vec<String>) -> FramedFuture<Frame>,
     ) -> Result<(), Error> {
         // todo!()
-        self.0.lock().await.register_service(service_name, func)
+        self.0.lock().await.register_function(service_name, func)
     }
 
-    pub async fn call_service(&self, proc: Proc) -> Result<Frame, Error> {
-        Ok(self.0.lock().await.call_service(proc).await?)
+    pub async fn call_registered_function(&self, proc: Proc) -> Result<Frame, Error> {
+        Ok(self.0.lock().await.call_registered_function(proc).await?)
     }
 }
 
@@ -105,7 +105,7 @@ impl Service<Frame> for ArcReactor
         let fut = async move {
             match req {
                 Frame::Exec(proc) => {
-                    me.call_service(dbg!(proc)).await
+                    me.call_registered_function(dbg!(proc)).await
                 },
                 Frame::Ping => {
                     Ok( Frame::pong() )
@@ -148,7 +148,7 @@ impl MakoReactor
         }
     }
 
-    pub fn get_service(
+    pub fn get_function(
         &self,
         service_name: &str,
     ) -> Result<fn(Vec<String>) -> FramedFuture<Frame>, Error> {
@@ -159,11 +159,11 @@ impl MakoReactor
     }
 
     async fn react(&self, proc: Proc) -> Result<Frame, Error> {
-        let service_fn = self.get_service(proc.cmd.as_str())?;
+        let service_fn = self.get_function(proc.cmd.as_str())?;
         Ok(service_fn(proc.args).await?)
     }
 
-    pub fn register_service(
+    pub fn register_function(
         &mut self,
         service_name: &str,
         func: fn(Vec<String>) -> FramedFuture<Frame>,
@@ -172,7 +172,7 @@ impl MakoReactor
         Ok(())
     }
 
-    pub async fn call_service(
+    pub async fn call_registered_function(
         &self,
         proc: Proc
     ) -> Result<Frame, Error> {
