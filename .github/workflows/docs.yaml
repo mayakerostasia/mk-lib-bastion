@@ -6,14 +6,8 @@ name: Docs
 # documentation.
 
 on:
-  # schedule:
-  #   - cron: '23 11 * * *'
   push:
-    # branches: [ "repo_dispatch" ]
     tags: [ 'v*.*.*' ]
-  pull_request:
-    branches: [ "master", "prod" ]
-
 
 env:
   REGISTRY: ghcr.io

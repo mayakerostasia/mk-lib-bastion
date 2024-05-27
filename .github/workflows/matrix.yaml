@@ -1,4 +1,8 @@
-on: push
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
 name: stable-beta-nightly
 
 jobs:
