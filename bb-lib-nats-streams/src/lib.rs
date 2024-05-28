@@ -30,5 +30,9 @@ pub use kingkong::KingKong;
 pub use kong::Kong;
 pub use monkey::Monkey;
 
+use std::future::Future;
+use std::pin::Pin;
 use util::boxed_future_generator;
-pub use util::{annotate, BoxedFutureFn, PinnedFuture};
+pub use util::{annotate, BoxedFutureFn};
+
+pub type PinnedFuture<O> = Pin<Box<dyn Future<Output = Result<O, Error>> + Send + Sync + 'static>>;

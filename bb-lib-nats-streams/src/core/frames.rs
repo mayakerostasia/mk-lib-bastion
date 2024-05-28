@@ -23,8 +23,9 @@ pub enum Frame {
     Bytes(Box<[u8]>),
     SendBox(SendBox),
     Close,
-    // Register(MonkeyRegistration),
     Exec(Proc),
+    Fin,
+    Error
 }
 impl Encoder for Frame {}
 impl<'de> Decoder<'de, Frame> for Frame {}

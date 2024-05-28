@@ -4,6 +4,7 @@
 // use crate::Frame::
 
 use crate::core::frames::{SendBox, Proc};
+// use serde::de::Error;
 use tracing::info;
 
 use crate::Error;
@@ -21,9 +22,19 @@ pub async fn match_frame<'de>(frame: Frame) -> Result<Frame, Error> {
         Frame::Ping => got_ping(),
         Frame::Pong => got_pong(),
         Frame::Close => got_close(),
+        Frame::Fin => got_fin(),
+        Frame::Error => got_error(),
     }
 }
 
+pub fn got_fin() -> Result<Frame, Error> {
+    info!("Got FIN");
+    Ok(Frame::Fin)
+}
+pub fn got_error() -> Result<Frame, Error> {
+    info!("Got Error");
+    Ok(Frame::Error)
+}
 pub fn got_ping() -> Result<Frame, Error> {
     info!("Got ping");
     Ok(Frame::pong())

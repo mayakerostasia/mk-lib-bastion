@@ -1,7 +1,9 @@
 // use crate::Error;
 use crate::Kong;
 use crate::Frame;
+use crate::PinnedFuture;
 use core::future::Future;
+use std::ops::DerefMut;
 use anyhow::{anyhow, Error};
 use bb_lib_http_listener::Server;
 use bytes::Bytes;
@@ -9,6 +11,7 @@ use petname::Generator;
 use rand::thread_rng;
 use tokio::task::JoinHandle;
 use tokio::task::{AbortHandle, JoinSet};
+use tower::Service;
 use tracing::{debug, error, instrument, instrument::Instrumented, Instrument};
 use tracing::{info, info_span};
 
@@ -21,6 +24,39 @@ pub struct KingKong {
     abort_handles: Vec<Instrumented<AbortHandle>>,
     _http_listener: Option<Server>,
     _http_started: bool,
+}
+
+// impl std::ops::Deref for KingKong {
+//     type Target = KingKong;
+//     fn deref(&self) -> &Self::Target {
+//         self
+//     }
+// }
+
+// impl DerefMut for KingKong {
+//     fn deref_mut(&mut self) -> &mut Self {
+//         self
+//     }
+// }
+
+
+impl Service<Frame> for KingKong {
+    type Error = anyhow::Error;
+    type Response = Frame;
+    type Future = PinnedFuture<Frame>;
+
+    fn poll_ready(&mut self, cx: &mut std::task::Context<'_>) -> std::task::Poll<Result<(), Self::Error>> {
+        std::task::Poll::Ready(Ok(()))
+    }
+
+    fn call(&mut self, req: Frame) -> Self::Future {
+        let fut = async move {
+            let mut res = Frame::pong();
+            // res.push_str("Hello World");
+            Ok(res)
+        };
+        Box::pin(fut)
+    }
 }
 
 impl KingKong {
