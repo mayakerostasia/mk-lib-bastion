@@ -9,7 +9,7 @@ members = [
   "bb-lib-surreal-client",
   "bb-lib-tracing",
   # "bb-lib-event",
-  "bb-lib-reactor",
+  # "bb-lib-reactor",
 ]
 
 [workspace.dependencies]

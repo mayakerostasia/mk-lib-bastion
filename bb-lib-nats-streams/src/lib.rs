@@ -12,30 +12,22 @@
 
 mod core;
 mod error;
-mod kingkong;
-mod kong;
-mod monkey;
+mod kong_tools;
 mod util;
+mod frame;
 // mod kong_tools;
 
 pub use anyhow::Error;
 pub use error::NSLibError;
 
 // pub use core::frame_handler::future::FrameFuture;
-pub use core::{
+pub use frame::{
     encoder::{Decoder, Encoder},
-    frames::{Frame, Proc},
-    match_frame,
-    // BastionRequest, BastionReply,
+    frame::Frame,
+    proc::Proc
 };
-pub use kingkong::KingKong;
-pub use kong::Kong;
-pub use monkey::Monkey;
+pub use kong_tools::KingKong;
+pub use kong_tools::Kong;
+pub use kong_tools::Monkey;
 
-use std::future::Future;
-use std::pin::Pin;
 use util::boxed_future_generator;
-pub use util::{annotate, BoxedFutureFn};
-// pub use core::frame_handler::FrameHandlerLayer;
-
-pub type PinnedFuture<O> = Pin<Box<dyn Future<Output = Result<O, Error>> + Send + Sync + 'static>>;

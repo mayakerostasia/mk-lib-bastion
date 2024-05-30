@@ -133,25 +133,25 @@ mod tests {
     use crate::core::make_request;
 
     #[tokio::test]
-    async fn initialize_kong() -> Result<(), Error> {
+    async fn initialize_kong() -> Result<(), BoxError> {
         let _kong = Kong::new("greet.kong", "10.2.4.106:4222").await;
         assert!(true);
         Ok(())
     }
 
     #[tokio::test]
-    async fn named_kong() -> Result<(), Error> {
-        // let kong = Kong::new("greet", "nats://10.2.4.106:4222").await;
-        // let listener = kong.listen().await?;
-        // let client: async_nats::Client = new_client("nats://10.2.4.106:4222").await?;
-        // let _request = make_request(
-        //     client.clone(),
-        //     "greet.sue".to_string(),
-        //     "Hello! My name is Sue!".to_string(),
-        // )
-        // .await?;
-        // listener.abort();
-        assert!(false);
+    async fn named_kong() -> Result<(), BoxError> {
+        let kong = Kong::new("greet", "nats://10.2.4.106:4222").await;
+        let listener = kong.listen().await?;
+        let client: async_nats::Client = new_client("nats://10.2.4.106:4222").await?;
+        let _request = make_request(
+            client.clone(),
+            "greet.sue".to_string(),
+            "Hello! My name is Sue!".to_string(),
+        )
+        .await?;
+        listener.abort();
+        // assert!(false);
         Ok(())
     }
 }

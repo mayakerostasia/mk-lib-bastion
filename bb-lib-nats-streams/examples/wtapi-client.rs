@@ -1,5 +1,5 @@
 use anyhow::Error;
-use bb_lib_nats_streams::{Decoder, Frame, Monkey, Proc};
+use bb_lib_nats_streams::{Decoder, Frame, Monkey};
 use serde_json::Value;
 
 #[tokio::main]

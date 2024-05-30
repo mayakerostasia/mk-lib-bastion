@@ -1,15 +1,14 @@
-use crate::{core::FrameFuture, Decoder, Frame, Kong, NSLibError};
+use crate::{Frame, Kong, NSLibError};
 use anyhow::anyhow;
 use bb_lib_http_listener::Server;
 use bytes::Bytes;
 use core::future::Future;
 use petname::Generator;
 use rand::thread_rng;
-use std::pin::Pin;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::task::{AbortHandle, JoinHandle, JoinSet};
-use tower::{BoxError, Service};
+use tower::BoxError;
 use tracing::{debug, error, info, info_span, instrument, instrument::Instrumented, Instrument};
 
 type Error = NSLibError;
@@ -24,44 +23,6 @@ pub struct KingKong {
     _http_listener: Option<Server>,
     _http_started: bool,
 }
-
-// impl Service<Bytes> for KingKong {
-//     type Error = BoxError;
-//     type Response = Frame;
-//     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
-
-//     fn poll_ready(
-//         &mut self,
-//         _cx: &mut std::task::Context<'_>,
-//     ) -> std::task::Poll<Result<(), Self::Error>> {
-//         std::task::Poll::Ready(Ok(()))
-//     }
-
-//     fn call(&mut self, req: Bytes) -> Self::Future {
-//         // let payload = req.payload.clone();
-//         let frame: Frame = Frame::decode(&req);
-//         Box::pin(async { Ok(frame) })
-//     }
-// }
-
-// impl Service<Frame> for KingKong {
-//     type Error = BoxError;
-//     type Response = Frame;
-//     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send + Sync>>;
-
-//     fn poll_ready(
-//         &mut self,
-//         _cx: &mut std::task::Context<'_>,
-//     ) -> std::task::Poll<Result<(), Self::Error>> {
-//         std::task::Poll::Ready(Ok(()))
-//     }
-
-//     fn call(&mut self, req: Frame) -> Self::Future {
-//         // let payload = req.payload.clone();
-//         // let frame: Frame = Frame::decode(&req);
-//         Box::pin(async { Ok(req) })
-//     }
-// }
 
 impl KingKong {
     pub fn new(subject: &str, nats_addr: &str) -> Self {
