@@ -8,7 +8,7 @@ members = [
   "bb-lib-nats-streams", 
   "bb-lib-surreal-client",
   "bb-lib-tracing",
-  "bb-lib-event",
+  # "bb-lib-event",
   "bb-lib-reactor",
 ]
 

@@ -1,8 +1,7 @@
-
 use anyhow::Error;
+use bb_lib_nats_streams::{Decoder, Encoder};
 use core::fmt::Formatter;
-use serde::{Serialize, Deserialize};
-use bb_lib_nats_streams::{Encoder, Decoder};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum BBEventType {
@@ -28,7 +27,7 @@ impl std::fmt::Display for BBEventType {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BBEvent {
     name: String,
-    _type: BBEventType
+    _type: BBEventType,
 }
 impl Encoder for BBEvent {}
 impl Decoder<'_, BBEvent> for BBEvent {}
@@ -40,13 +39,13 @@ impl Into<bytes::Bytes> for BBEvent {
 
 impl BBEvent {
     pub fn new(name: &str, event_type: BBEventType) -> Self {
-        BBEvent { 
+        BBEvent {
             name: name.to_string(),
             _type: event_type,
         }
     }
 
-    pub fn emit(&self) -> Result<(), Error> { 
+    pub fn emit(&self) -> Result<(), Error> {
         Ok(())
     }
 }
@@ -68,4 +67,3 @@ mod tests {
         assert_eq!(event.to_string(), "event=test type=test");
     }
 }
-

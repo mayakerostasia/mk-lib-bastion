@@ -1,9 +1,10 @@
-use anyhow::Error;
+// use anyhow::Error;
 use bb_lib_nats_streams::{Decoder, Frame, KingKong, Monkey, Proc};
 use serde_json::Value;
 use std::future::Future;
 use std::pin::Pin;
 
+pub type Error = tower::BoxError;
 const BASE_URL: &str = "http://worldtimeapi.org/api/timezone";
 
 async fn call_time(frame: Frame) -> Result<Frame, Error> {
@@ -14,10 +15,10 @@ async fn call_time(frame: Frame) -> Result<Frame, Error> {
     let request = reqwest::get(format!("{}/{}", BASE_URL, endpoint)).await?;
     println!("Status: {}", request.status());
     let val: Value = request.json().await?;
-    Ok(Frame::message(serde_json::to_string(&val)?))
+    Ok(Frame::message(serde_json::to_string(&val)?.as_str()))
 }
 
- fn process_frame(frame: Frame) -> Result<Proc, Error> {
+fn process_frame(frame: Frame) -> Result<Proc, Error> {
     match frame {
         Frame::Exec(proc) => Ok(proc),
         _ => unimplemented!(),
@@ -40,7 +41,7 @@ async fn main() -> Result<(), Error> {
     // Initialize the KingKong
     let mut kkong = KingKong::new("time", nats_addr.as_str());
     // Register the service
-    kkong.new_future_kong( "new_york", call_time_future ).await?;
+    kkong.new_future_kong("new_york", call_time_future).await?;
     kkong.wait().await?;
     Ok(())
 }

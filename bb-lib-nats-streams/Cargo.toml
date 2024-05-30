@@ -20,7 +20,9 @@ tower = "0.4.13"
 tracing = { workspace = true }
 opentelemetry = "0.23.0"
 tokio-util = "0.7.11"
+pin-project-lite.workspace = true
 
 [dev-dependencies]
 bb-lib-tracing = { path = "../bb-lib-tracing", version = "0.1.0" }
+pin-project-lite.workspace = true
 reqwest = { version = "0.12.4", features = ["json"] }

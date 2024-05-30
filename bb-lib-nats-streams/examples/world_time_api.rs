@@ -1,8 +1,9 @@
-use anyhow::Error;
 use bb_lib_nats_streams::{Decoder, Frame, KingKong, Monkey, Proc};
 use serde_json::Value;
 use std::future::Future;
 use std::pin::Pin;
+
+pub type Error = tower::BoxError;
 
 const BASE_URL: &str = "http://worldtimeapi.org/api/timezone";
 
@@ -14,10 +15,10 @@ async fn call_time(frame: Frame) -> Result<Frame, Error> {
     let request = reqwest::get(format!("{}/{}", BASE_URL, endpoint)).await?;
     println!("Status: {}", request.status());
     let val: Value = request.json().await?;
-    Ok(Frame::message(serde_json::to_string(&val)?))
+    Ok(Frame::message(serde_json::to_string(&val)?.as_str()))
 }
 
- fn process_frame(frame: Frame) -> Result<Proc, Error> {
+fn process_frame(frame: Frame) -> Result<Proc, Error> {
     match frame {
         Frame::Exec(proc) => Ok(proc),
         _ => unimplemented!(),
@@ -41,25 +42,20 @@ async fn main() -> Result<(), Error> {
     // Initialize the KingKong
     let mut kkong = KingKong::new("time", nats_addr.as_str());
     // Register the service
-    kkong.new_future_kong( "new_york", call_time_future ).await?;
+    kkong.new_future_kong("new_york", call_time_future).await?;
 
     // Other Process
     // Initialize a Monkey to send the request
     let monkey = Monkey::new("time.new_york", nats_addr.as_str()).await;
-    let resp = monkey
-        .msg(Frame::exec(Proc {
-            cmd: "America/New_York".to_string(),
-            args: vec![],
-        }))
-        .await?;
+    let resp = monkey.msg(Frame::exec("America/New_York", vec![])).await?;
 
     let frame = Frame::decode(&resp.payload);
     match frame {
-        Frame::Msg(val) => { 
+        Frame::Msg(val) => {
             let resul: Value = serde_json::from_str(&val)?;
-            serde_json::to_writer_pretty(std::io::stdout(), &resul)? 
-        },
-        _ => unimplemented!("Not Allowed!")
+            serde_json::to_writer_pretty(std::io::stdout(), &resul)?
+        }
+        _ => unimplemented!("Not Allowed!"),
     }
     // tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
     Ok(())

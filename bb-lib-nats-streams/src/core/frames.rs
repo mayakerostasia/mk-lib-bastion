@@ -8,6 +8,15 @@ pub struct Proc {
     pub args: Vec<String>,
 }
 
+impl Proc {
+    pub fn new(cmd: &str, args: Vec<&str>) -> Proc {
+        Proc {
+            cmd: cmd.to_string(),
+            args: args.iter().map(|t| t.to_string()).collect(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SendBox {
     pub from: String,
@@ -25,7 +34,7 @@ pub enum Frame {
     Close,
     Exec(Proc),
     Fin,
-    Error
+    Error(String),
 }
 impl Encoder for Frame {}
 impl<'de> Decoder<'de, Frame> for Frame {}
@@ -37,16 +46,16 @@ impl Into<Bytes> for Frame {
 }
 
 impl Frame {
-    pub fn message(msg: String) -> Frame {
-        Frame::Msg(msg)
+    pub fn message(msg: &str) -> Frame {
+        Frame::Msg(msg.to_string())
     }
 
     pub fn bytes(data: Box<[u8]>) -> Frame {
         Frame::Bytes(data)
     }
 
-    pub fn exec(proc: Proc) -> Frame {
-        Frame::Exec(proc)
+    pub fn exec(cmd: &str, args: Vec<&str>) -> Frame {
+        Frame::Exec(Proc::new(cmd, args))
     }
 
     pub fn ping() -> Frame {

@@ -1,50 +1,41 @@
-use http_body_util::{
-    BodyExt,
-    Full,
-    combinators::BoxBody,
-};
+use http_body_util::{combinators::BoxBody, BodyExt, Full};
 
-use serde_json::Value;
-use std::{net::SocketAddr, collections::HashMap};
-use tokio::{
-    task::JoinHandle,
-    net::TcpListener,
-};
 use serde_json::json;
+use serde_json::Value;
+use std::{collections::HashMap, net::SocketAddr};
+use tokio::{net::TcpListener, task::JoinHandle};
 
 use hyper::{
-    service::service_fn,
-    server::conn::http1::Builder,
-    HeaderMap,
-    StatusCode,
     body::{
         self,
         // Body,
-        Bytes
-    }
+        Bytes,
+    },
+    server::conn::http1::Builder,
+    service::service_fn,
+    HeaderMap, StatusCode,
 };
 
 use hyper_util::rt::TokioIo;
-use reqwest::{ Method, Url } ;
+use reqwest::{Method, Url};
 
-use bb_lib_base_api::{traits::RestClient, paged::Paged, client::Rest} ;
+use bb_lib_base_api::{client::Rest, paged::Paged, traits::RestClient};
 
 use super::calls::{TestCall, TestEchoCall};
 
 fn empty() -> BoxBody<Bytes, hyper::Error> {
     Full::new(Bytes::new())
-    .map_err(|never| match never {} )
-    .boxed()
+        .map_err(|never| match never {})
+        .boxed()
 }
 
 fn full<T: Into<Bytes>>(chunk: T) -> BoxBody<Bytes, hyper::Error> {
     Full::new(chunk.into())
-    .map_err(|never| match never {})
-    .boxed()
+        .map_err(|never| match never {})
+        .boxed()
 }
 
-fn create_resp_bytes(val: Value) -> Bytes 
-{
+fn create_resp_bytes(val: Value) -> Bytes {
     let body = serde_json::to_string(&val).unwrap();
     Bytes::from(body)
 }
@@ -53,25 +44,27 @@ fn hyper_response(val: Value) -> hyper::Response<BoxBody<Bytes, hyper::Error>> {
     hyper::Response::new(full(create_resp_bytes(val)))
 }
 
-async fn echo(req: hyper::Request<body::Incoming>) -> Result<hyper::Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
+async fn echo(
+    req: hyper::Request<body::Incoming>,
+) -> Result<hyper::Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
     // Watch out for extra `/` in path... dunno why it's happening
     match (req.method(), &req.uri().path()[1..]) {
         (&Method::GET, "/") => {
             // Ok(hyper::Response::new(full(create_resp_bytes(json!({"response": []})))))
             Ok(hyper_response(json!({"response": []})))
-        },
+        }
         (&Method::POST, "/echo") => {
             // Ok(hyper_response(json!({"response": []})))
             println!("Echo: {:?}", req.body());
             Ok(hyper::Response::new(req.into_body().boxed()))
-        },
+        }
         (_, x) => {
             println!("404: {}", x);
             Ok(hyper::Response::builder()
                 .status(StatusCode::NOT_FOUND)
                 .body(empty())
                 .unwrap())
-        },
+        }
     }
 }
 
@@ -88,7 +81,7 @@ impl TestClient {
         let listener = TcpListener::bind(addr).await?;
 
         // We start a loop to continuously accept incoming connections
-        Ok(tokio::task::spawn( async move {         
+        Ok(tokio::task::spawn(async move {
             loop {
                 let (stream, _) = listener.accept().await.unwrap();
 
@@ -112,13 +105,14 @@ impl TestClient {
                 });
             }
         }))
-
     }
 
     pub async fn new() -> Self {
-            let handle = TestClient::start();
-            TestClient {_handle: handle.await.unwrap(),}
+        let handle = TestClient::start();
+        TestClient {
+            _handle: handle.await.unwrap(),
         }
+    }
 }
 
 impl RestClient for TestClient {
@@ -170,34 +164,39 @@ fn gen_call(offset: usize) -> (TestCall, TestCall) {
             page_size: 10,
             abs_limit: 20,
             extra: HashMap::new(),
-        }
+        },
     };
     (tc.clone(), tc)
 }
 
 pub async fn test_rest_call(client: &TestClient) {
     let rest = Rest::new(client);
-    let (call, _call_control) = gen_call(0);   
+    let (call, _call_control) = gen_call(0);
     let resp = rest.call(client, &call).await.unwrap();
     assert_eq!(resp.0, StatusCode::OK);
     println!("{}", serde_json::to_string_pretty(&resp.1).unwrap());
     assert_eq!(resp.1, json!({"response":[]}));
-
 }
 
 pub async fn test_paged_call(client: &TestClient) {
     let rest = Rest::new(client);
-    let (paged, _paged_control) = gen_echo_call(0);   
-    let (mut call, _call_control) = gen_echo_call(0); 
+    let (paged, _paged_control) = gen_echo_call(0);
+    let (mut call, _call_control) = gen_echo_call(0);
 
-    let paged_response = rest.paged_call(client, &paged, Some(100), Some(10)).await.unwrap();
+    let paged_response = rest
+        .paged_call(client, &paged, Some(100), Some(10))
+        .await
+        .unwrap();
     assert_eq!(paged_response.0, StatusCode::OK);
-    assert_eq!(paged_response.1, json!({"total": 0, "page_size": 10, "offset": 0, "abs_limit": 100, "response":[]}));
-        
+    assert_eq!(
+        paged_response.1,
+        json!({"total": 0, "page_size": 10, "offset": 0, "abs_limit": 100, "response":[]})
+    );
+
     for i in 0..10 {
         let resp = rest.call(client, &call).await.unwrap();
         assert_eq!(resp.0, StatusCode::OK);
-        assert_eq!(resp.1, json!(gen_echo_call(i*10).0));
+        assert_eq!(resp.1, json!(gen_echo_call(i * 10).0));
         call += call.clone();
     }
 

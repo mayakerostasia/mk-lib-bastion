@@ -1,8 +1,12 @@
-pub use reactor::{ArcReactor, MakoBattery, MakoReactor};
-use std::pin::Pin;
-use std::future::Future;
+pub use future::FrameFuture;
+pub use reactor::{MakoBattery, MakoLayer, MakoReactor};
+pub type Error = anyhow::Error;
+pub use error::ReactorError;
 
+mod error;
+mod future;
 mod reactor;
 
-pub type Error = anyhow::Error;
-pub type FramedFuture<O> = Pin<Box<dyn Future<Output = Result<O, Error>> + Send + Sync + 'static>>;
+mod proc_service;
+
+// pub type PinnedFuture<O> = Pin<Box<dyn Future<Output = Result<O, Error>> + Send + Sync + 'static>>;

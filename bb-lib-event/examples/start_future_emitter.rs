@@ -1,5 +1,5 @@
 use anyhow::Error;
-use bb_lib_event::{BBEventType, Emitter};
+use bb_lib_event::Emitter;
 use bb_lib_nats_streams::{Frame, KingKong};
 use tracing::{info, info_span};
 
@@ -24,7 +24,7 @@ async fn main() -> Result<(), Error> {
     let _ = emitter
         .emit_event(
             "test-event",
-            Frame::message(format!("Hello from {}", kkong.name).to_string()),
+            Frame::message(format!("Hello from {}", kkong.name).as_str()),
         )
         .await?;
     span.exit();

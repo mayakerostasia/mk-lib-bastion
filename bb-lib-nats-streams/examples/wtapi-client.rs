@@ -12,21 +12,15 @@ async fn main() -> Result<(), Error> {
     // Other Process
     // Initialize a Monkey to send the request
     let monkey = Monkey::new("time.new_york", nats_addr.as_str()).await;
-    let resp = monkey
-        .msg(Frame::exec(Proc {
-            cmd: "America/New_York".to_string(),
-            args: vec![],
-        }))
-        .await?;
+    let resp = monkey.msg(Frame::exec("America/New_York", vec![])).await?;
 
     let frame = Frame::decode(&resp.payload);
     match frame {
-        Frame::Msg(val) => { 
+        Frame::Msg(val) => {
             let resul: Value = serde_json::from_str(&val)?;
-            serde_json::to_writer_pretty(std::io::stdout(), &resul)? 
-        },
-        _ => unimplemented!("Not Allowed!")
+            serde_json::to_writer_pretty(std::io::stdout(), &resul)?
+        }
+        _ => unimplemented!("Not Allowed!"),
     };
     Ok(())
 }
-

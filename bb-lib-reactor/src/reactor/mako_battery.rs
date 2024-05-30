@@ -43,7 +43,6 @@ impl Drop for MakoBattery {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use anyhow::Error;
@@ -53,7 +52,7 @@ mod tests {
     #[tokio::test]
     async fn test_battery_capacity() -> Result<(), Error> {
         let capacity = 5;
-        let update_interval = tokio::time::Duration::from_secs_f32(1.0 / capacity as f32 );
+        let update_interval = tokio::time::Duration::from_secs_f32(1.0 / capacity as f32);
         let bucket = MakoBattery::new(update_interval, capacity);
         for _ in 0..10 {
             bucket.acquire().await;

@@ -1,8 +1,12 @@
-use crate::{Error, Frame};
-use bytes::Bytes;
-use futures::Future;
-use tracing::{debug, info, instrument};
 use crate::Decoder;
+use crate::Frame;
+// use anyhow::anyhow;
+use bytes::Bytes;
+use std::future::Future;
+use tower::BoxError;
+use tracing::{debug, info, instrument};
+
+pub type Error = crate::NSLibError;
 
 #[instrument(skip(request, client), fields(monkey_name, monkey_payload))]
 pub async fn echo_request(
@@ -41,14 +45,37 @@ pub async fn reply_with_object<T>(
     Ok(())
 }
 
+// #[instrument(skip(request, client, fut))]
+// pub async fn reply_with_future<F, T, E>(
+//     request: async_nats::Message,
+//     client: &async_nats::Client,
+//     fut: fn(Frame) -> F,
+// ) -> Result<(), E>
+// where
+//     F: Future<Output = Result<T, E>> + Send + 'static,
+//     T: std::fmt::Debug + Into<Bytes> + Send + 'static,
+//     E: std::error::Error + From<async_nats::client::PublishError> + Into<BoxError>,
+// {
+//     let name = request.subject.clone();
+//     let payload = request.payload.clone();
+//     let frame = Frame::decode(&payload);
+//     info!(?name, ?payload, "Received payload: {:#?}", &frame);
+//     let future = fut(frame.clone()).await?;
+//     info!("Got result {:#?}", &future);
+//     if let Some(reply) = request.reply {
+//         client.publish(reply, future.into()).await?;
+//     }
+//     Ok(())
+// }
+
 #[instrument(skip(request, client, fut))]
 pub async fn reply_with_future<O, T>(
     request: async_nats::Message,
     client: &async_nats::Client,
     fut: fn(Frame) -> O
-) -> Result<(), Error> 
+) -> Result<(), BoxError> 
 where
-    O: Future<Output = Result<T, Error>> + Send + 'static,
+    O: Future<Output = Result<T, BoxError>> + Send + 'static,
     T: std::fmt::Debug + Into<Bytes> + Send + 'static,
 {
     let name = request.subject.clone();

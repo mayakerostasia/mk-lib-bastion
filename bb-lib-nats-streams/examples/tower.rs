@@ -1,11 +1,9 @@
 use bb_lib_nats_streams::{Frame, KingKong, Monkey};
-use bb_lib_reactor::{FrameFuture, MakoLayer};
-use reqwest::Identity;
 use serde_json::Value;
 use std::sync::Arc;
 use std::{future::Future, pin::Pin};
 use tokio::sync::Mutex;
-use tower::{BoxError, Service, ServiceExt};
+use tower::{BoxError, Service};
 
 const BASE_URL: &str = "http://worldtimeapi.org/api/timezone";
 const NATS_ADDR: &str = "nats://10.2.4.106:4222";
@@ -39,11 +37,7 @@ struct FrameHandler;
 
 impl Service<Frame> for FrameHandler {
     type Response = Frame;
-    type Future = FrameFuture<
-        Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send + Sync>>,
-        Self::Response,
-        Self::Error,
-    >;
+    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send + Sync>>;
     type Error = BoxError;
 
     fn poll_ready(
@@ -54,7 +48,7 @@ impl Service<Frame> for FrameHandler {
     }
 
     fn call(&mut self, req: Frame) -> Self::Future {
-        FrameFuture::new(Box::pin(async { Ok(frame_handler(req).await?) }))
+        Box::pin(async { Ok(frame_handler(req).await?) })
     }
 }
 
@@ -82,19 +76,5 @@ async fn main() -> Result<(), BoxError> {
     let resp = monkey.msg(byt).await?;
 
     println!("Response: {:?}", resp);
-    // Ok(())
-
-    // Manual Call
-    // for _ in 0..1 {
-    //     let _srv = reactor_service.clone();
-    //     let mut srv = _srv.lock().await;
-    //     let reacto = srv.ready().await?;
-    //     let fut: Frame = reacto
-    //         .call(Frame::exec("time", vec!["America/New_York"]))
-    //         .await
-    //         .unwrap();
-    //     dbg!(fut);
-    // }
-    // kkong.wait().await?;
     Ok(())
 }

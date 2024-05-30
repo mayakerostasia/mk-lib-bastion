@@ -1,10 +1,10 @@
-use std::ops::{ Add, AddAssign };
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use reqwest::Method;
+use bb_lib_base_api::client::IntermediateResponse;
 use bb_lib_base_api::paged::Paged;
 use bb_lib_base_api::traits::RestCall;
-use bb_lib_base_api::client::IntermediateResponse;
+use reqwest::Method;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::ops::{Add, AddAssign};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TestCall {
@@ -45,7 +45,12 @@ impl RestCall for TestCall {
         None
     }
 
-    fn paged(&self, response: IntermediateResponse, abs_limit: Option<usize>, _page_size: Option<usize>) -> Option<Vec<impl RestCall>> {
+    fn paged(
+        &self,
+        response: IntermediateResponse,
+        abs_limit: Option<usize>,
+        _page_size: Option<usize>,
+    ) -> Option<Vec<impl RestCall>> {
         let mut calls = vec![];
         let mut paged = response.paged.clone();
 
@@ -59,7 +64,7 @@ impl RestCall for TestCall {
                 page_size: paged.page_size,
                 abs_limit: paged.abs_limit,
                 extra: paged.extra.clone(),
-            }
+            },
         };
         calls.push(new_call);
         Some(calls)
@@ -106,7 +111,12 @@ impl RestCall for TestEchoCall {
         Some(serde_json::to_value(self.clone()).unwrap())
     }
 
-    fn paged(&self, response: IntermediateResponse, abs_limit: Option<usize>, _page_size: Option<usize>) -> Option<Vec<impl RestCall>> {
+    fn paged(
+        &self,
+        response: IntermediateResponse,
+        abs_limit: Option<usize>,
+        _page_size: Option<usize>,
+    ) -> Option<Vec<impl RestCall>> {
         let mut calls = vec![];
         let mut paged = response.paged.clone();
 
@@ -120,7 +130,7 @@ impl RestCall for TestEchoCall {
                 page_size: paged.page_size,
                 abs_limit: paged.abs_limit,
                 extra: paged.extra.clone(),
-            }
+            },
         };
         calls.push(new_call);
         Some(calls)

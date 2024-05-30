@@ -1,32 +1,34 @@
-// use bb_lib_tracing::instrument::Instrumented;
-// use std::pin::Pin;
-use crate::Error;
 use async_nats::HeaderMap;
 use bytes::Bytes;
-use core::future::Future;
 use futures::StreamExt;
 pub use operations::match_frame;
-use std::env;
+use std::{env, sync::Arc, future::Future};
 use tokio_util::sync::CancellationToken;
-use tracing::instrument::Instrumented;
-use tracing::{debug, info, info_span, instrument, Instrument};
+use tracing::{debug, info, info_span, instrument, instrument::Instrumented, Instrument};
 
-use crate::util::BoxedFutureFn;
-use crate::Frame;
-use responders::{echo_request, reply_with_future, reply_with_object};
+use crate::{util::BoxedFutureFn, Decoder, Frame};
+use responders::{echo_request, reply_with_object, reply_with_future};
+use tower::{BoxError, Service, ServiceExt};
 
 mod bastion;
 pub mod encoder;
+// pub mod frame_handler;
 pub mod frames;
+mod future;
 mod operations;
 mod responders;
+
+pub use future::FrameFuture;
+
+pub type Error = crate::NSLibError;
 
 #[instrument]
 pub async fn new_echo_responder(
     client: &async_nats::Client,
     name: &str,
 ) -> Result<tokio::task::JoinHandle<Result<(), Error>>, Error> {
-    let mut requests = client.subscribe(format!("{}.*", name)).await.unwrap();
+    let subscribe = client.subscribe(format!("{}.*", name)).await.unwrap();
+    let mut requests = subscribe;
 
     info!("Starting responder @ {name}");
     let handle = tokio::spawn({
@@ -50,7 +52,7 @@ pub async fn new_object_responder<T>(
     client: &async_nats::Client,
     name: &str,
     object: impl Into<Bytes>,
-) -> Result<tokio::task::JoinHandle<Result<(), Error>>, Error> {
+) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError> {
     let mut requests = client.subscribe(format!("{}.*", name)).await.unwrap();
     let object: Bytes = object.into();
     // let identity = annotate(|_req: &Bytes | { Box::new(object) });
@@ -63,7 +65,7 @@ pub async fn new_object_responder<T>(
                 debug!("Request -> {:#?}", request);
                 reply_with_object::<T>(request, &client, object.clone()).await?;
             }
-            Ok::<(), Error>(())
+            Ok::<(), BoxError>(())
         }
     });
     info!("responder listening to {name}.*");
@@ -78,7 +80,7 @@ pub async fn new_service_responder<T: Send + std::fmt::Debug + Into<Bytes> + 'st
     subject: &str,
     func: BoxedFutureFn<T>,
     cancel_token: CancellationToken,
-) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), Error>>>, Error> {
+) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError> {
     let mut requests = client
         .clone()
         .subscribe(format!("{}", subject))
@@ -91,7 +93,7 @@ pub async fn new_service_responder<T: Send + std::fmt::Debug + Into<Bytes> + 'st
         async move {
             tokio::select! {
                 _ = cancel_token.cancelled() => {
-                        Ok::<(), Error>(())
+                        Ok::<(), BoxError>(())
                     },
 
                 _ = async move {
@@ -101,14 +103,13 @@ pub async fn new_service_responder<T: Send + std::fmt::Debug + Into<Bytes> + 'st
                         debug!("Result is {:#?}", &result);
                         reply_with_object::<T>(request, &client, result).await?;
                         };
-                        Ok::<(), Error>(())
-                    }// .instrument(info_span!("request"))
-                    => {
-                        Ok::<(), Error>(())
-
+                        Ok::<(), BoxError>(())
                     }
-            } // .instrument(info_span!("select"))
-        } // .instrument(info_span!("async"))
+                    => {
+                        Ok::<(), BoxError>(())
+                    }
+            }
+        }
     })
     .instrument(span);
     Ok(handle)
@@ -123,10 +124,10 @@ pub async fn new_service_future_responder<O, T>(
     // func: BoxedFutureFn<T>,
     func: fn(Frame) -> O,
     cancel_token: CancellationToken,
-) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), Error>>>, Error>
+) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError>
 where
     T: std::fmt::Debug + Into<Bytes> + Send + 'static,
-    O: Future<Output = Result<T, Error>> + Send + 'static,
+    O: Future<Output = Result<T, BoxError>> + Send + 'static,
 {
     let mut requests = client
         .clone()
@@ -141,7 +142,7 @@ where
         async move {
             tokio::select! {
                 _ = cancel_token.cancelled() => {
-                        Ok::<(), Error>(())
+                        Ok::<(), BoxError>(())
                     },
 
                 _ = async move {
@@ -149,10 +150,10 @@ where
                         info!(?request.subject, ?request.payload);
                         reply_with_future(request, &client, func).await?;
                         };
-                        Ok::<(), Error>(())
+                        Ok::<(), BoxError>(())
                     }// .instrument(info_span!("request"))
                     => {
-                        Ok::<(), Error>(())
+                        Ok::<(), BoxError>(())
 
                     }
             } // .instrument(info_span!("select"))
@@ -162,8 +163,64 @@ where
     Ok(handle)
 }
 
+// use std::sync::Arc;
+use tokio::sync::Mutex;
+#[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
+pub async fn new_tower_service_responder<'a, S>(
+    client: &'a async_nats::Client,
+    name: &'a str,
+    subject: &'a str,
+    service: Arc<Mutex<S>>,
+    cancel_token: CancellationToken,
+) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, Error>
+where
+    S: Clone + Service<Frame> + Send + Sync + 'static,
+    S::Future: Send + Sync,
+    S::Response: Send + Sync + Into<Bytes>,
+    S::Error: Into<BoxError>,
+{
+    let mut requests = client
+        .clone()
+        .subscribe(format!("{}", subject))
+        .await
+        .unwrap();
+    // let func = Arc::new(func);
+    let span = info_span!("ServiceResponder");
+
+    let handle = tokio::spawn({
+        let client = client.clone();
+        // let service = service.clone();
+        // let func = Box::new(func);
+        async move {
+            tokio::select! {
+                _ = cancel_token.cancelled() => {
+                        Ok::<(), BoxError>(())
+                    },
+                _ = async move {
+                        let mut _srv = service.lock().await;
+                        let srv = _srv.ready().await.map_err(Into::into)?;
+                        while let Some(request) = requests.next().await {
+                            info!(?request.subject, ?request.payload);
+                            let fut = srv.call(Frame::decode(&request.payload)).await.map_err(Into::into)?;
+                            reply_with_object::<Frame>(
+                                request,
+                                &client,
+                                fut
+                            ).await?;
+                        };
+                    Ok::<(), BoxError>(())
+                } => { Ok::<(), BoxError>(()) }
+
+            }
+        }
+    }).instrument(span);
+    //
+    // todo!("Finish this shit ")
+    Ok(handle)
+}
+
 #[instrument]
-pub async fn new_client(url: &str) -> Result<async_nats::Client, Error> {
+pub async fn new_client(url: &str) -> Result<async_nats::Client, anyhow::Error> {
     info!(url = url, "New Nats Client");
     let nats_url = env::var("NATS_ADDR").unwrap_or_else(|_| url.to_string());
     Ok(async_nats::connect(nats_url).await?)
@@ -175,7 +232,11 @@ pub async fn make_request(
     addr: String,
     payload: impl Into<Bytes>,
 ) -> Result<async_nats::Message, Error> {
-    let response = client.clone().request(addr.clone(), payload.into()).await?;
+    let response = client
+        .clone()
+        .request(addr.clone(), payload.into())
+        .await
+        .map_err(|e| Error::RequestError(e))?;
     debug!("got a response: {:?}", &response);
     Ok(response)
 }
@@ -190,7 +251,8 @@ pub async fn make_header_request(
     let response = client
         .clone()
         .request_with_headers(addr.clone(), headers, payload.into())
-        .await?;
+        .await
+        .map_err(|e| Error::RequestError(e))?;
     debug!("got a response: {:?}", &response);
     Ok(response)
 }

@@ -11,7 +11,9 @@ async fn main() -> Result<(), Error> {
     let _span = info_span!("root").entered();
     let emitter = Emitter::new();
     for _ in [..10] {
-        let _event = emitter.emit_event("bastion-event.log", Frame::Msg("Emitted".to_string())).await?;
-    };
+        let _event = emitter
+            .emit_event("bastion-event.log", Frame::Msg("Emitted".to_string()))
+            .await?;
+    }
     Ok(())
 }

@@ -1,6 +1,6 @@
 mod things;
 pub use things::client::TestClient;
-use things::client::{test_rest_call, test_paged_call};
+use things::client::{test_paged_call, test_rest_call};
 
 #[tokio::test]
 async fn test_rest_client() {

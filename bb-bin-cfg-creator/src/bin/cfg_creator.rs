@@ -1,8 +1,8 @@
+#[allow(unused)]
+use bb_lib_config::{configuration::Configuration, AutotaskCfg, JiraCfg, SurrealCfg, SwimlaneCfg};
 use clap::{self, Args, Parser, Subcommand};
 use serde::Serialize;
 use std::path::PathBuf;
-#[allow(unused)]
-use bb_lib_config::{configuration::Configuration, AutotaskCfg, JiraCfg, SurrealCfg, SwimlaneCfg};
 
 #[derive(Parser, Debug)]
 #[command(version = "0.1.0")]

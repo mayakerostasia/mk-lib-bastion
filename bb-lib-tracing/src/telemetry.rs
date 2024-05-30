@@ -4,9 +4,9 @@ use tracing_appender::non_blocking::WorkerGuard;
 use crate::{get_export_config, resource, ConfigType};
 use opentelemetry_otlp::{HttpExporterBuilder, WithExportConfig};
 
-use opentelemetry_sdk::{trace::Tracer, logs::Logger, runtime};
-use tracing_appender::rolling;
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
+use opentelemetry_sdk::{logs::Logger, runtime, trace::Tracer};
+use tracing_appender::rolling;
 use tracing_opentelemetry::OpenTelemetryLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, Layer};
 
@@ -52,7 +52,6 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
     let tracer = init_tracer(endpoints.tracer)?;
     let _trace_provider = tracer.provider().unwrap();
 
-
     // let meter_provider = init_meter_provider(endpoints.metrics)?;
 
     let logger = init_logger(endpoints.logger)?;
@@ -65,7 +64,7 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
     // to occur less frequently, roll that file on a daily basis instead.
     // TODO: Logs directory should be configurable
     // let warn_file = rolling::daily("./logs", "warnings").with_max_level(tracing::Level::WARN);
-    
+
     // TODO: Logs directory should be configurable
     // let stderr = std::io::stderr();
     let all_files = debug_file;
@@ -88,16 +87,16 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
                 .with_target(true)
                 .with_level(true)
                 .with_writer(non_blocking)
-                .and_then(log_trace_bridge)
+                .and_then(log_trace_bridge),
         )
-        .with(        
+        .with(
             tracing_subscriber::fmt::layer()
                 .pretty()
                 // .compact()
                 .with_target(true)
                 // .with_file(true)
                 // .with_line_number(true)
-                .with_timer(ChronoLocal::rfc_3339())
+                .with_timer(ChronoLocal::rfc_3339()),
         )
         .init();
 
