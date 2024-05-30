@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+  "bb-bin-monkey",
   "bb-bin-cfg-creator",
   "bb-lib-base-api",
   "bb-lib-config",

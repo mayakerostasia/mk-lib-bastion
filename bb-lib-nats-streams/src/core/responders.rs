@@ -195,6 +195,7 @@ where
                         let mut _srv = service.lock().await;
                         let srv = _srv.ready().await.map_err(Into::into)?;
                         while let Some(request) = requests.next().await {
+                            let srv = srv.ready().await.map_err(Into::into)?;
                             info!(?request.subject, ?request.payload);
                             let fut = srv.call(Frame::decode(&request.payload)).await.map_err(Into::into)?;
                             reply_with_object::<Frame>(
