@@ -9,7 +9,7 @@ use reqwest::header::{self, HeaderMap};
 use reqwest::StatusCode;
 use serde::{self, Deserialize, Serialize};
 use serde_json::Value;
-use tracing::{debug, warn};
+use tracing::{debug, warn, instrument};
 
 use crate::traits::{RestCall, RestClient};
 use crate::{paged::Paged, RestSvcError};
@@ -96,6 +96,7 @@ impl Rest {
         headers
     }
 
+    #[instrument(skip_all)]
     pub async fn call(
         &self,
         client: &impl RestClient,
@@ -133,6 +134,7 @@ impl Rest {
         }
     }
 
+    #[instrument(skip_all)]
     pub async fn paged_call(
         &self,
         client: &impl RestClient,
@@ -167,6 +169,7 @@ impl Rest {
 
         while let Some(_resp) = task_que.next().await {
             let new_resp = _resp?;
+            debug!(status = ?new_resp.0);
             if let StatusCode::OK = new_resp.0 {
                 ret_resp += serde_json::from_value::<IntermediateResponse>(new_resp.1)?;
             }
