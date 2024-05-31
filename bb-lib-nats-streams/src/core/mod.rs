@@ -9,6 +9,7 @@ pub use responders::{
     new_service_future_responder, 
     new_tower_service_responder,
     make_request, 
+    make_timeout_request,
     make_header_request
 };
 

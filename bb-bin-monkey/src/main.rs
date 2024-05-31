@@ -27,7 +27,10 @@ async fn main() -> Result<(), Error> {
     let args = MonkeyCli::parse();
     // Monkey Call
     let monkey = Monkey::new(&args.subject, &args.nats_addr).await;
-    let resp = monkey.msg(Frame::exec(&args.cmd, args.args.iter().map(|a| a.as_str()).collect())).await?;
+    let resp = monkey.msg_timeout(
+        Frame::exec(&args.cmd, args.args.iter().map(|a| a.as_str()).collect()),
+        None
+    ).await?;
     println!("{:#?}", resp);
     Ok(())
 }

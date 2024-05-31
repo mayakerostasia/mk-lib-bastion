@@ -238,6 +238,27 @@ pub async fn make_request(
 }
 
 #[instrument(skip(payload))]
+pub async fn make_timeout_request(
+    client: async_nats::Client,
+    addr: String,
+    payload: impl Into<Bytes>,
+    timeout: Option<core::time::Duration>,
+) -> Result<async_nats::Message, Error> {
+    let request = async_nats::Request::new()
+        // .inbox(format!("monkey@{}", addr))
+        .timeout(timeout)
+        .payload(payload.into());
+    let response = client
+        .clone()
+        .send_request(addr.clone(), request)
+        .await
+        .map_err(|e| Error::RequestError(e))?;
+    debug!("got a response: {:?}", &response);
+    Ok(response)
+
+}
+
+#[instrument(skip(payload))]
 pub async fn make_header_request(
     client: async_nats::Client,
     addr: String,
