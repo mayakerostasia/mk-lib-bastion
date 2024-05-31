@@ -16,11 +16,19 @@ fn default_page_size() -> usize {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Paged {
-    #[serde(alias = "total", default = "default_total")]
+    #[serde(
+        alias = "total", 
+        alias = "total_count", 
+        default = "default_total"
+    )]
     pub total: usize,
-    #[serde(alias = "startAt", default = "default_start_at")]
+    #[serde(alias = "startAt", 
+        alias = "from",
+        default = "default_start_at")]
     pub offset: usize,
-    #[serde(alias = "maxResults", default = "default_page_size")]
+    #[serde(alias = "maxResults", 
+        alias = "to",
+        default = "default_page_size")]
     pub page_size: usize,
     #[serde(default = "default_abs_limit")]
     pub abs_limit: usize,
