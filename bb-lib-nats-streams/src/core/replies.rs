@@ -23,20 +23,20 @@ pub async fn echo_request(
     Ok(())
 }
 
-fn ret_object<'de, T>(object: impl Into<Bytes>) -> Bytes {
+fn ret_object(object: impl Into<Bytes>) -> Bytes {
     let bytes: Bytes = object.into();
     debug!("Object to ret is {bytes:#?}");
     bytes
 }
 
 // #[instrument(skip(request, client, object))]
-pub async fn reply_with_object<T>(
+pub async fn reply_with_object(
     request: async_nats::Message,
     client: &async_nats::Client,
     object: impl Into<Bytes>,
 ) -> Result<(), Error> {
     if let Some(reply) = request.reply {
-        client.publish(reply, ret_object::<T>(object)).await?;
+        client.publish(reply, ret_object(object)).await?;
     }
     Ok(())
 }
@@ -51,7 +51,7 @@ where
     O: Future<Output = Result<T, BoxError>> + Send,
     T: std::fmt::Debug + Into<Bytes> + Send,
 {
-    let name = request.subject.clone();
+    // let name = request.subject.clone();
     let payload = request.payload.clone();
     let frame: Frame = Frame::decode(&payload);
     let future = fut(frame).await?;

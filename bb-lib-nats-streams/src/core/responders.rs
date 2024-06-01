@@ -5,7 +5,7 @@ use futures::StreamExt;
 use std::{env, future::Future, sync::Arc};
 use tokio_util::sync::CancellationToken;
 use tracing::{
-    debug, error, info, info_span, instrument, instrument::Instrumented, warn, Instrument,
+    debug, info, info_span, instrument, instrument::Instrumented, Instrument,
 };
 
 use super::replies::{echo_request, reply_with_future, reply_with_object};
@@ -59,7 +59,7 @@ pub async fn new_object_responder<T>(
         async move {
             while let Some(request) = requests.next().await {
                 debug!("Request -> {:#?}", request);
-                reply_with_object::<T>(request, &client, object.clone()).await?;
+                reply_with_object(request, &client, object.clone()).await?;
             }
             Ok::<(), BoxError>(())
         }
@@ -100,7 +100,7 @@ where
                         info!(?request.subject, ?request.payload);
                         let result: T = func().await;
                         debug!("Result is {:#?}", &result);
-                        reply_with_object::<T>(request, &client, result).await?;
+                        reply_with_object(request, &client, result).await?;
                         };
                         Ok::<(), BoxError>(())
                     }
@@ -208,7 +208,7 @@ where
                             let srv = _srv_unlocked.ready().await.map_err(Into::into)?;
                             let frame: Frame = Frame::decode(&request.payload);
                             let new_frame: <S as Service<Frame>>::Response = srv.call(frame).await.map_err(Into::into)?;
-                            reply_with_object::<Frame>(request, &client, new_frame).await.map_err(Into::<BoxError>::into)?;
+                            reply_with_object(request, &client, new_frame).await.map_err(Into::<BoxError>::into)?;
                         };
                         Ok::<(), BoxError>(())
 
