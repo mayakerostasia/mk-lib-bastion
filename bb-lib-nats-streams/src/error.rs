@@ -13,4 +13,3 @@ pub enum NSLibError {
     #[error("Boxed Error {0:#?}")]
     Boxed(Box<dyn std::error::Error + Send + Sync>),
 }
-

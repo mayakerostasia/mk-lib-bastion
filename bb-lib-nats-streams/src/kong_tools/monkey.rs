@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::core::{make_header_request, make_request, new_client, make_timeout_request};
+use crate::core::{make_header_request, make_request, make_timeout_request, new_client};
 use crate::Error;
 use async_nats::{HeaderMap, HeaderName, HeaderValue};
 use bytes::Bytes;
@@ -42,8 +42,18 @@ impl Monkey {
     }
 
     #[instrument(skip(payload, self), fields(monkey_name = %self.name, monkey_subject = %self.subject))]
-    pub async fn msg_timeout(&self, payload: impl Into<Bytes>, timeout: Option<std::time::Duration>) -> Result<async_nats::Message, Error> {
-        Ok(make_timeout_request(self.client()?, self.subject.to_string(), payload.into(), timeout).await?)
+    pub async fn msg_timeout(
+        &self,
+        payload: impl Into<Bytes>,
+        timeout: Option<std::time::Duration>,
+    ) -> Result<async_nats::Message, Error> {
+        Ok(make_timeout_request(
+            self.client()?,
+            self.subject.to_string(),
+            payload.into(),
+            timeout,
+        )
+        .await?)
     }
 
     #[instrument(skip(payload, self), fields(monkey_name = %self.name, monkey_subject = %self.subject))]

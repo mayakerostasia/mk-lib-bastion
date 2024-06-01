@@ -45,8 +45,8 @@ pub async fn reply_with_object<T>(
 pub async fn reply_with_future<O, T>(
     request: async_nats::Message,
     client: &async_nats::Client,
-    fut: fn(Frame) -> O
-) -> Result<(), BoxError> 
+    fut: fn(Frame) -> O,
+) -> Result<(), BoxError>
 where
     O: Future<Output = Result<T, BoxError>> + Send,
     T: std::fmt::Debug + Into<Bytes> + Send,

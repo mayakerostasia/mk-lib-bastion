@@ -1,4 +1,4 @@
-use super::encoder::{ Decoder, Encoder };
+use super::encoder::{Decoder, Encoder};
 use super::proc::Proc;
 use bytes::Bytes;
 use serde::{Deserialize, Serialize};
@@ -52,4 +52,3 @@ pub struct SendBox {
     pub addr: String,
     pub data: Box<[u8]>,
 }
-

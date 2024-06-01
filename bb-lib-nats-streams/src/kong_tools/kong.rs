@@ -1,19 +1,19 @@
 use crate::boxed_future_generator;
 use crate::core::{
-    new_client, new_echo_responder, new_object_responder, new_tower_service_responder,
-    new_service_responder, new_service_future_responder
+    new_client, new_echo_responder, new_object_responder, new_service_future_responder,
+    new_service_responder, new_tower_service_responder,
 };
 use crate::Frame;
 use bytes::Bytes;
 use petname::Generator;
 use rand::thread_rng;
+use std::future::Future;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
 use tracing::instrument;
 use tracing::instrument::Instrumented;
-use std::future::Future;
 
 pub type Error = crate::NSLibError;
 
@@ -103,7 +103,6 @@ impl Kong {
         )
         .await?)
     }
-
 
     #[instrument(skip(self, service), fields( kong_name = %self.name, kong_subject = %self.subject))]
     pub async fn tower_service<'a, S>(

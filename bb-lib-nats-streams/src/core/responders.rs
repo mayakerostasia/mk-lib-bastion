@@ -9,7 +9,7 @@ use tracing::{
 };
 
 use super::replies::{echo_request, reply_with_future, reply_with_object};
-use crate::{util::BoxedFutureFn, Frame, Decoder};
+use crate::{util::BoxedFutureFn, Decoder, Frame};
 use tower::{BoxError, Service, ServiceExt};
 
 // mod replies;

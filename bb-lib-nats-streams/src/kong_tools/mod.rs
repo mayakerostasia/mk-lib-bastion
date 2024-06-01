@@ -1,5 +1,5 @@
-mod kong;
 mod kingkong;
+mod kong;
 mod monkey;
 
 pub use kingkong::KingKong;

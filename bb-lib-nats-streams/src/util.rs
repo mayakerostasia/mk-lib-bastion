@@ -13,4 +13,3 @@ where
 {
     Box::new(move || Box::pin(f()))
 }
-

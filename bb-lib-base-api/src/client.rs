@@ -142,8 +142,7 @@ impl Rest {
         abs_limit: Option<usize>,
         page_size: Option<usize>,
     ) -> Result<RestSvcResp, RestSvcError> {
-        let resp: IntermediateResponse =
-            serde_json::from_value(self.call(client, call).await?.1)?;
+        let resp: IntermediateResponse = serde_json::from_value(self.call(client, call).await?.1)?;
         let new_rest_call = call.clone();
         debug!("Resp: {:?}", resp);
         // eprintln!("New Call: {:?}", new_call);

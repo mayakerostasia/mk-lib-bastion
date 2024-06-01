@@ -1,12 +1,11 @@
-use pin_project_lite::pin_project;
 use futures::Future;
-use std::task::Poll;
+use pin_project_lite::pin_project;
 use std::pin::Pin;
-
+use std::task::Poll;
 
 use tower::BoxError;
 
-pub type PinnedFuture<R,E> = Pin<Box<dyn Future<Output = Result<R, E>> + Send + Sync>>;
+pub type PinnedFuture<R, E> = Pin<Box<dyn Future<Output = Result<R, E>> + Send + Sync>>;
 
 pin_project! {
     pub struct FrameFuture<F, R, E>
@@ -43,9 +42,7 @@ where
         let this = self.project();
 
         match this.inner.poll(cx) {
-            Poll::Ready(result) => {
-                Poll::Ready(result)
-            }
+            Poll::Ready(result) => Poll::Ready(result),
             Poll::Pending => Poll::Pending,
         }
     }
