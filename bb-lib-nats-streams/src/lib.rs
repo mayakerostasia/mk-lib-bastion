@@ -14,17 +14,18 @@ mod core;
 mod error;
 mod kong_tools;
 mod util;
-mod frame;
+mod frame_tools;
 // mod kong_tools;
 
 pub use anyhow::Error;
 pub use error::NSLibError;
 
 // pub use core::frame_handler::future::FrameFuture;
-pub use frame::{
+pub use frame_tools::{
     encoder::{Decoder, Encoder},
     frame::Frame,
-    proc::Proc
+    proc::Proc,
+    future::{FrameFuture, PinnedFuture},
 };
 pub use kong_tools::KingKong;
 pub use kong_tools::Kong;

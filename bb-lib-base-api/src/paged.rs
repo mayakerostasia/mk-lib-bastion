@@ -51,16 +51,16 @@ impl Iterator for Paged {
 
     fn next(&mut self) -> Option<Self> {
         if self.offset >= self.total || self.offset >= self.abs_limit {
-            return None;
+            None
         } else {
             let new = self.offset + self.page_size;
-            return Some(Paged {
+            Some(Paged {
                 total: self.total,
                 offset: new,
                 page_size: self.page_size,
                 abs_limit: self.abs_limit,
                 extra: self.extra.clone(),
-            });
+            })
         }
     }
 }

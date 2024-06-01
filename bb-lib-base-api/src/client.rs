@@ -9,7 +9,7 @@ use reqwest::header::{self, HeaderMap};
 use reqwest::StatusCode;
 use serde::{self, Deserialize, Serialize};
 use serde_json::Value;
-use tracing::{debug, warn, instrument};
+use tracing::{debug, error, instrument, warn};
 
 use crate::traits::{RestCall, RestClient};
 use crate::{paged::Paged, RestSvcError};
@@ -39,7 +39,7 @@ impl Add for IntermediateResponse {
             serde_json::from_value::<HashMap<String, Value>>(other.response.clone()).unwrap();
         _resp
             .get_mut("response")
-            .expect(" Failed to unwrap response during add")
+            .expect("Failed to unwrap response during add")
             .as_array_mut()
             .unwrap()
             .extend(_other["response"].as_array().unwrap().clone());
@@ -90,7 +90,7 @@ pub struct Rest {
 
 impl Rest {
     fn _build_headers(headers: Option<HeaderMap>) -> header::HeaderMap {
-        let mut headers = headers.unwrap_or_else(HeaderMap::new);
+        let mut headers = headers.unwrap_or_default();
         headers.insert(header::ACCEPT, "application/json".parse().unwrap());
         headers.insert(header::CONTENT_TYPE, "application/json".parse().unwrap());
         headers
@@ -143,9 +143,9 @@ impl Rest {
         page_size: Option<usize>,
     ) -> Result<RestSvcResp, RestSvcError> {
         let resp: IntermediateResponse =
-            serde_json::from_value::<IntermediateResponse>(self.call(client, call).await?.1)?;
+            serde_json::from_value(self.call(client, call).await?.1)?;
         let new_rest_call = call.clone();
-        // eprintln!("Resp: {:?}", resp);
+        debug!("Resp: {:?}", resp);
         // eprintln!("New Call: {:?}", new_call);
         let mut ret_resp = resp.clone();
 
@@ -158,7 +158,7 @@ impl Rest {
                 );
                 vec![]
             });
-        // eprintln!("Calls: {:?}", calls);
+        debug!("Calls: {:?}", calls);
 
         // let mut page_iter = resp.paged.clone();
 
@@ -171,16 +171,13 @@ impl Rest {
             let new_resp = _resp?;
             debug!(status = ?new_resp.0);
             if let StatusCode::OK = new_resp.0 {
+                debug!("Request OK!");
                 ret_resp += serde_json::from_value::<IntermediateResponse>(new_resp.1)?;
+            } else {
+                error!("Status code Not OK -> {:?}", new_resp.0)
             }
         }
 
-        // todo!(r#"
-        //     // let new_resp = self.call(client, &call).await?;
-        //     // if let StatusCode::OK = new_resp.0 {
-        //     //     ret_resp += serde_json::from_value::<IntermediateResponse>(new_resp.1)?;
-        //     // }
-        // "#);
         Ok(RestSvcResp(
             StatusCode::OK,
             serde_json::to_value(ret_resp).unwrap(),

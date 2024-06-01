@@ -28,7 +28,7 @@ fn call_time_future(frame: Frame) -> FramedFuture<Frame> {
     Box::pin(call_time(frame))
 }
 
-type FramedFuture<O> = Pin<Box<dyn Future<Output = Result<O, Error>> + Send + 'static>>;
+type FramedFuture<O> = Pin<Box<dyn Future<Output = Result<O, Error>> + Send>>;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {

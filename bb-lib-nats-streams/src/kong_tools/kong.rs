@@ -69,8 +69,8 @@ impl Kong {
         func: fn() -> T,
     ) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError>
     where
-        T: Send + futures::Future<Output = U> + 'static,
-        U: Send + 'static + Into<Bytes> + std::fmt::Debug,
+        T: futures::Future<Output = U> + Send + 'static,
+        U: Into<Bytes> + std::fmt::Debug + Send + 'static,
     {
         Ok::<_, BoxError>(
             new_service_responder(
@@ -92,7 +92,7 @@ impl Kong {
     ) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError>
     where
         O: Future<Output = Result<T, BoxError>> + Send + 'static,
-        T: Into<Bytes> + std::fmt::Debug + Send + 'static,
+        T: Into<Bytes> + std::fmt::Debug + Send,
     {
         Ok(new_service_future_responder::<O, T>(
             &self.client,
@@ -113,7 +113,7 @@ impl Kong {
     where
         S: tower::Service<Frame> + Send + Sync + Clone + 'static,
         S::Future: Send + Sync,
-        S::Response: Into<Bytes> + Send + Sync,
+        S::Response: Into<Bytes> + Send + Sync + std::fmt::Debug,
         S::Error: Into<BoxError>,
     {
         Ok(new_tower_service_responder::<S>(

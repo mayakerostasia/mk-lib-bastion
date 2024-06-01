@@ -12,14 +12,16 @@ use tower::BoxError;
 use tracing::{debug, error, info, info_span, instrument, instrument::Instrumented, Instrument};
 
 type Error = NSLibError;
+type InstrumentedJoinHandle = Instrumented<JoinHandle<Result<(), BoxError>>>;
+type InstrumentedAbortHandle = Instrumented<AbortHandle>;
 
 #[derive(Debug)]
 pub struct KingKong {
     pub name: String,
     subject: String,
     nats_addr: String,
-    listeners: JoinSet<Result<Instrumented<JoinHandle<Result<(), BoxError>>>, BoxError>>,
-    abort_handles: Vec<Instrumented<AbortHandle>>,
+    listeners: JoinSet<Result<InstrumentedJoinHandle, BoxError>>,
+    abort_handles: Vec<InstrumentedAbortHandle>,
     _http_listener: Option<Server>,
     _http_started: bool,
 }
@@ -45,11 +47,10 @@ impl KingKong {
     }
 
     #[instrument(skip_all, fields(kingkong_name = %self.name, kingkong_subject = %self.subject))]
-    async fn start_kong(
-        &mut self,
-        fut: impl futures::Future<
-                Output = Result<Instrumented<JoinHandle<Result<(), BoxError>>>, BoxError>,
-            > + Send
+    async fn start_kong<'a>(
+        &'a mut self,
+        fut: impl std::future::Future<Output = Result<InstrumentedJoinHandle, BoxError>>
+            + Send
             + 'static,
     ) -> Result<(), BoxError> {
         self.abort_handles.push(
@@ -73,10 +74,14 @@ impl KingKong {
     }
 
     #[instrument(skip_all, fields(kingkong_name = %self.name, kingkong_subject = %self.subject, kong_subject = %subject))]
-    pub async fn new_kong<T, U>(&mut self, subject: &str, func: fn() -> T) -> Result<(), BoxError>
+    pub async fn new_kong<'a, T, U>(
+        &'a mut self,
+        subject: &'a str,
+        func: fn() -> T,
+    ) -> Result<(), BoxError>
     where
-        T: Send + core::future::Future<Output = U> + 'static,
-        U: Send + 'static + Into<Bytes> + std::fmt::Debug,
+        T: Send + std::future::Future<Output = U> + 'static,
+        U: Send + Into<Bytes> + std::fmt::Debug + 'static,
     {
         let kong = Kong::new(
             format!("{}.{}", self.subject, subject).as_str(),
@@ -85,7 +90,7 @@ impl KingKong {
         .await;
         let name = kong.name.clone();
         self.start_kong(
-            async move { Ok::<_, BoxError>(kong.service(func).await?) }
+            async move { kong.service(func).await }
                 .instrument(info_span!("kong_func").or_current()),
         )
         .await?;
@@ -94,17 +99,15 @@ impl KingKong {
     }
 
     #[instrument(skip_all, fields(kingkong_name = %self.name, kingkong_subject = %self.subject, kong_subject = %subject))]
-    pub async fn new_future_kong<O, T>(
-        &mut self,
-        subject: &str,
+    pub async fn new_future_kong<'a, O, T>(
+        &'a mut self,
+        subject: &'a str,
         func: fn(Frame) -> O,
         // func: fn(T) -> U,
     ) -> Result<(), BoxError>
     where
         O: Future<Output = Result<T, BoxError>> + Send + 'static,
-        T: Into<Bytes> + std::fmt::Debug + Send + 'static,
-        // T: Send + core::future::Future<Output = U> + 'static,
-        // U: Send + 'static + Into<Bytes> + std::fmt::Debug,
+        T: Into<Bytes> + std::fmt::Debug + Send,
     {
         let kong = Kong::new(
             format!("{}.{}", self.subject, subject).as_str(),
@@ -113,14 +116,15 @@ impl KingKong {
         .await;
         let name = kong.name.clone();
         self.start_kong(
-            async move { 
-                Ok::<_, BoxError>(kong.service_future(func).await?) 
-            }.instrument(info_span!("kong_func").or_current()),
-        ).await?;
+            async move { kong.service_future(func).await }
+                .instrument(info_span!("kong_func").or_current()),
+        )
+        .await?;
         info!(kong_name = name, kong_subject = subject, "Kong Up");
         Ok::<_, BoxError>(())
     }
 
+    #[instrument(skip_all, fields(kingkong_name = %self.name, kingkong_subject = %self.subject, kong_subject = %subject))]
     pub async fn new_tower_kong<'a, S>(
         &'a mut self,
         subject: &'a str,
@@ -129,7 +133,7 @@ impl KingKong {
     where
         S: Clone + tower::Service<Frame> + Send + Sync + 'static,
         S::Future: Send + Sync,
-        S::Response: Into<Bytes> + Send + Sync,
+        S::Response: Into<Bytes> + Send + Sync + std::fmt::Debug,
         S::Error: Into<BoxError>,
     {
         let kong = Kong::new(
@@ -139,7 +143,7 @@ impl KingKong {
         .await;
         let name = kong.name.clone();
         self.start_kong(
-            async move { Ok(kong.tower_service(service).await?) }
+            async move { kong.tower_service(service).await }
                 .instrument(info_span!("kong_func").or_current()),
         )
         .await?;
