@@ -206,9 +206,7 @@ where
                         while let Some(request) = requests.next().await {
                             let mut _srv_unlocked = service.lock().await;
                             let srv = _srv_unlocked.ready().await.map_err(Into::into)?;
-                            info!(?request.subject, ?request.payload);
                             let frame: Frame = Frame::decode(&request.payload);
-                            warn!(?frame);
                             let new_frame: <S as Service<Frame>>::Response = srv.call(frame).await.map_err(Into::into)?;
                             reply_with_object::<Frame>(request, &client, new_frame).await.map_err(Into::<BoxError>::into)?;
                         };
