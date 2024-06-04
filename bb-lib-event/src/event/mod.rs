@@ -1,5 +1,6 @@
 use anyhow::Error;
 use bb_lib_nats_streams::{Decoder, Encoder};
+use bytes::Bytes;
 use core::fmt::Formatter;
 use serde::{Deserialize, Serialize};
 
@@ -9,12 +10,11 @@ pub enum BBEventType {
 }
 impl Encoder for BBEventType {}
 impl Decoder<'_, BBEventType> for BBEventType {}
-impl Into<bytes::Bytes> for BBEventType {
-    fn into(self) -> bytes::Bytes {
-        self.encode().into()
+impl From<BBEventType> for Bytes { 
+    fn from(value: BBEventType) -> Self {
+        value.encode().into()
     }
 }
-
 impl std::fmt::Display for BBEventType {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
         match self {
@@ -31,9 +31,9 @@ pub struct BBEvent {
 }
 impl Encoder for BBEvent {}
 impl Decoder<'_, BBEvent> for BBEvent {}
-impl Into<bytes::Bytes> for BBEvent {
-    fn into(self) -> bytes::Bytes {
-        self.encode().into()
+impl From<BBEvent> for Bytes { 
+    fn from(value: BBEvent) -> Self {
+        value.encode().into()
     }
 }
 

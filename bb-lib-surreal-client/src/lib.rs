@@ -37,23 +37,18 @@
 //!     }
 //! }
 //! ```
-mod config;
-mod creds;
-mod deserialize_id;
-mod error;
-mod ident;
-mod record;
-mod storable;
 
 pub use config::{setup, DbConfig};
-use core::panic;
 pub use error::Error;
-use error::SurrealClientError;
-pub use ident::SurrealId;
-use once_cell::sync::Lazy;
-pub use record::Record;
+pub use schemas::Document;
+pub use schemas::Record;
+pub use schemas::SurrealId;
+
 pub use storable::{DBThings, Storable};
 
+use core::panic;
+use error::SurrealClientError;
+use once_cell::sync::Lazy;
 use serde_json::Value;
 use surrealdb::{
     engine::any::Any,
@@ -62,6 +57,17 @@ use surrealdb::{
     Response, Surreal,
 };
 use tracing::{debug, instrument, warn};
+
+mod config;
+mod creds;
+
+#[cfg(feature = "tower")]
+mod surreal_tower;
+
+// mod deserialize_id;
+mod error;
+mod schemas;
+mod storable;
 
 static DB: Lazy<Surreal<Any>> = Lazy::new(Surreal::init);
 
@@ -157,9 +163,7 @@ where
     }
 }
 
-pub async fn select<'a, T: Send + Clone>(
-    record: &'a mut Record<T>,
-) -> Result<Record<Value>, Error> {
+pub async fn select<T: Send + Clone>(record: &mut Record<T>) -> Result<Record<Value>, Error> {
     let selected: Option<Record<Value>> = DB.select((record.tb(), record.id()?)).await?;
     // let bux = Box::new(selected);
     // record.set_data(bux);
@@ -247,7 +251,7 @@ pub async fn query(query: &str) -> Result<Response, Error> {
 
 /// Static function to connect to the database
 /// This function is used automatically in the `Storable` trait
-pub async fn connect<'a>(config: &'a config::DbConfig) -> Result<(), Error> {
+pub async fn connect(config: &config::DbConfig) -> Result<(), Error> {
     DB.connect(&config.path).await?;
     let _result = DB
         .signin(Root {
@@ -283,8 +287,9 @@ where
 }
 
 // DBGuard Implementation
-// /// Currently Unimplemented
-// struct DBGuard(Jwt);
+/// Currently Unimplemented
+// struct DBGuard;
+
 // impl DBGuard {
 //     fn new(token: Jwt) -> Self {
 //         Self(token)
@@ -297,7 +302,7 @@ where
 
 // impl Drop for DBGuard {
 //     fn drop(&mut self) {
-//         // let _ = DB.invalidate();
+//         let _closed = DB.invalidate();
 //     }
 // }
 

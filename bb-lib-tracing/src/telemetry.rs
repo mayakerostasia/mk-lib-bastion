@@ -19,12 +19,11 @@ use tracing_subscriber::fmt::time::ChronoLocal;
 use crate::init_tracer;
 
 fn _http_exporter(endpoint: String) -> HttpExporterBuilder {
-    let exporter = opentelemetry_otlp::new_exporter()
+    opentelemetry_otlp::new_exporter()
         .http()
         // .with_protocol(Protocol::HttpBinary)
         // .with_tls_config(ClientTlsConfig::default())
-        .with_export_config(get_export_config(endpoint, ConfigType::Logs));
-    exporter
+        .with_export_config(get_export_config(endpoint, ConfigType::Logs))
 }
 
 fn init_logger(endpoint: String) -> anyhow::Result<Logger, LogError> {
@@ -129,8 +128,8 @@ impl Drop for OtelGuard {
 
         // let _ = opentelemetry::global::shutdown_meter_provider();
 
-        let _shutdown_log = opentelemetry::global::shutdown_logger_provider();
-        let _shutdown_trace = opentelemetry::global::shutdown_tracer_provider();
+        opentelemetry::global::shutdown_logger_provider();
+        opentelemetry::global::shutdown_tracer_provider();
     }
 }
 

@@ -1,7 +1,9 @@
 use super::encoder::{Decoder, Encoder};
+use super::BBFrame;
 use super::proc::Proc;
 use bytes::Bytes;
 use serde::{Deserialize, Serialize};
+use std::convert::From;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Frame {
@@ -15,12 +17,18 @@ pub enum Frame {
     Fin,
     Error(String),
 }
+impl BBFrame for Frame {}
 impl Encoder for Frame {}
 impl<'de> Decoder<'de, Frame> for Frame {}
+impl From<Frame> for Bytes {
+    fn from(value: Frame) -> Self {
+        value.encode().into()
+    }
+}
 
-impl Into<Bytes> for Frame {
-    fn into(self) -> Bytes {
-        self.encode().into()
+impl From<Bytes> for Frame {
+    fn from(value: Bytes) -> Self {
+        Frame::decode(&value) 
     }
 }
 

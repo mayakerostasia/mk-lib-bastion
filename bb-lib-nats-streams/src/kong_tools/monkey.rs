@@ -8,12 +8,30 @@ use petname::Generator;
 use rand::thread_rng;
 use tracing::instrument;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Monkey {
     pub name: String,
     pub subject: String,
     headers: async_nats::HeaderMap,
     _client: async_nats::Client,
+}
+
+// impl Borrow<Monkey> for Monkey {
+//     fn borrow(&self) -> &Monkey {
+//         self
+//     }
+// }
+//
+impl AsRef<Monkey> for Monkey {
+    fn as_ref(&self) -> &Monkey {
+        self
+    }
+}
+
+impl AsMut<Monkey> for Monkey {
+    fn as_mut(&mut self) -> &mut Monkey {
+        self
+    }
 }
 
 impl Monkey {
@@ -84,13 +102,13 @@ mod tests {
     async fn initialize_monkey() -> Result<(), Error> {
         let _kong = Kong::new("greet", NATS_URL).await;
         let _monkey = Monkey::new("greet.monkey", NATS_URL).await;
-        assert!(true);
+        // assert!(true);
         Ok(())
     }
 
     #[tokio::test]
     async fn named_kong() -> Result<(), Error> {
-        let kong = Kong::new("greet", NATS_URL).await;
+        let kong = Kong::new("greet", NATS_URL).await?;
         let listener = kong.listen().await?;
 
         let _client: async_nats::Client = new_client(NATS_URL).await?;

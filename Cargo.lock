@@ -517,6 +517,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "bb-lib-event"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bb-lib-nats-streams",
+ "bb-lib-tracing",
+ "bytes",
+ "opentelemetry 0.23.0",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "tracing-opentelemetry 0.24.0",
+]
+
+[[package]]
 name = "bb-lib-http-listener"
 version = "0.1.0"
 dependencies = [
@@ -527,7 +543,7 @@ dependencies = [
  "hyper-util",
  "pin-project-lite",
  "tokio",
- "tower-service",
+ "tower",
  "tracing",
 ]
 
@@ -564,6 +580,8 @@ dependencies = [
  "async-trait",
  "bb-lib-config",
  "bb-lib-tracing",
+ "bytes",
+ "futures",
  "futures-lite 2.3.0",
  "geo-types",
  "lazy_static",
@@ -575,6 +593,7 @@ dependencies = [
  "surrealdb",
  "thiserror",
  "tokio",
+ "tower",
  "tracing",
 ]
 
@@ -596,7 +615,7 @@ dependencies = [
  "tonic",
  "tracing",
  "tracing-appender",
- "tracing-opentelemetry",
+ "tracing-opentelemetry 0.23.0",
  "tracing-subscriber",
 ]
 
@@ -3393,9 +3412,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.84"
+version = "1.0.85"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec96c6a92621310b51366f1e28d05ef11489516e93be030060e5fc12024a49d6"
+checksum = "22244ce15aa966053a896d1accb3a6e68469b97c7f33f284b99f0d576879fc23"
 dependencies = [
  "unicode-ident",
 ]
@@ -5172,6 +5191,24 @@ dependencies = [
  "once_cell",
  "opentelemetry 0.22.0",
  "opentelemetry_sdk 0.22.1",
+ "smallvec",
+ "tracing",
+ "tracing-core",
+ "tracing-log",
+ "tracing-subscriber",
+ "web-time",
+]
+
+[[package]]
+name = "tracing-opentelemetry"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f68803492bf28ab40aeccaecc7021096bd256baf7ca77c3d425d89b35a7be4e4"
+dependencies = [
+ "js-sys",
+ "once_cell",
+ "opentelemetry 0.23.0",
+ "opentelemetry_sdk 0.23.0",
  "smallvec",
  "tracing",
  "tracing-core",

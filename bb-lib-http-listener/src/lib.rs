@@ -9,7 +9,7 @@ use hyper_util::rt::TokioIo;
 use shutdown::shutdown_signal;
 use timer::TokioTimer;
 use tokio::sync::watch;
-use tower_service::Service;
+use tower::Service;
 use tracing::debug;
 mod handlers;
 mod shutdown;

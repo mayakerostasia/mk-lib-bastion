@@ -17,6 +17,9 @@ mod kong_tools;
 mod util;
 // mod kong_tools;
 
+//TODO: Make me private?
+pub mod towerish;
+
 pub use anyhow::Error;
 pub use error::NSLibError;
 
@@ -31,4 +34,8 @@ pub use kong_tools::KingKong;
 pub use kong_tools::Kong;
 pub use kong_tools::Monkey;
 
+pub use towerish::NatsSend;
+pub use towerish::ResponseFuture;
+
+use tower::BoxError;
 use util::boxed_future_generator;

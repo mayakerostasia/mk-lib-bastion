@@ -4,7 +4,7 @@ use crate::Frame;
 use bytes::Bytes;
 use std::future::Future;
 use tower::BoxError;
-use tracing::{debug, info, instrument};
+use tracing::{info, instrument};
 
 type Error = crate::NSLibError;
 
@@ -25,7 +25,7 @@ pub async fn echo_request(
 
 fn ret_object(object: impl Into<Bytes>) -> Bytes {
     let bytes: Bytes = object.into();
-    debug!("Object to ret is {bytes:#?}");
+    // debug!("Object to ret is {bytes:#?}");
     bytes
 }
 

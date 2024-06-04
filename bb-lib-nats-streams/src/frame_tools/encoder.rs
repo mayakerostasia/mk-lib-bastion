@@ -5,6 +5,7 @@ pub struct Encode<T>(pub T);
 
 impl Encoder for Encode<String> {}
 impl Encoder for Encode<Vec<u8>> {}
+impl Encoder for bytes::Bytes {}
 
 // Hmmmm?
 // const key: &'static [u8; 8] =  &[ 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8 ];

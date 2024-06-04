@@ -38,7 +38,7 @@ async fn main() -> Result<(), Error> {
     let nats_addr = std::env::var("NATS_ADDR").unwrap_or("nats://10.2.4.106:4222".to_string());
 
     // Initialize the KingKong
-    let mut kkong = KingKong::new("time", nats_addr.as_str());
+    let mut kkong = KingKong::new("time", nats_addr.as_str(), "0.0.0.0:6663");
     // Register the service
     kkong.new_future_kong("new_york", call_time_future).await?;
     kkong.wait().await?;

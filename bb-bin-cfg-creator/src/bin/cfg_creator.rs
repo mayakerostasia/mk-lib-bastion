@@ -97,7 +97,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 auth_level: args.auth_level,
             };
 
-            let _written = write_json(cfg, ".env.json".into())?;
+            write_json(cfg, ".env.json".into())?;
             // let _written = write_yaml(cfg, ".env".into())?;
         }
         SubCmd::Autotask(args) => {

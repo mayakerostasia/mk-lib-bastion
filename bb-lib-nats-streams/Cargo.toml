@@ -2,6 +2,7 @@
 name = "bb-lib-nats-streams"
 version = "0.1.0"
 edition = "2021"
+exclude = [ "logs", ".scratch" ]
 
 [dependencies]
 anyhow = { workspace = true }

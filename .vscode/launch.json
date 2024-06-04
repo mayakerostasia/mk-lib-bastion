@@ -1,0 +1,641 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'bb-bin-monkey'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=bb-bin-monkey",
+                    "--package=bb-bin-monkey"
+                ],
+                "filter": {
+                    "name": "bb-bin-monkey",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'bb-bin-monkey'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=bb-bin-monkey",
+                    "--package=bb-bin-monkey"
+                ],
+                "filter": {
+                    "name": "bb-bin-monkey",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'bb-lib-nats-streams'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=bb-lib-nats-streams"
+                ],
+                "filter": {
+                    "name": "bb-lib-nats-streams",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'tower'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=tower",
+                    "--package=bb-lib-nats-streams"
+                ],
+                "filter": {
+                    "name": "tower",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'tower'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=tower",
+                    "--package=bb-lib-nats-streams"
+                ],
+                "filter": {
+                    "name": "tower",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'tower_two'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=tower_two",
+                    "--package=bb-lib-nats-streams"
+                ],
+                "filter": {
+                    "name": "tower_two",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'tower_two'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=tower_two",
+                    "--package=bb-lib-nats-streams"
+                ],
+                "filter": {
+                    "name": "tower_two",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'world_time_api'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=world_time_api",
+                    "--package=bb-lib-nats-streams"
+                ],
+                "filter": {
+                    "name": "world_time_api",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'world_time_api'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=world_time_api",
+                    "--package=bb-lib-nats-streams"
+                ],
+                "filter": {
+                    "name": "world_time_api",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'wtapi-client'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=wtapi-client",
+                    "--package=bb-lib-nats-streams"
+                ],
+                "filter": {
+                    "name": "wtapi-client",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'wtapi-client'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=wtapi-client",
+                    "--package=bb-lib-nats-streams"
+                ],
+                "filter": {
+                    "name": "wtapi-client",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'wtapi-server'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=wtapi-server",
+                    "--package=bb-lib-nats-streams"
+                ],
+                "filter": {
+                    "name": "wtapi-server",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'wtapi-server'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=wtapi-server",
+                    "--package=bb-lib-nats-streams"
+                ],
+                "filter": {
+                    "name": "wtapi-server",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'bb-lib-http-listener'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=bb-lib-http-listener"
+                ],
+                "filter": {
+                    "name": "bb-lib-http-listener",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'bb-lib-tracing'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=bb-lib-tracing"
+                ],
+                "filter": {
+                    "name": "bb-lib-tracing",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'cfg_creator'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=cfg_creator",
+                    "--package=cfg_creator"
+                ],
+                "filter": {
+                    "name": "cfg_creator",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'cfg_creator'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=cfg_creator",
+                    "--package=cfg_creator"
+                ],
+                "filter": {
+                    "name": "cfg_creator",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'bb-lib-config'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=bb-lib-config"
+                ],
+                "filter": {
+                    "name": "bb-lib-config",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'bb_lib_base_api'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=bb-lib-base-api"
+                ],
+                "filter": {
+                    "name": "bb_lib_base_api",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'echo-server'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=echo-server",
+                    "--package=bb-lib-base-api"
+                ],
+                "filter": {
+                    "name": "echo-server",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'echo-server'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=echo-server",
+                    "--package=bb-lib-base-api"
+                ],
+                "filter": {
+                    "name": "echo-server",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'tests'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=tests",
+                    "--package=bb-lib-base-api"
+                ],
+                "filter": {
+                    "name": "tests",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'bb-lib-surreal-client'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=bb-lib-surreal-client"
+                ],
+                "filter": {
+                    "name": "bb-lib-surreal-client",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'bb-lib-event'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=bb-lib-event"
+                ],
+                "filter": {
+                    "name": "bb-lib-event",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'emitter'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=emitter",
+                    "--package=bb-lib-event"
+                ],
+                "filter": {
+                    "name": "emitter",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'emitter'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=emitter",
+                    "--package=bb-lib-event"
+                ],
+                "filter": {
+                    "name": "emitter",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'receiver'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=receiver",
+                    "--package=bb-lib-event"
+                ],
+                "filter": {
+                    "name": "receiver",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'receiver'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=receiver",
+                    "--package=bb-lib-event"
+                ],
+                "filter": {
+                    "name": "receiver",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'start_collector'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=start_collector",
+                    "--package=bb-lib-event"
+                ],
+                "filter": {
+                    "name": "start_collector",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'start_collector'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=start_collector",
+                    "--package=bb-lib-event"
+                ],
+                "filter": {
+                    "name": "start_collector",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'start_emitter'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=start_emitter",
+                    "--package=bb-lib-event"
+                ],
+                "filter": {
+                    "name": "start_emitter",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'start_emitter'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=start_emitter",
+                    "--package=bb-lib-event"
+                ],
+                "filter": {
+                    "name": "start_emitter",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'start_future_emitter'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=start_future_emitter",
+                    "--package=bb-lib-event"
+                ],
+                "filter": {
+                    "name": "start_future_emitter",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'start_future_emitter'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=start_future_emitter",
+                    "--package=bb-lib-event"
+                ],
+                "filter": {
+                    "name": "start_future_emitter",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

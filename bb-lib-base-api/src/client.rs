@@ -144,8 +144,7 @@ impl Rest {
     ) -> Result<RestSvcResp, RestSvcError> {
         let resp: IntermediateResponse = serde_json::from_value(self.call(client, call).await?.1)?;
         let new_rest_call = call.clone();
-        debug!("Resp: {:?}", resp);
-        // eprintln!("New Call: {:?}", new_call);
+        debug!("Intermediate Response Received");
         let mut ret_resp = resp.clone();
 
         let calls = new_rest_call
@@ -157,6 +156,7 @@ impl Rest {
                 );
                 vec![]
             });
+
         debug!("Calls: {:?}", calls);
 
         // let mut page_iter = resp.paged.clone();
@@ -170,7 +170,7 @@ impl Rest {
             let new_resp = _resp?;
             debug!(status = ?new_resp.0);
             if let StatusCode::OK = new_resp.0 {
-                debug!("Request OK!");
+                debug!("Request OK! {}", new_resp.0);
                 ret_resp += serde_json::from_value::<IntermediateResponse>(new_resp.1)?;
             } else {
                 error!("Status code Not OK -> {:?}", new_resp.0)

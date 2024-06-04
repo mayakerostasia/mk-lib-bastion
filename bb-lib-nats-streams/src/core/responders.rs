@@ -2,11 +2,9 @@ use async_nats::HeaderMap;
 use bytes::Bytes;
 use futures::StreamExt;
 // pub use operations::match_frame;
-use std::{env, future::Future, sync::Arc};
+use std::{env, future::Future};
 use tokio_util::sync::CancellationToken;
-use tracing::{
-    debug, info, info_span, instrument, instrument::Instrumented, Instrument,
-};
+use tracing::{debug, warn, info, info_span, instrument, instrument::Instrumented, Instrument};
 
 use super::replies::{echo_request, reply_with_future, reply_with_object};
 use crate::{util::BoxedFutureFn, Decoder, Frame};
@@ -172,17 +170,16 @@ where
 // fn pop_call_tower_service(frame: Frame) {}
 
 // use std::sync::Arc;
-use tokio::sync::Mutex;
 #[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
 pub async fn new_tower_service_responder<'a, S>(
     client: &'a async_nats::Client,
     name: &'a str,
     subject: &'a str,
-    service: Arc<Mutex<S>>,
+    service: S,
     cancel_token: CancellationToken,
 ) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError>
 where
-    S: Service<Frame> + Send + Sync + 'static,
+    S: Clone + Service<Frame> + Send + Sync + 'static,
     S::Future: Send + Sync,
     S::Response: Send + Sync + Into<Bytes> + std::fmt::Debug,
     S::Error: Into<BoxError>,
@@ -202,13 +199,20 @@ where
                         Ok::<(), BoxError>(())
                     },
                 _ = async move {
-                        let service = service.clone();
                         while let Some(request) = requests.next().await {
-                            let mut _srv_unlocked = service.lock().await;
-                            let srv = _srv_unlocked.ready().await.map_err(Into::into)?;
+                            debug!("Msg Received");
+                            let mut srv = service.clone();
+                            debug!("Readying Service");
+                            let mut _srv = srv.ready().await.map_err(Into::into)?;
+                            debug!("Service Ready");
                             let frame: Frame = Frame::decode(&request.payload);
-                            let new_frame: <S as Service<Frame>>::Response = srv.call(frame).await.map_err(Into::into)?;
-                            reply_with_object(request, &client, new_frame).await.map_err(Into::<BoxError>::into)?;
+                            debug!("Frame Decoded - Calling Service");
+                            warn!(?frame);
+                            let new_frame: <S as Service<Frame>>::Response = _srv.call(frame).await.map_err(Into::into)?;
+                            debug!("Service call completed");
+                            reply_with_object(request, &client, new_frame).await.map_err(Into::<BoxError>::into)?; 
+                            drop(srv);
+                            debug!("Replied with object");
                         };
                         Ok::<(), BoxError>(())
 

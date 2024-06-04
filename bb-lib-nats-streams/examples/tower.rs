@@ -1,8 +1,6 @@
 use bb_lib_nats_streams::{Frame, KingKong, Monkey};
 use serde_json::Value;
-use std::sync::Arc;
 use std::{future::Future, pin::Pin};
-use tokio::sync::Mutex;
 use tower::{BoxError, Service};
 
 const BASE_URL: &str = "http://worldtimeapi.org/api/timezone";
@@ -55,19 +53,15 @@ impl Service<Frame> for FrameHandler {
 #[tokio::main]
 async fn main() -> Result<(), BoxError> {
     let srv = tower::ServiceBuilder::new()
-        .buffer(10)
-        .concurrency_limit(5)
-        .timeout(tokio::time::Duration::from_secs(1))
-        .rate_limit(1, tokio::time::Duration::from_secs(1))
+        .buffer(1)
+        // .concurrency_limit(5)
+        // .timeout(tokio::time::Duration::from_secs(1))
+        // .rate_limit(1, tokio::time::Duration::from_secs(1))
         // .layer(MakoLayer::new(1, 1))
         .service(FrameHandler);
 
-    let reactor_service = Arc::new(Mutex::new(srv));
-
-    let mut kkong = KingKong::new("time", NATS_ADDR);
-    kkong
-        .new_tower_kong("time", reactor_service.clone())
-        .await?;
+    let mut kkong = KingKong::new("time", NATS_ADDR, "0.0.0.0:6661");
+    kkong.new_tower_kong("time", srv).await?;
 
     // Monkey Call
     let monkey = Monkey::new("time.time", NATS_ADDR).await;

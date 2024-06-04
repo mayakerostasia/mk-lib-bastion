@@ -5,8 +5,6 @@ use bytes::Bytes;
 use core::future::Future;
 use petname::Generator;
 use rand::thread_rng;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 use tokio::task::{AbortHandle, JoinHandle, JoinSet};
 use tower::BoxError;
 use tracing::{debug, error, info, info_span, instrument, instrument::Instrumented, Instrument};
@@ -27,13 +25,13 @@ pub struct KingKong {
 }
 
 impl KingKong {
-    pub fn new(subject: &str, nats_addr: &str) -> Self {
+    pub fn new(subject: &str, nats_addr: &str, health_bind: &str) -> Self {
         let mut rng = thread_rng();
         let name = petname::Petnames::default()
             .generate(&mut rng, 2, "-")
             .expect("Petname Failed");
 
-        let server = Server::new("0.0.0.0:6669");
+        let server = Server::new(health_bind);
         KingKong {
             name,
             subject: subject.to_string(),
@@ -87,7 +85,7 @@ impl KingKong {
             format!("{}.{}", self.subject, subject).as_str(),
             self.nats_addr.as_str(),
         )
-        .await;
+        .await?;
         let name = kong.name.clone();
         self.start_kong(
             async move { kong.service(func).await }
@@ -113,7 +111,7 @@ impl KingKong {
             format!("{}.{}", self.subject, subject).as_str(),
             self.nats_addr.as_str(),
         )
-        .await;
+        .await?;
         let name = kong.name.clone();
         self.start_kong(
             async move { kong.service_future(func).await }
@@ -128,7 +126,7 @@ impl KingKong {
     pub async fn new_tower_kong<'a, S>(
         &'a mut self,
         subject: &'a str,
-        service: Arc<Mutex<S>>, // bytes: Bytes,
+        service: S, // bytes: Bytes,
     ) -> Result<(), BoxError>
     where
         S: Clone + tower::Service<Frame> + Send + Sync + 'static,
@@ -140,7 +138,7 @@ impl KingKong {
             format!("{}.{}", self.subject, subject).as_str(),
             self.nats_addr.as_str(),
         )
-        .await;
+        .await?;
         let name = kong.name.clone();
         self.start_kong(
             async move { kong.tower_service(service).await }

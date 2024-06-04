@@ -6,19 +6,25 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 async-trait = "0.1.77"
+bb-lib-config = { path = "../bb-lib-config", features = ["surreal"]}
 futures-lite = "2.2.0"
 geo-types = "0.7.13"
 once_cell = "1.19.0"
 pin-project-lite = { workspace = true }
 serde = {  workspace = true, features = ["derive"] }
 serde_json =  { workspace = true }
-serde_with = "3.6.1"
+serde_with = "3.8.1"
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 tracing = { workspace = true }
 lazy_static = { workspace = true }
-surrealdb = "1.4.2"
-bb-lib-config = { path = "../bb-lib-config", features = ["surreal"]}
+surrealdb = "1.5.1"
+tower = { workspace = true, optional = true }
+futures = { workspace = true, optional = true }
+bytes = { workspace = true, optional = true }
 
 [dev-dependencies]
 bb-lib-tracing = { path = "../bb-lib-tracing", version = "0.1.0" }
+
+[features]
+tower = ["dep:tower", "dep:futures", "dep:bytes"]

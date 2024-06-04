@@ -1,8 +1,8 @@
 use crate::Error;
-use std::task::{Context, Poll};
-use surrealdb::sql::{ Thing, Value };
-use pin_project_lite::pin_project;
 use futures_lite::future::FutureExt;
+use pin_project_lite::pin_project;
+use std::task::{Context, Poll};
+use surrealdb::sql::{Thing, Value};
 
 pub struct DbRequest {
     cmd: Cmd,
@@ -27,32 +27,32 @@ pin_project! {
 
 impl DbRequest {
     pub fn create_table(table: &str, value: Option<Value>) -> Self {
-        Self { 
-            cmd: Cmd::CreateTable(String::from(table), value)
+        Self {
+            cmd: Cmd::CreateTable(String::from(table), value),
         }
     }
 
     pub fn get_record(table: &str, id: &str) -> Self {
         Self {
-            cmd: Cmd::Get(String::from(table), String::from(id))
+            cmd: Cmd::Get(String::from(table), String::from(id)),
         }
     }
 
     pub fn set_record(table: &str, id: &str, value: Value) -> Self {
         Self {
-            cmd: Cmd::Set(String::from(table), String::from(id), value)
+            cmd: Cmd::Set(String::from(table), String::from(id), value),
         }
     }
 
     pub fn query(query: &str) -> Self {
         Self {
-            cmd: Cmd::Query(String::from(query))
+            cmd: Cmd::Query(String::from(query)),
         }
     }
 
     pub fn call_fn(name: &str, args: Vec<Value>) -> Self {
         Self {
-            cmd: Cmd::CallFn(String::from(name), args)
+            cmd: Cmd::CallFn(String::from(name), args),
         }
     }
 }
@@ -65,7 +65,7 @@ pub enum Cmd {
     CallFn(String, Vec<Value>),
 }
 
-use std::{pin::Pin, future::Future};
+use std::{future::Future, pin::Pin};
 
 impl<F> Future for DbResponse<F>
 where

@@ -51,13 +51,13 @@ impl<D: Send + Clone> Record<D> {
 
     pub fn id(&self) -> Result<Id, SurrealClientError> {
         match &self._id {
-            Some(id) => Ok(Id::from(id.clone())),
+            Some(id) => Ok(id.clone()),
             None => Err(SurrealClientError::NoID),
         }
     }
 
     pub fn tb(&self) -> &str {
-        &self._tb.as_str()
+        self._tb.as_str()
     }
 
     pub fn data(&self) -> Box<D> {

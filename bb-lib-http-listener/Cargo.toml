@@ -10,7 +10,7 @@ hyper = { workspace = true }
 hyper-util = { workspace = true, features = ["tokio"] }
 pin-project-lite = { workspace = true }
 tokio = { workspace = true, features = ["net", "signal", "rt-multi-thread"] }
-tower-service = { workspace = true }
+tower = { workspace = true }
 tracing = { workspace = true }
 
 [dev-dependencies]

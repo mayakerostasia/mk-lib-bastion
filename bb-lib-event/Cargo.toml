@@ -17,4 +17,4 @@ bb-lib-tracing = { path = "../bb-lib-tracing"}
 [dev-dependencies]
 tokio = { workspace = true }
 tracing = { workspace = true, features = ["log"] }
-tracing-opentelemetry = "0.23.0"
+tracing-opentelemetry = "0.24.0"

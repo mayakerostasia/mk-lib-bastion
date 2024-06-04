@@ -1,15 +1,15 @@
-use crate::boxed_future_generator;
-use crate::core::{
-    new_client, new_echo_responder, new_object_responder, new_service_future_responder,
-    new_service_responder, new_tower_service_responder,
+use crate::{
+    boxed_future_generator,
+    core::{
+        new_client, new_echo_responder, new_object_responder, new_service_future_responder,
+        new_service_responder, new_tower_service_responder,
+    },
+    Frame, NSLibError,
 };
-use crate::Frame;
 use bytes::Bytes;
 use petname::Generator;
 use rand::thread_rng;
 use std::future::Future;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
 use tracing::instrument;
@@ -34,18 +34,22 @@ pub struct Kong {
 // }
 
 impl Kong {
-    pub async fn new(subject: &str, nats_url: &str) -> Self {
+    pub async fn new(subject: &str, nats_url: &str) -> Result<Self, Error> {
         let mut rng = thread_rng();
         let name = petname::Petnames::default()
             .generate(&mut rng, 2, "-")
             .expect("Petname Failed");
-        Kong {
+
+        let nats_client = new_client(nats_url)
+            .await
+            .map_err(|e| NSLibError::NatsError(e.into()))?;
+        Ok(Kong {
             name,
             subject: subject.to_string(),
-            client: new_client(nats_url).await.unwrap(),
+            client: nats_client,
             token: CancellationToken::new(),
             // bastion: None,
-        }
+        })
     }
 
     pub fn client(&self) -> Result<async_nats::Client, Error> {
@@ -53,14 +57,14 @@ impl Kong {
     }
 
     pub async fn listen(&self) -> Result<tokio::task::JoinHandle<Result<(), Error>>, Error> {
-        Ok(new_echo_responder(&self.client, &self.subject).await?)
+        new_echo_responder(&self.client, &self.subject).await
     }
 
     pub async fn serve<T>(
         &self,
         object: impl Into<Bytes>,
     ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError> {
-        Ok::<_, BoxError>(new_object_responder::<T>(&self.client, &self.subject, object).await?)
+        new_object_responder::<T>(&self.client, &self.subject, object).await
     }
 
     #[instrument(skip(self, func), fields( kong_name = %self.name, kong_subject = %self.subject))]
@@ -72,16 +76,14 @@ impl Kong {
         T: futures::Future<Output = U> + Send + 'static,
         U: Into<Bytes> + std::fmt::Debug + Send + 'static,
     {
-        Ok::<_, BoxError>(
-            new_service_responder(
-                &self.client,
-                &self.name,
-                &self.subject,
-                boxed_future_generator(func),
-                self.token.clone(),
-            )
-            .await?,
+        new_service_responder(
+            &self.client,
+            &self.name,
+            &self.subject,
+            boxed_future_generator(func),
+            self.token.clone(),
         )
+        .await
     }
 
     #[instrument(skip(self, func), fields( kong_name = %self.name, kong_subject = %self.subject))]
@@ -94,20 +96,20 @@ impl Kong {
         O: Future<Output = Result<T, BoxError>> + Send + 'static,
         T: Into<Bytes> + std::fmt::Debug + Send,
     {
-        Ok(new_service_future_responder::<O, T>(
+        new_service_future_responder::<O, T>(
             &self.client,
             &self.name,
             &self.subject,
             func,
             self.token.clone(),
         )
-        .await?)
+        .await
     }
 
     #[instrument(skip(self, service), fields( kong_name = %self.name, kong_subject = %self.subject))]
     pub async fn tower_service<'a, S>(
         &'a self,
-        service: Arc<Mutex<S>>, // func: fn() -> T,
+        service: S, // func: fn() -> T,
     ) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError>
     where
         S: tower::Service<Frame> + Send + Sync + Clone + 'static,
@@ -115,14 +117,14 @@ impl Kong {
         S::Response: Into<Bytes> + Send + Sync + std::fmt::Debug,
         S::Error: Into<BoxError>,
     {
-        Ok(new_tower_service_responder::<S>(
+        new_tower_service_responder::<S>(
             &self.client,
             &self.name,
             &self.subject,
             service,
             self.token.clone(),
         )
-        .await?)
+        .await
     }
 }
 
@@ -134,13 +136,13 @@ mod tests {
     #[tokio::test]
     async fn initialize_kong() -> Result<(), BoxError> {
         let _kong = Kong::new("greet.kong", "10.2.4.106:4222").await;
-        assert!(true);
+        // assert!(true);
         Ok(())
     }
 
     #[tokio::test]
     async fn named_kong() -> Result<(), BoxError> {
-        let kong = Kong::new("greet", "nats://10.2.4.106:4222").await;
+        let kong = Kong::new("greet", "nats://10.2.4.106:4222").await?;
         let listener = kong.listen().await?;
         let client: async_nats::Client = new_client("nats://10.2.4.106:4222").await?;
         let _request = make_request(
@@ -150,7 +152,6 @@ mod tests {
         )
         .await?;
         listener.abort();
-        // assert!(false);
         Ok(())
     }
 }
