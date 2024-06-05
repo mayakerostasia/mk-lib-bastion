@@ -1,4 +1,4 @@
-use bb_lib_nats_streams::NatsSend;
+use bb_lib_nats_streams::{Decoder, Encoder, Frame, NatsSend};
 use bytes::Bytes;
 use std::future::Future;
 use std::pin::Pin;
@@ -8,8 +8,11 @@ use tower::{BoxError, Service, ServiceExt};
 #[derive(Clone)]
 struct MockService;
 
-impl Service<Bytes> for MockService {
-    type Response = Bytes;
+impl<T> Service<T> for MockService 
+where 
+    T: Into<Bytes> + From<Bytes> + Send + Sync + 'static
+{
+    type Response = T;
     type Error = BoxError;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send + Sync>>;
 
@@ -17,9 +20,10 @@ impl Service<Bytes> for MockService {
         Poll::Ready(Ok(()))
     }
 
-    fn call(&mut self, req: Bytes) -> Self::Future {
+    fn call(&mut self, req: T) -> Self::Future {
         let fut = async move {
             // Process the request and return a response
+            eprintln!("Request has returned");
             Ok(req)
         };
         Box::pin(fut)
@@ -28,20 +32,13 @@ impl Service<Bytes> for MockService {
 
 #[tokio::main]
 async fn main() -> Result<(), BoxError> {
-    let subject = "test_subject";
+    let subject = "gc-api.log";
     let nats_url = "nats://10.2.4.106:4222";
-    let msg = Bytes::from("test_message");
+    let msg = Frame::message("Hello From Tower_Two!");
     let inner_service = MockService;
-
-    eprintln!("0");
-    let mut nats_send = NatsSend::new(subject, nats_url, msg.clone(), inner_service.clone());
-    eprintln!("1");
+    let mut nats_send = NatsSend::new(subject, nats_url, inner_service.clone());
     let sender = nats_send.ready().await?;
-    eprintln!("2");
-
-    // Test call
-    let response = sender.call(msg.clone()).await.unwrap();
-    eprintln!("3");
-    // assert_eq!(response, msg);
+    let response = sender.call(msg.clone()).await?;
+    assert_eq!(response.encode(), msg.encode());
     Ok(())
 }

@@ -9,3 +9,7 @@ bb-lib-nats-streams = { path = "../bb-lib-nats-streams" }
 tokio = { workspace = true, features = ["macros", "rt"] }
 tower = "0.4.13"
 anyhow.workspace = true
+serde_json.workspace = true
+bytes.workspace = true
+tracing.workspace = true
+bb-lib-tracing = { path = "../bb-lib-tracing", version = "0.1.0" }

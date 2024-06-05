@@ -4,7 +4,7 @@ use futures::StreamExt;
 // pub use operations::match_frame;
 use std::{env, future::Future};
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, warn, info, info_span, instrument, instrument::Instrumented, Instrument};
+use tracing::{debug, warn, info, info_span, instrument, instrument::Instrumented, Instrument, error};
 
 use super::replies::{echo_request, reply_with_future, reply_with_object};
 use crate::{util::BoxedFutureFn, Decoder, Frame};
@@ -80,7 +80,7 @@ where
 {
     let mut requests = client
         .clone()
-        .subscribe(format!("{}", subject))
+        .subscribe(subject.to_string())
         .await
         .unwrap();
     // let func = Arc::new(func);
@@ -128,7 +128,7 @@ where
 {
     let mut requests = client
         .clone()
-        .subscribe(format!("{}", subject))
+        .subscribe(subject.to_string())
         .await
         .unwrap();
     // let func = Arc::new(func);
@@ -144,32 +144,22 @@ where
 
                 _ = async move {
                     while let Some(request) = requests.next().await {
-                        info!(?request.subject, ?request.payload);
-                        reply_with_future(request, &client, func).await?;
+                            info!(?request.subject, ?request.payload);
+                            reply_with_future(request, &client, func).await?;
                         };
                         Ok::<(), BoxError>(())
-                    }// .instrument(info_span!("request"))
+                    }
                     => {
                         Ok::<(), BoxError>(())
 
                     }
-            } // .instrument(info_span!("select"))
-        } // .instrument(info_span!("async"))
+            }
+        }
     })
     .instrument(span);
     Ok(handle)
 }
 
-// use std::pin::Pin;
-// async fn pin_future(
-//     fut: impl Future<Output = Result<Frame, Error>> + Send + Sync + 'static,
-// ) -> Pin<Box<dyn Future<Output = Result<Frame, Error>> + Send + Sync>> {
-//     Box::pin(fut)
-// }
-
-// fn pop_call_tower_service(frame: Frame) {}
-
-// use std::sync::Arc;
 #[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
 pub async fn new_tower_service_responder<'a, S>(
     client: &'a async_nats::Client,
@@ -185,7 +175,6 @@ where
     S::Error: Into<BoxError>,
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
-    // let func = Arc::new(func);
     let span = info_span!("ServiceResponder");
 
     let handle = tokio::spawn({
@@ -201,17 +190,33 @@ where
                 _ = async move {
                         while let Some(request) = requests.next().await {
                             debug!("Msg Received");
-                            let mut srv = service.clone();
-                            debug!("Readying Service");
-                            let mut _srv = srv.ready().await.map_err(Into::into)?;
-                            debug!("Service Ready");
-                            let frame: Frame = Frame::decode(&request.payload);
+                            let frame: Frame = match Frame::decode(&request.payload) {
+                                Ok(fr) => fr,
+                                Err(e) => Frame::Error(e.to_string()),
+                            };
                             debug!("Frame Decoded - Calling Service");
-                            warn!(?frame);
-                            let new_frame: <S as Service<Frame>>::Response = _srv.call(frame).await.map_err(Into::into)?;
-                            debug!("Service call completed");
-                            reply_with_object(request, &client, new_frame).await.map_err(Into::<BoxError>::into)?; 
-                            drop(srv);
+
+                            debug!("Readying Service");
+                            let mut srv = service.clone();
+                            let mut _srv = match srv.ready().await.map_err(Into::into) {
+                                Ok(serv) => serv,
+                                Err(e) => panic!("Whoops! Service couldn't ready up {e:#?}"),
+                            };
+                            debug!("Service Ready");
+
+                            let new_frame: <S as Service<Frame>>::Response = match _srv.call(frame).await.map_err(Into::into) {
+                                Ok(fr) => fr,
+                                Err(e) => panic!("Fuck! Couldn't Call the service {e:#?}"),
+                            };
+
+                            debug!("Service call completed - Composing Reply");
+                            // drop(srv);
+
+                            match reply_with_object(request, &client, new_frame).await {
+                                Ok(rep) => { info!(?rep) },
+                                Err(e) => { error!(?e) }
+                            };
+
                             debug!("Replied with object");
                         };
                         Ok::<(), BoxError>(())

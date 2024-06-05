@@ -1,10 +1,11 @@
 use crate::Decoder;
 use crate::Frame;
+use anyhow::anyhow;
 // use anyhow::anyhow;
 use bytes::Bytes;
 use std::future::Future;
 use tower::BoxError;
-use tracing::{info, instrument};
+use tracing::{info, instrument, error, debug};
 
 type Error = crate::NSLibError;
 
@@ -23,21 +24,21 @@ pub async fn echo_request(
     Ok(())
 }
 
-fn ret_object(object: impl Into<Bytes>) -> Bytes {
-    let bytes: Bytes = object.into();
-    // debug!("Object to ret is {bytes:#?}");
-    bytes
-}
-
 // #[instrument(skip(request, client, object))]
 pub async fn reply_with_object(
     request: async_nats::Message,
     client: &async_nats::Client,
     object: impl Into<Bytes>,
 ) -> Result<(), Error> {
+    debug!("Starting Reply with {request:#?}");
     if let Some(reply) = request.reply {
-        client.publish(reply, ret_object(object)).await?;
+        debug!("Trying publish");
+        client.publish(reply, object.into()).await?;
+    } else {
+        error!("There's no Reply here");
+        return Err(crate::NSLibError::Anyhow(anyhow!("No reply in request")))
     }
+    debug!("Reply Finished");
     Ok(())
 }
 
@@ -51,12 +52,16 @@ where
     O: Future<Output = Result<T, BoxError>> + Send,
     T: std::fmt::Debug + Into<Bytes> + Send,
 {
+    debug!("Starting Reply");
     // let name = request.subject.clone();
     let payload = request.payload.clone();
-    let frame: Frame = Frame::decode(&payload);
-    let future = fut(frame).await?;
+    let frame: Frame = Frame::decode(&payload)?;
+    let resp = fut(frame).await?;
     if let Some(reply) = request.reply {
-        client.publish(reply, future.into()).await?;
+        client.publish(reply, resp.into()).await?;
+    } else {
+        error!{"No Reply in request"};
     }
+    debug!("Reply Finished");
     Ok(())
 }

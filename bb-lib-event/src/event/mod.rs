@@ -1,6 +1,7 @@
 use anyhow::Error;
 use bb_lib_nats_streams::{Decoder, Encoder};
 use bytes::Bytes;
+use tracing::error;
 use core::fmt::Formatter;
 use serde::{Deserialize, Serialize};
 
@@ -12,7 +13,10 @@ impl Encoder for BBEventType {}
 impl Decoder<'_, BBEventType> for BBEventType {}
 impl From<BBEventType> for Bytes { 
     fn from(value: BBEventType) -> Self {
-        value.encode().into()
+        match value.encode() {
+            Ok(val) => val.into(),
+            Err(e) => {error!("Whoops! Had an error {e}"); panic!("exiting");},
+        }
     }
 }
 impl std::fmt::Display for BBEventType {
@@ -33,7 +37,10 @@ impl Encoder for BBEvent {}
 impl Decoder<'_, BBEvent> for BBEvent {}
 impl From<BBEvent> for Bytes { 
     fn from(value: BBEvent) -> Self {
-        value.encode().into()
+        match value.encode() {
+            Ok(val) => val.into(),
+            Err(e) => {error!("Whoops! Had an error {e}"); panic!("exiting");},
+        }
     }
 }
 

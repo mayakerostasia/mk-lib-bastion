@@ -1,3 +1,4 @@
+use crate::towerish::error::{FrameSendIssue, MonkeyStartFailure};
 use crate::Monkey;
 use bytes::Bytes;
 use futures::Future;
@@ -6,7 +7,7 @@ use std::marker::PhantomData;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use tower::{BoxError, Service};
-use tracing::error;
+use tracing::{error, debug};
 
 pin_project! {
     /// a Service<R: Into<Bytes>> that sends a
@@ -45,21 +46,19 @@ where
     async fn make_request(&self, req: Request) -> Result<Request, BoxError>
     where
         S: Service<Request>,
-        Request: Into<Bytes> + Clone + From<Bytes>,
+        Request: Clone + From<Bytes> + Into<Bytes>,
     {
         let monkey = self.monkey.as_ref().unwrap();
         let orig_req = req.clone();
         match monkey.msg(orig_req).await {
             Ok(resp) => {
                 println!("Response: {:#?}", resp);
-                // let new_req: Request = Into::<Request>::into(resp.payload.clone());
-                Ok(req)
+                let new_req: Request = Into::<Request>::into(resp.payload.clone());
+                Ok(new_req)
             }
             Err(e) => {
-                error!("Error! {:#?}", e);
-                eprintln!("Error! {:#?}", e);
-                panic!("Whoops! {e}");
-                // Err(FrameSendIssue.into())
+                error!("Error in `NatsSend::make_request` ! {:#?}", e);
+                Err(FrameSendIssue.into())
             }
         }
     }
@@ -85,10 +84,11 @@ where
         while self.monkey.is_none() {
             match monkey_future.as_mut().poll(cx) {
                 Poll::Pending => { 
+                    // Poll::Pending
                     // eprintln!("Polling");
                 }
                 Poll::Ready(monkey) => {
-                    eprintln!("Monkey ready");
+                    debug!("Monkey ready");
                     let _ = self.monkey.insert(monkey);
                     return Poll::Ready(Ok(()));
                 }

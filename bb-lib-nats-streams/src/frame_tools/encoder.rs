@@ -1,4 +1,8 @@
+use std::fmt::Debug;
+
+use tower::BoxError;
 use serde::{Deserialize, Serialize};
+use tracing::debug;
 
 #[derive(Serialize, Deserialize)]
 pub struct Encode<T>(pub T);
@@ -19,19 +23,26 @@ impl Encoder for bytes::Bytes {}
 //     .collect::<Vec<u8>>();
 
 pub trait Encoder {
-    fn encode(&self) -> Vec<u8>
+    fn encode(&self) -> Result<Vec<u8>, BoxError>
     where
-        Self: Serialize,
+        Self: Serialize + Debug
     {
-        bincode::serialize(self).expect("Failed to encode")
+        debug!("Encoder Started");
+        let ser = bincode::serialize(self)?;
+        debug!("Encoder Finished");
+        Ok(ser)
     }
 }
 
 pub trait Decoder<'de, T> {
-    fn decode(data: &'de [u8]) -> T
+    fn decode(data: &'de [u8]) -> Result<T, BoxError>
     where
         T: Deserialize<'de>,
+        T: Debug,
     {
-        bincode::deserialize::<T>(data).expect("Failed to decode")
+        debug!("Decoder Started");
+        let deser = bincode::deserialize::<T>(data)?;
+        debug!("Decoder Finished: {deser:?}");
+        Ok(deser)
     }
 }
