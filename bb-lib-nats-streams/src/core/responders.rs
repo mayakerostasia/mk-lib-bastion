@@ -4,7 +4,7 @@ use futures::StreamExt;
 // pub use operations::match_frame;
 use std::{env, future::Future};
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, info, info_span, instrument, instrument::Instrumented, Instrument, error};
+use tracing::{debug, error, info, info_span, instrument, instrument::Instrumented, Instrument};
 
 use super::replies::{echo_request, reply_with_future, reply_with_object};
 use crate::{util::BoxedFutureFn, Decoder, Frame};
@@ -78,11 +78,7 @@ pub async fn new_service_responder<'a, T>(
 where
     T: Send + std::fmt::Debug + Into<Bytes> + 'static,
 {
-    let mut requests = client
-        .clone()
-        .subscribe(subject.to_string())
-        .await
-        .unwrap();
+    let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
     // let func = Arc::new(func);
     let span = info_span!("ServiceResponder");
     let handle = tokio::spawn({
@@ -126,11 +122,7 @@ where
     T: std::fmt::Debug + Into<Bytes> + Send,
     O: Future<Output = Result<T, BoxError>> + Send + 'static,
 {
-    let mut requests = client
-        .clone()
-        .subscribe(subject.to_string())
-        .await
-        .unwrap();
+    let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
     // let func = Arc::new(func);
     let span = info_span!("ServiceResponder");
     let handle = tokio::spawn({

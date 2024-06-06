@@ -49,7 +49,9 @@ pub use storable::Storable;
 use core::panic;
 use error::SurrealClientError;
 use once_cell::sync::Lazy;
+use serde::{de::DeserializeOwned, Serialize};
 use serde_json::Value;
+use std::fmt::Debug;
 use surrealdb::{
     engine::any::Any,
     opt::{auth::Root, PatchOp},
@@ -57,8 +59,6 @@ use surrealdb::{
     Response, Surreal,
 };
 use tracing::{debug, instrument, warn};
-use serde::{de::DeserializeOwned, Serialize};
-use std::fmt::Debug;
 
 mod config;
 mod creds;

@@ -57,13 +57,13 @@ where
 
         match this.state.as_mut().project() {
             // match fut.poll(cx) {
-            FrameFutureProj::Error { err } => {
-                Poll::Ready(Err::<T, BoxError>(err.take().unwrap()))
-            }
+            FrameFutureProj::Error { err } => Poll::Ready(Err::<T, BoxError>(err.take().unwrap())),
             FrameFutureProj::Poll { fut } => fut.poll(cx).map_err(Into::into),
             FrameFutureProj::Ok { res } => {
                 let result = res.clone();
-                this.state.set(FrameFutureStatus::Ok { res: result.clone() });
+                this.state.set(FrameFutureStatus::Ok {
+                    res: result.clone(),
+                });
                 Poll::Ready(Ok(result))
             }
         }

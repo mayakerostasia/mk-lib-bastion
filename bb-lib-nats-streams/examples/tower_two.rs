@@ -8,9 +8,9 @@ use tower::{BoxError, Service, ServiceExt};
 #[derive(Clone)]
 struct MockService;
 
-impl<T> Service<T> for MockService 
-where 
-    T: Into<Bytes> + From<Bytes> + Send + Sync + 'static
+impl<T> Service<T> for MockService
+where
+    T: Into<Bytes> + From<Bytes> + Send + Sync + 'static,
 {
     type Response = T;
     type Error = BoxError;

@@ -18,8 +18,7 @@ impl std::fmt::Debug for FrameSendIssue {
     }
 }
 
-pub struct MonkeyStartFailure(pub String); 
-
+pub struct MonkeyStartFailure(pub String);
 
 impl std::error::Error for MonkeyStartFailure {}
 impl std::fmt::Display for MonkeyStartFailure {
@@ -35,4 +34,3 @@ impl std::fmt::Debug for MonkeyStartFailure {
         Ok(())
     }
 }
-

@@ -55,9 +55,7 @@ pub mod server {
         req: hyper::Request<body::Incoming>,
     ) -> Result<hyper::Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
         match (req.method(), req.uri().path()) {
-            (&Method::GET, "/") => {
-                Ok(hyper_response(json!({"response": []})))
-            }
+            (&Method::GET, "/") => Ok(hyper_response(json!({"response": []}))),
             (&Method::POST, "/echo") => {
                 println!("Echo: {:?}", req.body());
                 Ok(hyper::Response::new(req.into_body().boxed()))

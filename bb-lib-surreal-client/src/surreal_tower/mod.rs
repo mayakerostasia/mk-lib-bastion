@@ -3,9 +3,9 @@
 // pub use service::DbService;
 // use surrealdb::sql::{Thing, Value};
 
-mod service;
 mod error;
 mod future;
+mod service;
 
 // mod prelude {
 //     pub use crate::schemas::Record;

@@ -1,7 +1,7 @@
-use std::io::Write;
 use anyhow::{anyhow, Error};
-use bb_lib_nats_streams::{Frame, Monkey, Decoder};
+use bb_lib_nats_streams::{Decoder, Frame, Monkey};
 use clap::Parser;
+use std::io::Write;
 const DEFAULT_NATS_ADDR: &str = "nats://10.2.4.106:4222";
 use tracing::debug_span;
 /// Simple program to greet a person
@@ -29,11 +29,11 @@ pub async fn handle_ret_frame(frame: bytes::Bytes) -> Result<Frame, Error> {
         Frame::Msg(stri) => {
             eprintln!("Ret frame = Msg");
             writeln!(std::io::stdout(), "Message -> {:#?}", stri)?;
-        },
+        }
         Frame::Json(val) => {
             eprintln!("Ret frame = Json");
             serde_json::to_writer_pretty(std::io::stdout(), &val)?;
-        },
+        }
         _ => {
             eprintln!("Ret frame = ? ");
             eprintln!("Other -> {:#?}", fram);

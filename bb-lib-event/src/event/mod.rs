@@ -1,9 +1,9 @@
 use anyhow::Error;
 use bb_lib_nats_streams::{Decoder, Encoder};
 use bytes::Bytes;
-use tracing::error;
 use core::fmt::Formatter;
 use serde::{Deserialize, Serialize};
+use tracing::error;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum BBEventType {
@@ -11,11 +11,14 @@ pub enum BBEventType {
 }
 impl Encoder for BBEventType {}
 impl Decoder<'_, BBEventType> for BBEventType {}
-impl From<BBEventType> for Bytes { 
+impl From<BBEventType> for Bytes {
     fn from(value: BBEventType) -> Self {
         match value.encode() {
             Ok(val) => val.into(),
-            Err(e) => {error!("Whoops! Had an error {e}"); panic!("exiting");},
+            Err(e) => {
+                error!("Whoops! Had an error {e}");
+                panic!("exiting");
+            }
         }
     }
 }
@@ -35,11 +38,14 @@ pub struct BBEvent {
 }
 impl Encoder for BBEvent {}
 impl Decoder<'_, BBEvent> for BBEvent {}
-impl From<BBEvent> for Bytes { 
+impl From<BBEvent> for Bytes {
     fn from(value: BBEvent) -> Self {
         match value.encode() {
             Ok(val) => val.into(),
-            Err(e) => {error!("Whoops! Had an error {e}"); panic!("exiting");},
+            Err(e) => {
+                error!("Whoops! Had an error {e}");
+                panic!("exiting");
+            }
         }
     }
 }

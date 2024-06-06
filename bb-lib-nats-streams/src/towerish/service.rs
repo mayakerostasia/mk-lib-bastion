@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use tower::{BoxError, Service};
-use tracing::{error, debug};
+use tracing::{debug, error};
 
 pin_project! {
     /// a Service<R: Into<Bytes>> that sends a
@@ -83,7 +83,7 @@ where
         let mut monkey_future = Box::pin(Monkey::new(subj.as_str(), url.as_str()));
         while self.monkey.is_none() {
             match monkey_future.as_mut().poll(cx) {
-                Poll::Pending => { 
+                Poll::Pending => {
                     // Poll::Pending
                     // eprintln!("Polling");
                 }
@@ -93,7 +93,7 @@ where
                     return Poll::Ready(Ok(()));
                 }
             };
-        };
+        }
         Poll::Ready(Ok(()))
     }
 
@@ -113,9 +113,9 @@ where
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use tower::Service;
     use tower::ServiceExt;
-    use super::*;
 
     #[derive(Clone)]
     struct MockService;

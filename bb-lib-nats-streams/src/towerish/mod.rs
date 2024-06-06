@@ -4,5 +4,5 @@ pub mod layer;
 pub mod service;
 
 pub use future::ResponseFuture;
-pub use service::NatsSend;
 pub use layer::NatsLayer;
+pub use service::NatsSend;

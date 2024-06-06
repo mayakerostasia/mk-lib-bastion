@@ -1,10 +1,10 @@
 use super::encoder::{Decoder, Encoder};
-use super::BBFrame;
 use super::proc::Proc;
+use super::BBFrame;
 use bytes::Bytes;
 use serde::{Deserialize, Serialize};
-use std::convert::From;
 use serde_json::Value;
+use std::convert::From;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Frame {
@@ -75,9 +75,9 @@ pub struct SendBox {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use serde_json::json;
     use tower::BoxError;
-    use super::*;
 
     #[test]
     fn test_json_serialize() -> Result<(), BoxError> {

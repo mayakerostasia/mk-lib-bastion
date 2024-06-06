@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
-use tower::BoxError;
 use serde::{Deserialize, Serialize};
+use tower::BoxError;
 use tracing::debug;
 
 #[derive(Serialize, Deserialize)]
@@ -25,7 +25,7 @@ impl Encoder for bytes::Bytes {}
 pub trait Encoder {
     fn encode(&self) -> Result<Vec<u8>, BoxError>
     where
-        Self: Serialize + Debug
+        Self: Serialize + Debug,
     {
         debug!("Encoder Started");
         let ser = bincode::serialize(self)?;

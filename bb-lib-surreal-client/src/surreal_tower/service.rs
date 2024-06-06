@@ -6,9 +6,9 @@ use bytes::Bytes;
 pub struct DbService {}
 
 #[allow(unused)]
-impl DbService { 
+impl DbService {
     pub fn new() -> Self {
-        DbService {  }
+        DbService {}
     }
 }
 

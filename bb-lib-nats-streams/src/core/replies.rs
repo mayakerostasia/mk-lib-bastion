@@ -5,7 +5,7 @@ use anyhow::anyhow;
 use bytes::Bytes;
 use std::future::Future;
 use tower::BoxError;
-use tracing::{info, instrument, error, debug};
+use tracing::{debug, error, info, instrument};
 
 type Error = crate::NSLibError;
 
@@ -36,7 +36,7 @@ pub async fn reply_with_object(
         client.publish(reply, object.into()).await?;
     } else {
         error!("There's no Reply here");
-        return Err(crate::NSLibError::Anyhow(anyhow!("No reply in request")))
+        return Err(crate::NSLibError::Anyhow(anyhow!("No reply in request")));
     }
     debug!("Reply Finished");
     Ok(())
@@ -60,7 +60,7 @@ where
     if let Some(reply) = request.reply {
         client.publish(reply, resp.into()).await?;
     } else {
-        error!{"No Reply in request"};
+        error! {"No Reply in request"};
     }
     debug!("Reply Finished");
     Ok(())

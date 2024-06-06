@@ -5,7 +5,7 @@ use tower::{Layer, Service};
 
 use crate::NatsSend;
 
-pub struct NatsLayer<S, Request> 
+pub struct NatsLayer<S, Request>
 where
     S: Service<Request>,
     Request: Into<Bytes> + Clone + From<Bytes>,
@@ -14,10 +14,9 @@ where
     pub nats_url: String,
     _phantom_service: PhantomData<S>,
     _phantom_request: PhantomData<Request>,
-
 }
 
-impl<S, Request> NatsLayer<S, Request> 
+impl<S, Request> NatsLayer<S, Request>
 where
     S: Service<Request>,
     Request: Into<Bytes> + Clone + From<Bytes>,
@@ -27,7 +26,7 @@ where
             subject: subject.to_string(),
             nats_url: nats_url.to_string(),
             _phantom_service: PhantomData,
-            _phantom_request: PhantomData
+            _phantom_request: PhantomData,
         }
     }
 }
