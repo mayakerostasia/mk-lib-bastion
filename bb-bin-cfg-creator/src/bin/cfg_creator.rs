@@ -87,7 +87,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cfg = CfgCreator::parse();
     match cfg.subcmd {
         SubCmd::Surreal(args) => {
-            println!("Surreal -> \n {:#?}", args);
+            eprintln!("Surreal -> \n {:#?}", args);
             let cfg = SurrealCfg {
                 path: args.uri,
                 ns: args.ns,

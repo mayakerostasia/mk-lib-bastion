@@ -1,6 +1,6 @@
 // #![cfg(feature = "serde_json")]
 
-use crate::{DBThings, SurrealId};
+use crate::{SurrealId};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::time::SystemTime;
@@ -11,8 +11,6 @@ pub struct Document {
     pub meta: Option<Box<Value>>,
     pub data: Option<Box<Value>>,
 }
-
-impl DBThings for Document {}
 
 impl Document {
     #[allow(unused)]

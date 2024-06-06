@@ -52,7 +52,7 @@ where
         let orig_req = req.clone();
         match monkey.msg(orig_req).await {
             Ok(resp) => {
-                println!("Response: {:#?}", resp);
+                debug!("Response: {:#?}", resp);
                 let new_req: Request = Into::<Request>::into(resp.payload.clone());
                 Ok(new_req)
             }

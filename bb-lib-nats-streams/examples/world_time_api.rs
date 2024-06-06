@@ -51,7 +51,7 @@ async fn main() -> Result<(), Error> {
 
     let frame = Frame::decode(&resp.payload);
     match frame {
-        Frame::Msg(val) => {
+        Ok(Frame::Msg(val)) => {
             let resul: Value = serde_json::from_str(&val)?;
             serde_json::to_writer_pretty(std::io::stdout(), &resul)?
         }

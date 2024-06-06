@@ -39,6 +39,6 @@ async fn main() -> Result<(), BoxError> {
     let mut nats_send = NatsSend::new(subject, nats_url, inner_service.clone());
     let sender = nats_send.ready().await?;
     let response = sender.call(msg.clone()).await?;
-    assert_eq!(response.encode(), msg.encode());
+    assert_eq!(response.encode()?, msg.encode()?);
     Ok(())
 }

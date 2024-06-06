@@ -14,7 +14,7 @@ use tonic::transport::channel::ClientTlsConfig;
 // For Timer
 use tracing_subscriber::fmt::time::ChronoLocal;
 
-// use tracing::{error, warn};
+use tracing::debug;
 
 use crate::init_tracer;
 
@@ -140,7 +140,7 @@ struct Endpoints {
 }
 
 pub fn initialize() -> anyhow::Result<OtelGuard> {
-    println!("Initializing telemetry");
+    debug!("Initializing telemetry");
     let collector_endpoint: String =
         std::env::var("COLLECTOR_ENDPOINT").unwrap_or("http://localhost:4317".to_string());
     let logs_endpoint: String =

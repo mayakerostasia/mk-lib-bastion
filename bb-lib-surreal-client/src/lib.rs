@@ -44,7 +44,7 @@ pub use schemas::Document;
 pub use schemas::Record;
 pub use schemas::SurrealId;
 
-pub use storable::{DBThings, Storable};
+pub use storable::Storable;
 
 use core::panic;
 use error::SurrealClientError;
@@ -57,6 +57,8 @@ use surrealdb::{
     Response, Surreal,
 };
 use tracing::{debug, instrument, warn};
+use serde::{de::DeserializeOwned, Serialize};
+use std::fmt::Debug;
 
 mod config;
 mod creds;
@@ -91,7 +93,6 @@ pub mod prelude {
         get_record,
         query,
         update_record,
-        DBThings,
         Error,
         Record,
         Storable,
@@ -115,9 +116,10 @@ pub fn prespopt<T: Send>(rpo: Result<Option<T>, Error>) -> Result<T, Error> {
 /// # Examples
 ///
 #[instrument]
-pub async fn create_record<'a, D>(record: Record<D>) -> Result<Record<D>, Error>
+pub async fn create_record<'a, T>(record: Record<T>) -> Result<Record<T>, Error>
 where
-    D: DBThings + Send + 'static,
+    T: Debug + Serialize + DeserializeOwned + Sized + Clone,
+    T: Send + Sync + 'static,
 {
     // let _id = record.thing();
     let data = record.data();
@@ -132,7 +134,7 @@ where
             }
         }
     };
-    let created: Option<Record<D>> = DB.create((record.tb(), id)).content(data).await?;
+    let created: Option<Record<T>> = DB.create((record.tb(), id)).content(data).await?;
 
     match created {
         Some(record) => Ok(record),
@@ -151,7 +153,8 @@ where
 #[instrument(skip(record), fields(db_id = %record.id().unwrap_or(Id::from(666)), db_tb = &record.tb()))]
 pub async fn update_record<'a, T>(record: Record<T>) -> Result<Record<Value>, Error>
 where
-    T: DBThings + Send + 'static,
+    T: Debug + Serialize + DeserializeOwned + Sized + Clone,
+    T: Send + Sync + 'static,
 {
     let data = record.data();
     let updated: Option<Record<Value>> =
@@ -178,7 +181,8 @@ pub async fn select<T: Send + Clone>(record: &mut Record<T>) -> Result<Record<Va
 #[instrument(skip(record), fields(db_id = %record.id().unwrap_or(Id::from(666)), db_tb = &record.tb()))]
 pub async fn get_record<T>(record: Record<T>) -> Result<Value, Error>
 where
-    T: DBThings + Send + 'static,
+    T: Debug + Serialize + DeserializeOwned + Sized + Clone,
+    T: Send + Sync + 'static,
 {
     let q_str = format!(
         "select * from {};",
@@ -198,9 +202,9 @@ where
 // #[instrument]
 #[instrument(skip(record), fields(db_id = %record.id().unwrap_or(Id::from(666)), db_tb = &record.tb()))]
 pub async fn delete_record<T>(record: Record<T>) -> Result<Option<T>, Error>
-// pub async fn delete_record<T>(table: &str, id: Id) -> Result<Option<T>, Error>
 where
-    T: DBThings + Send,
+    T: Debug + Serialize + DeserializeOwned + Sized + Clone,
+    T: Send + Sync + 'static,
 {
     let table = record.tb();
 
@@ -219,7 +223,8 @@ where
 #[instrument(skip(record), fields(db_id = %record.id().unwrap_or(Id::from(666)), db_tb = &record.tb()))]
 pub async fn patch_record<T>(record: Record<T>, patch: PatchOp) -> Result<Option<T>, Error>
 where
-    T: DBThings + Send,
+    T: Debug + Serialize + DeserializeOwned + Sized + Clone,
+    T: Send + Sync + 'static,
 {
     let table = record.tb();
     if table == "_" {
@@ -272,7 +277,8 @@ pub async fn live_select<'a, T>(
     id: Option<Thing>,
 ) -> Result<surrealdb::method::Stream<'a, Any, Vec<T>>, Error>
 where
-    T: DBThings + Send,
+    T: Debug + Serialize + DeserializeOwned + Sized + Clone,
+    T: Send + Sync + 'static,
 {
     match id {
         Some(_) => {

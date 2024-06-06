@@ -9,7 +9,7 @@ use crate::{connect, setup, Record};
 use crate::{create_record, delete_record, select, update_record};
 use serde_json::Value;
 
-pub trait DBThings: Debug + Serialize + DeserializeOwned + Sized + Clone {}
+// pub trait DBThings: Debug + Serialize + DeserializeOwned + Sized + Clone {}
 
 lazy_static! {
     static ref CFG: DbConfig = setup();
@@ -48,7 +48,8 @@ lazy_static! {
 pub trait Storable<D>
 where
     Self: Into<Record<D>> + Clone,
-    D: DBThings + Clone + Send + 'static,
+    D: Debug + Serialize + DeserializeOwned + Sized + Clone,
+    D: Send + Sync + 'static,
 {
     async fn save(&self) -> Result<Record<D>, Error> {
         let _ = connect(&CFG).await.ok();

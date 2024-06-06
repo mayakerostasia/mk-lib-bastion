@@ -1,5 +1,6 @@
-use crate::{error::SurrealClientError, storable::DBThings, Storable};
-use serde::{Deserialize, Serialize};
+use crate::{error::SurrealClientError, Storable};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use std::fmt::Debug;
 use surrealdb::sql::Id;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -14,10 +15,6 @@ pub struct Record<D: Send + Clone> {
     _data: Option<Box<D>>,
     _meta: Option<Box<D>>,
 }
-
-// impl DeserializeOwned: for<'de> Deserialize<'de> {
-
-// }
 
 impl<D: Send + Clone> Record<D> {
     pub fn new(tb: &str, id: Option<Id>, data: Option<Box<D>>, meta: Option<Box<D>>) -> Self {
@@ -65,6 +62,8 @@ impl<D: Send + Clone> Record<D> {
     }
 }
 
-impl<D: DBThings + Send> DBThings for Record<D> {}
-
-impl<D> Storable<D> for Record<D> where D: DBThings + Send + 'static {}
+// impl<D: DBThings + Send> DBThings for Record<D> {}
+impl<D> Storable<D> for Record<D> where
+    D: Debug + Serialize + DeserializeOwned + Sized + Clone + Send + Sync + 'static
+{
+}
