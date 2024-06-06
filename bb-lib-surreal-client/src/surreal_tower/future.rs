@@ -34,6 +34,7 @@ pin_project! {
     }
 }
 
+#[allow(unused)]
 impl<T> ResponseFuture<T> {
     pub fn new(fut: T) -> Self {
         ResponseFuture {

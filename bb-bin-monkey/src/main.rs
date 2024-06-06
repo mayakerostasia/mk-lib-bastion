@@ -1,6 +1,6 @@
-use std::{fmt::write, io::Write};
+use std::io::Write;
 use anyhow::{anyhow, Error};
-use bb_lib_nats_streams::{Frame, Monkey, Decoder, Encoder};
+use bb_lib_nats_streams::{Frame, Monkey, Decoder};
 use clap::Parser;
 const DEFAULT_NATS_ADDR: &str = "nats://10.2.4.106:4222";
 use tracing::debug_span;
@@ -45,7 +45,7 @@ pub async fn handle_ret_frame(frame: bytes::Bytes) -> Result<Frame, Error> {
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let _otel = bb_lib_tracing::initialize()?;
-    let span = debug_span!("MonkeySpan").entered();
+    let _span = debug_span!("MonkeySpan").entered();
     let args = MonkeyCli::parse();
     // Monkey Call
     let monkey = Monkey::new(&args.subject, &args.nats_addr).await;

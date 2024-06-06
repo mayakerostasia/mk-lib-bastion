@@ -5,6 +5,7 @@ use bytes::Bytes;
 
 pub struct DbService {}
 
+#[allow(unused)]
 impl DbService { 
     pub fn new() -> Self {
         DbService {  }

@@ -1,5 +1,3 @@
-use std::fmt::Write;
-
 pub struct FrameSendIssue;
 
 impl std::error::Error for FrameSendIssue {}

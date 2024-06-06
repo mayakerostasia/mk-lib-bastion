@@ -4,7 +4,7 @@ use futures::StreamExt;
 // pub use operations::match_frame;
 use std::{env, future::Future};
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, warn, info, info_span, instrument, instrument::Instrumented, Instrument, error};
+use tracing::{debug, info, info_span, instrument, instrument::Instrumented, Instrument, error};
 
 use super::replies::{echo_request, reply_with_future, reply_with_object};
 use crate::{util::BoxedFutureFn, Decoder, Frame};

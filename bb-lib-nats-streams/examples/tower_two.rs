@@ -1,4 +1,4 @@
-use bb_lib_nats_streams::{Decoder, Encoder, Frame, NatsSend};
+use bb_lib_nats_streams::{Encoder, Frame, NatsSend};
 use bytes::Bytes;
 use std::future::Future;
 use std::pin::Pin;

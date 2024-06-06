@@ -17,22 +17,18 @@ pub mod server {
 
     use serde_json::json;
     use serde_json::Value;
-    use std::{collections::HashMap, net::SocketAddr};
+    use std::net::SocketAddr;
     use tokio::{net::TcpListener, task::JoinHandle};
 
     use hyper::{
-        body::{self, Body, Bytes},
+        body::{self, Bytes},
         server::conn::http1::Builder,
         service::service_fn,
-        HeaderMap, StatusCode,
+        StatusCode,
     };
 
     use hyper_util::rt::TokioIo;
-    use reqwest::{Method, Url};
-
-    use bb_lib_base_api::{client::Rest, paged::Paged, traits::RestClient};
-
-    // use super::calls::{TestCall, TestEchoCall};
+    use reqwest::Method;
 
     fn empty() -> BoxBody<Bytes, hyper::Error> {
         Full::new(Bytes::new())
@@ -58,13 +54,11 @@ pub mod server {
     async fn echo(
         req: hyper::Request<body::Incoming>,
     ) -> Result<hyper::Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
-        match (req.method(), &req.uri().path()[..]) {
+        match (req.method(), req.uri().path()) {
             (&Method::GET, "/") => {
-                // Ok(hyper::Response::new(full(create_resp_bytes(json!({"response": []})))))
                 Ok(hyper_response(json!({"response": []})))
             }
             (&Method::POST, "/echo") => {
-                // Ok(hyper_response(json!({"response": []})))
                 println!("Echo: {:?}", req.body());
                 Ok(hyper::Response::new(req.into_body().boxed()))
             }

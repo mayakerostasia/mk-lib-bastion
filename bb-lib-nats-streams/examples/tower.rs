@@ -46,7 +46,7 @@ impl Service<Frame> for FrameHandler {
     }
 
     fn call(&mut self, req: Frame) -> Self::Future {
-        Box::pin(async { Ok(frame_handler(req).await?) })
+        Box::pin(async { frame_handler(req).await })
     }
 }
 

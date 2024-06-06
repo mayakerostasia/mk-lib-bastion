@@ -1,8 +1,6 @@
 use anyhow::Error;
-use bb_lib_event::Emitter;
-use bb_lib_nats_streams::{Frame, KingKong};
+use bb_lib_nats_streams::KingKong;
 use tracing::{info, info_span};
-// use tower::BoxError;
 
 const NATS_ADDR: &str = "nats://10.0.0.27:4222";
 
@@ -21,6 +19,5 @@ async fn main() -> Result<(), Error> {
         .await;
     kkong.wait().await?;
     
-    // tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
     Ok(())
 }
