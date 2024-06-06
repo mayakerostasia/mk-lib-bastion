@@ -27,6 +27,7 @@ pub use error::NSLibError;
 pub use frame_tools::{
     encoder::{Decoder, Encoder},
     frame::Frame,
+    frame_handler::{HandlesFrames, FrameHandler},
     future::{FrameFuture, PinnedFuture},
     proc::Proc,
 };

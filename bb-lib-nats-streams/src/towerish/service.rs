@@ -83,10 +83,7 @@ where
         let mut monkey_future = Box::pin(Monkey::new(subj.as_str(), url.as_str()));
         while self.monkey.is_none() {
             match monkey_future.as_mut().poll(cx) {
-                Poll::Pending => {
-                    // Poll::Pending
-                    // eprintln!("Polling");
-                }
+                Poll::Pending => {},
                 Poll::Ready(monkey) => {
                     debug!("Monkey ready");
                     let _ = self.monkey.insert(monkey);

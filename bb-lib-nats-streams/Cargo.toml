@@ -22,6 +22,7 @@ tracing = { workspace = true }
 opentelemetry = "0.23.0"
 tokio-util = "0.7.11"
 pin-project-lite.workspace = true
+async-trait = "0.1.80"
 
 [dev-dependencies]
 bb-lib-tracing = { path = "../bb-lib-tracing", version = "0.1.0" }
