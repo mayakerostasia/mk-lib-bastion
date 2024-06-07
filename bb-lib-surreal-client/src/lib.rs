@@ -43,8 +43,10 @@ pub use error::Error;
 pub use schemas::Document;
 pub use schemas::Record;
 pub use schemas::SurrealId;
-
 pub use storable::Storable;
+
+#[cfg(feature = "tower")]
+pub use surreal_tower::DbService;
 
 use core::panic;
 use error::SurrealClientError;
@@ -62,18 +64,12 @@ use tracing::{debug, instrument, warn};
 
 mod config;
 mod creds;
-
-#[cfg(feature = "tower")]
-mod surreal_tower;
-
-// mod deserialize_id;
 mod error;
 mod schemas;
 mod storable;
+#[cfg(feature = "tower")]
+mod surreal_tower;
 
-static DB: Lazy<Surreal<Any>> = Lazy::new(Surreal::init);
-
-// static CONFIG: Lazy<config::DbConfig> = Lazy::new(config::setup);
 
 pub mod prelude {
     pub use surrealdb::sql::Id;
@@ -99,6 +95,8 @@ pub mod prelude {
         SurrealId,
     };
 }
+static DB: Lazy<Surreal<Any>> = Lazy::new(Surreal::init);
+
 /// Processing a Result<Option<T>> into a Result<T>
 /// Process Response Option
 /// PResPopTee
@@ -256,7 +254,7 @@ pub async fn query(query: &str) -> Result<Response, Error> {
 
 /// Static function to connect to the database
 /// This function is used automatically in the `Storable` trait
-pub async fn connect(config: &config::DbConfig) -> Result<(), Error> {
+pub async fn connect(config: &config::DbConfig) -> Result<DbGuard, Error> {
     DB.connect(&config.path).await?;
     let _result = DB
         .signin(Root {
@@ -266,7 +264,7 @@ pub async fn connect(config: &config::DbConfig) -> Result<(), Error> {
         .await?;
 
     DB.use_ns(&config.ns).use_db(&config.db).await?;
-    Ok(())
+    Ok(DbGuard)
 }
 
 /// Static function to start a live select stream
@@ -294,23 +292,14 @@ where
 
 // DBGuard Implementation
 /// Currently Unimplemented
-// struct DBGuard;
+#[derive(Debug, Clone)]
+pub struct DbGuard;
 
-// impl DBGuard {
-//     fn new(token: Jwt) -> Self {
-//         Self(token)
-//     }
-
-//     fn token(self) -> Jwt {
-//         self.0
-//     }
-// }
-
-// impl Drop for DBGuard {
-//     fn drop(&mut self) {
-//         let _closed = DB.invalidate();
-//     }
-// }
+impl Drop for DbGuard {
+    fn drop(&mut self) {
+        let _closed = DB.invalidate();
+    }
+}
 
 pub async fn close() -> Result<(), Error> {
     DB.invalidate().await?;

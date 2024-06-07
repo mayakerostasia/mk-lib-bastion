@@ -1,7 +1,10 @@
 use crate::{error::SurrealClientError, Storable};
+use bb_lib_nats_streams::{Encoder, Decoder};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use tracing::error;
 use std::fmt::Debug;
 use surrealdb::sql::Id;
+use bytes::Bytes;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Record<D: Send + Clone> {
@@ -14,6 +17,41 @@ pub struct Record<D: Send + Clone> {
     #[serde(flatten)]
     _data: Option<Box<D>>,
     _meta: Option<Box<D>>,
+}
+
+impl<T> Encoder for Record<T> 
+where
+    T: Into<Bytes> + Clone + Send,
+{}
+impl<'a, T> Decoder<'a, T> for Record<T> 
+where
+    T: Into<Bytes> + Clone + Send,
+{}
+
+impl<T> From<Record<T>> for Bytes 
+where
+    T: Clone + Send + Debug + Serialize,
+    Record<T>: Encoder,
+{
+    fn from(value: Record<T>) -> Self {
+        value.encode().expect("Failed to encode Bytes").into()
+    }
+}
+
+impl<T> From<Bytes> for Record<T> 
+where
+    T: Clone + Send + Debug + for <'de> Deserialize<'de> + Serialize + Into<Bytes>,
+{
+    fn from(value: Bytes) -> Self {
+        match Record::decode(&value) {
+            Ok(rec) => rec,
+            Err(e) => {
+                error!("Whoops! Error! -> {}", e);
+                panic!("Couldn't convert Bytes to Record")
+            }
+        }
+    }
+
 }
 
 impl<D: Send + Clone> Record<D> {

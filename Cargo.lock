@@ -584,6 +584,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "bb-lib-config",
+ "bb-lib-nats-streams",
  "bb-lib-tracing",
  "bytes",
  "futures",
