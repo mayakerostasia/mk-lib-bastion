@@ -47,7 +47,8 @@ lazy_static! {
 #[async_trait]
 pub trait Storable<D>
 where
-    Self: Into<Record<D>> + Clone,
+    Self: Into<Record<D>> + Clone + Send + Sync,
+    Record<D>: Send + Sync + 'static,
     D: Debug + Serialize + DeserializeOwned + Sized + Clone,
     D: Send + Sync + 'static,
 {
@@ -63,10 +64,11 @@ where
         Ok(select(&mut record).await?)
     }
 
-    async fn update(&self) -> Result<Option<Record<Value>>, Error> {
-        let _ = connect(&CFG).await.ok();
+    async fn update(&self) -> Result<Record<Value>, Error> {
+        // let _ = connect(&CFG).await.ok();
         let record: Record<D> = self.clone().into();
-        Ok(Some(update_record(record).await?))
+        let updated = update_record(record).await?;
+        Ok(updated)
     }
 
     async fn delete(&self) -> Result<Option<D>, Error> {

@@ -47,6 +47,8 @@ pub use storable::Storable;
 
 #[cfg(feature = "tower")]
 pub use surreal_tower::DbService;
+// #[cfg(feature = "tower")]
+// pub use surreal_tower::DbServiceLayer;
 
 use core::panic;
 use error::SurrealClientError;
@@ -155,8 +157,9 @@ where
     T: Send + Sync + 'static,
 {
     let data = record.data();
-    let updated: Option<Record<Value>> =
-        DB.update((record.tb(), record.id()?)).content(data).await?;
+    // let updated: Option<Record<Value>> =
+        // DB.update((record.tb(), record.id()?)).content(data).await?;
+    let updated = None;
 
     match updated {
         Some(record) => Ok(record),

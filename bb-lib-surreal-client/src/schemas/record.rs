@@ -19,14 +19,8 @@ pub struct Record<D: Send + Clone> {
     _meta: Option<Box<D>>,
 }
 
-impl<T> Encoder for Record<T> 
-where
-    T: Into<Bytes> + Clone + Send,
-{}
-impl<'a, T> Decoder<'a, T> for Record<T> 
-where
-    T: Into<Bytes> + Clone + Send,
-{}
+impl<T> Encoder for Record<T> where T: Into<Bytes> + Clone + Send, {}
+impl<'a, T> Decoder<'a, T> for Record<T> where T: Into<Bytes> + Clone + Send, {}
 
 impl<T> From<Record<T>> for Bytes 
 where

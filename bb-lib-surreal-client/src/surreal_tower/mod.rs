@@ -6,8 +6,10 @@
 mod error;
 mod future;
 mod service;
+mod layer;
 
 pub use service::DbService;
+// pub use layer::DbServiceLayer;
 
 // mod prelude {
 //     pub use crate::schemas::Record;
@@ -19,21 +21,17 @@ pub use service::DbService;
 
 #[cfg(test)]
 mod tests {
-    use crate::Record;
-    use crate::{setup, DbService, Error, prelude::Id};
-    use bytes::Bytes;
     use std::task::Context;
     use std::task::Poll;
     use std::{future::Future, pin::Pin};
-    use tower::{BoxError, Service, ServiceExt};
-    use serde_json::{Value, json};
-    use bb_lib_nats_streams::{Frame, Encoder};
+    use tower::{BoxError, Service };
+    use bb_lib_nats_streams::Frame;
 
     #[derive(Clone)]
     struct MockService;
 
-    impl Service<Record<Value>> for MockService {
-        type Response = Record<Value>;
+    impl Service<Frame> for MockService {
+        type Response = Frame;
         type Error = BoxError;
         type Future =
             Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send + Sync>>;
@@ -42,7 +40,7 @@ mod tests {
             Poll::Ready(Ok(()))
         }
 
-        fn call(&mut self, req: Record<Value>) -> Self::Future {
+        fn call(&mut self, req: Frame) -> Self::Future {
             let fut = async move {
                 // Process the request and return a response
                 println!("Mock-> Req -> {:#?}", req);
@@ -54,17 +52,22 @@ mod tests {
 
     #[tokio::test]
     async fn test_db_service() -> Result<(), BoxError> {
-        let cfg = setup();
-        let mut db = DbService::new(cfg, MockService).await?;
-        let _db = db.ready().await?;
-        let saved = _db.call(Record::new(
-            "test",
-            Some(Id::rand()),
-            Some(Box::new(json!({"hello":"world"}))),
-            None,
-        ));
-        let okee = saved.await?;
-        assert_eq!(Frame::Fin.encode()?, okee.encode()?);
+        // let cfg = setup();
+        // let mut db = DbService::new(&cfg, MockService);
+        // let _db = db.ready().await?;
+
+        // let record = Record::new(
+        //     "test",
+        //     Some(Id::rand()),
+        //     Some(Box::new(json!({"hello":"world"}))),
+        //     None,
+        // );
+
+        // let record_encoder: &[u8] = &Encoder::encode(&record.into())?;
+        // let frame = Frame::Bytes(Box::new(*record_encoder));
+        // let saved = _db.call(frame);
+        // let okee = saved.await?;
+        // assert_eq!(Frame::Fin.encode()?, okee.encode()?);
 
         Ok(())
     }

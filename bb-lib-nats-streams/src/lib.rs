@@ -36,6 +36,7 @@ pub use kong_tools::Kong;
 pub use kong_tools::Monkey;
 
 pub use towerish::NatsSend;
+pub use towerish::NatsLayer;
 pub use towerish::ResponseFuture;
 
 use tower::BoxError;
