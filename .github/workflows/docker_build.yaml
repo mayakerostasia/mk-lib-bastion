@@ -1,0 +1,60 @@
+name: Docker
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  push:
+    tags: [ 'v*.*.*' ]
+
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+  BUILD_TARGET: asset
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+    strategy:
+      matrix:
+        include:
+          - first: "docker/Dockerfile"
+          # - third: "Dockerfile"
+        
+    steps:
+      - name: Check out the repository code into the VM
+        uses: actions/checkout@v4
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+            ssh-private-key: ${{ secrets.RUNNER_10_2_4_50_SSH }}
+
+      - name: Get ShortRef
+        env:
+          GITHUB_REF: ${{ github.ref }}
+        run: echo "ref=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Build image
+        uses: ./.github/docker
+        with:
+          dockerfile: ${{ matrix.first }}
+          build_target: ${{ env.BUILD_TARGET }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          ssh: ${{ env.RUNNER_10_2_4_50_SSH }}
+        env:
+          DOCKER_BUILDKIT: 1
+          ref: ${{ env.ref }}
+          DOCKER_PROGRESS: plain
+          SSH_AUTH_SOCK: ${{ env.SSH_AUTH_SOCK }}
+
