@@ -16,6 +16,7 @@ RUN --mount=type=ssh cargo build --release
 # Asset
 ####################################################################################################
 FROM ghcr.io/bluebastion/dev-bb-rs-builder:v0.1.0 as asset
+SHELL [ "/bin/bash", "-c" ]
 ARG RUST_BIN="bb-bin-monkey"
 ENV RUST_BIN $RUST_BIN
 ENV RUST_LOG "debug"
@@ -24,3 +25,4 @@ ENV SERVICE_NAME "bb-monkey"
 # Copy our build
 # COPY migrations /app/migrations
 COPY --from=builder /app/target/release/$RUST_BIN /usr/local/bin/$RUST_BIN
+ENTRYPOINT [ "/bin/bash", "-c" ]
