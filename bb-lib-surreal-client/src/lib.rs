@@ -157,9 +157,9 @@ where
     T: Send + Sync + 'static,
 {
     let data = record.data();
-    // let updated: Option<Record<Value>> =
-        // DB.update((record.tb(), record.id()?)).content(data).await?;
-    let updated = None;
+    let updated: Option<Record<Value>> =
+        DB.update((record.tb(), record.id()?)).content(data).await?;
+    // let updated = None;
 
     match updated {
         Some(record) => Ok(record),

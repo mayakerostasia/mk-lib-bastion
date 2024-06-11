@@ -30,7 +30,3 @@ echoserver = ["dep:clap", "dep:hyper-util", "dep:tokio", "dep:http-body-util", "
 name = "echo-server"
 path = "src/bin/echo_server.rs"
 required-features = ["echoserver"]
-
-[lib]
-name = "bb_lib_base_api"
-path = "src/lib.rs"
