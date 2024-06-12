@@ -11,7 +11,7 @@ use tracing::debug_span;
 ///
 /// Example:
 /// ```no-run
-///
+/// bb-bin-monkey --subject "gc-api.exec" --cmd "_all"
 /// ```
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
