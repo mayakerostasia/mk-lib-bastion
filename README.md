@@ -2,34 +2,57 @@
 
 This project is a collection of Rust libraries and binaries. The main components of the project are:
 
-- [bb-lib-nats-streams](bb-lib-nats-streams/Cargo.toml)
-- [bb-lib-surreal-client](bb-lib-surreal-client/Cargo.toml)
-- [bb-lib-config](bb-lib-config/Cargo.toml)
-- [bb-lib-reactor](bb-lib-reactor/Cargo.toml)
-- [bb-lib-event](bb-lib-event/Cargo.toml)
-- [cfg_creator](bb-bin-cfg-creator/Cargo.toml)
+- [bb-bin-monkey](#bb-bin-monkey)
+- [bb-lib-nats-streams](#bb-lib-nats-streams)
+- [cfg_creator](bb-bin-cfg-creator)
+- [bb-lib-surreal-client](#bb-lib-surreal-client)
+- [bb-lib-config](#bb-lib-config)
+- [bb-lib-reactor](#bb-lib-reactor)
+- [bb-lib-event](#bb-lib-event)
+
+## bb-bin-monkey
+[Readme](./bb-bin-monkey/README.md) 
+[Cargo](./bb-bin-monkey/Cargo.toml)
 
 ## bb-lib-base-api
 
 ## bb-lib-config
 
-## bb-lib-event
+## bb-lib-event [unimplimented]
+[Cargo](./bb-lib-event/Cargo.toml)
 
 ## bb-lib-http-listener
+provides http endpoints healthz and readyz
+```rust
+use bb_lib_http_listener::Server;
+
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let listener = Server::new("127.0.0.1:6060");
+    let _: ! = listener.listen().await()?;
+    Ok(())
+}
+
+```
 
 ## bb-lib-nats-streams
-Tools for sending and receiving requests across a nats messaging service
+Tools for sending and receiving requests across a nats messaging service  
+[Cargo](./bb-lib-nats-streams/Cargo.toml)
 
-## bb-lib-reactor
-Tower service creator
+## bb-lib-reactor [this is an example repo]
+Tower service creator  
+[Cargo](./bb-lib-reactor/Cargo.toml)
 
 ## bb-lib-surreal-client
-Surreal Database Client and Storage tools
-
+Surreal Database Client and Storage tools  
+[Cargo](./bb-lib-surreal-client/Cargo.toml)
 
 ## bb-lib-tracing
 Tracing instrumentation
+[Cargo](./bb-lib-tracing/Cargo.toml)
 
+### Usage:
+Initialize the tracing subscribers using the following function in a tokio runtime  
 ```rust
 // A tokio reactor must be enabled to initialize the tracing library
 #[tokio::main]

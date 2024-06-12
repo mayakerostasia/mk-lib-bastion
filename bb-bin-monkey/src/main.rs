@@ -1,24 +1,34 @@
+//! # Monkey Sender
+//!
 use anyhow::{anyhow, Error};
 use bb_lib_nats_streams::{Decoder, Frame, Monkey};
 use clap::Parser;
 use std::io::Write;
 const DEFAULT_NATS_ADDR: &str = "nats://10.2.4.106:4222";
 use tracing::debug_span;
-/// Simple program to greet a person
+
+/// A nats message tool using the bb-frame-protocol
+///
+/// Example:
+/// ```no-run
+///
+/// ```
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct MonkeyCli {
-    /// Name of the person to greet
+    /// nats subject to target
     #[arg(short, long)]
     subject: String,
 
-    /// Number of times to greet
+    /// Frame::Proc.cmd -> The command string you'd like to send
     #[arg(short, long)]
     cmd: String,
 
+    /// Frame::Proc.args -> The args you'd like to include in the proc object
     #[arg(short, long)]
     args: Vec<String>,
 
+    /// The nats server address listening for the message
     #[arg(short,long, default_value = DEFAULT_NATS_ADDR)]
     nats_addr: String,
 }
