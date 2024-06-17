@@ -270,6 +270,11 @@ pub async fn connect(config: &config::DbConfig) -> Result<DbGuard, Error> {
     Ok(DbGuard)
 }
 
+pub async fn relate(edge_table: &str, from: Thing, to: Thing) -> Result<Response, Error> {
+    let relate_query = format!("RELATE {} ->{} -> {};", from, edge_table, to);
+    let resp = query(relate_query.as_str()).await?;
+    Ok(resp)
+}
 /// Static function to start a live select stream
 /// This function requires you to call the `connect` function before calling
 /// Unimplemented
