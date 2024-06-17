@@ -3,7 +3,7 @@ use bb_lib_nats_streams::{Encoder, Decoder};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::error;
 use std::fmt::Debug;
-use surrealdb::sql::Id;
+use surrealdb::sql::{Id, Thing};
 use bytes::Bytes;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -87,6 +87,10 @@ impl<D: Send + Clone> Record<D> {
 
     pub fn tb(&self) -> &str {
         self._tb.as_str()
+    }
+
+    pub fn as_thing(&self) -> Result<Thing, SurrealClientError> {
+        Ok(Thing::from((self.tb(), self.id()?)))
     }
 
     pub fn data(&self) -> Box<D> {
