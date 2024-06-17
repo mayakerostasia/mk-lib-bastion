@@ -44,7 +44,11 @@ fn init_logger(endpoint: String) -> anyhow::Result<Logger, LogError> {
         )
         // .with_batch_config(BatchConfig::default())
         .with_exporter(exporter)
-        .with_batch_config(BatchConfigBuilder::default().with_max_queue_size(8192).build())
+        .with_batch_config(BatchConfigBuilder::default()
+            .with_max_queue_size(8192)
+            .with_max_export_batch_size(8192)
+            .build()
+        )
         .install_batch(runtime::Tokio)
 }
 
