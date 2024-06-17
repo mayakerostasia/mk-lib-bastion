@@ -5,7 +5,7 @@ use crate::{get_export_config, resource, ConfigType};
 use opentelemetry_otlp::{HttpExporterBuilder, WithExportConfig};
 
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
-use opentelemetry_sdk::{logs::Logger, runtime, trace::Tracer};
+use opentelemetry_sdk::{logs::{BatchConfigBuilder, Logger}, runtime, trace::Tracer};
 use tracing_appender::rolling;
 use tracing_opentelemetry::OpenTelemetryLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, Layer};
@@ -39,9 +39,12 @@ fn init_logger(endpoint: String) -> anyhow::Result<Logger, LogError> {
     opentelemetry_otlp::new_pipeline()
         .logging()
         .with_log_config(
-            opentelemetry_sdk::logs::Config::default().with_resource(resource()), // .with_id_generator(RandomIdGenerator::default()),
+            opentelemetry_sdk::logs::Config::default()
+                .with_resource(resource()), // .with_id_generator(RandomIdGenerator::default()),
         )
+        // .with_batch_config(BatchConfig::default())
         .with_exporter(exporter)
+        .with_batch_config(BatchConfigBuilder::default().with_max_queue_size(8192).build())
         .install_batch(runtime::Tokio)
 }
 
