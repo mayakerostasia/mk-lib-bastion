@@ -1,7 +1,8 @@
 use crate::{get_export_config, resource, ConfigType};
 use opentelemetry::trace::TraceError;
 use opentelemetry_otlp::WithExportConfig;
-use opentelemetry_sdk::trace::BatchConfig;
+// use opentelemetry_sdk::logs::BatchConfigBuilder;
+use opentelemetry_sdk::trace::BatchConfigBuilder;
 use opentelemetry_sdk::{
     runtime,
     trace::{RandomIdGenerator, Sampler, SpanLimits, Tracer},
@@ -35,7 +36,7 @@ pub fn init_tracer(endpoint: String) -> anyhow::Result<Tracer, TraceError> {
                 .with_id_generator(RandomIdGenerator::default()) // .with_resource(resource())
                 .with_span_limits(SpanLimits::default()),
         )
-        .with_batch_config(BatchConfig::default())
+        .with_batch_config(BatchConfigBuilder::default().with_max_queue_size(8192).with_max_export_batch_size(1000).build())
         .with_exporter(exporter)
         .install_batch(runtime::Tokio)
 }
