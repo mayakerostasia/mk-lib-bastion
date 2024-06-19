@@ -72,10 +72,10 @@ runs:
         uses: docker/metadata-action@v5.5.0
         with:
           images: ${{ env.REGISTRY }}/${{ inputs.name }}
-          # labels: |
-          #   org.bluebastion.image.name=${{ inputs.image_name }}
-          #   org.bluebastion.image.date=${{ github.event.created_at }}
-          #   org.bluebastion.image.version=${{ env.ref }}
+          labels: |
+            org.bluebastion.image.name=${{ inputs.name }}
+            org.bluebastion.image.date=${{ github.event.created_at }}
+            org.bluebastion.image.version=${{ env.ref }}
           tags: |
             ${{ env.ref }}
 
@@ -92,8 +92,8 @@ runs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # cache-from: type=gha
-          # cache-to: type=gha,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           github-token: ${{ inputs.gh_token }}
           ssh: |
             default=${{ env.SSH_AUTH_SOCK }}
