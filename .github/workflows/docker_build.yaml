@@ -14,8 +14,8 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: "bluebastion/bb-monkey"
-  BUILD_TARGET: asset
+  # IMAGE_NAME: "bluebastion/bb-monkey"
+  # BUILD_TARGET: asset
 
 jobs:
   build:
@@ -28,8 +28,11 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        include:
-          - first: "docker/Dockerfile"
+        containers: 
+          - dockerfile: "docker/Dockerfile"
+            name: "bluebastion/bb-monkey"
+          - dockerfile: "docker/Dockerfile.log_emitter"
+            name: "bluebastion/bb-log-emitter"
           # - third: "Dockerfile"
         
     steps:
@@ -47,7 +50,8 @@ jobs:
       - name: Build image
         uses: ./.github/docker
         with:
-          dockerfile: ${{ matrix.first }}
+          dockerfile: ${{ matrix.containers.dockerfile }}
+          name: ${{ matrix.containers.name }}
           build_target: ${{ env.BUILD_TARGET }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           registry: ${{ env.REGISTRY }}

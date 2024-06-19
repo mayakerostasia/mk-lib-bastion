@@ -1,3 +1,17 @@
+//! # Log Emitter
+//! Listens to [BB_ENDPOINT].[BB_PATH] and Logs events sent to it
+//! ## Env Vars:
+//! BB_NATS_ADDR
+//! BB_ENDPOINT
+//! BB_PATH
+//! BB_HEALTHZ_BIND
+//!
+//! ## Telemetry Vars
+//! COLLECTOR_ENDPOINT
+//! SERVICE_NAME
+//! SERVICE_VERSION
+//! ENV
+//! RUST_LOG
 use anyhow::Error;
 use bb_lib_nats_streams::KingKong;
 use tracing::{info, info_span};
@@ -17,7 +31,6 @@ async fn main() -> Result<(), Error> {
     let healthz_bind = env::var("HEALTHZ_BIND").unwrap_or(BB_HEALTHZ_BIND.to_string());
 
     let _span = info_span!("{}/{}", endpoint, path).entered();
-
 
     let mut kkong = KingKong::new(&endpoint, &nats_addr, &healthz_bind);
 

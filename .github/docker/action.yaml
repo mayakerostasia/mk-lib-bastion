@@ -24,6 +24,9 @@ inputs:
         default: "Dockerfile"
         description: "The path to the Dockerfile"
         required: true
+    name:
+      description: "Image name - like: bluebastion/bb-monkey"
+      required: true
     build_target:
         # type: "string"
         default: ""
@@ -68,11 +71,11 @@ runs:
         id: meta
         uses: docker/metadata-action@v5.5.0
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          labels: |
-            org.bluebastion.image.title=${{ env.IMAGE_NAME }}
-            org.bluebastion.image.date=${{ github.event.created_at }}
-            org.bluebastion.image.version=${{ env.ref }}
+          images: ${{ env.REGISTRY }}/${{ inputs.name }}
+          # labels: |
+          #   org.bluebastion.image.name=${{ inputs.image_name }}
+          #   org.bluebastion.image.date=${{ github.event.created_at }}
+          #   org.bluebastion.image.version=${{ env.ref }}
           tags: |
             ${{ env.ref }}
 
