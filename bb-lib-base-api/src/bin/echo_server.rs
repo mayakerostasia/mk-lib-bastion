@@ -17,6 +17,7 @@ pub mod server {
 
     use serde_json::json;
     use serde_json::Value;
+    use core::panic;
     use std::net::SocketAddr;
     use tokio::{net::TcpListener, task::JoinHandle};
 
@@ -54,24 +55,17 @@ pub mod server {
     async fn echo(
         req: hyper::Request<body::Incoming>,
     ) -> Result<hyper::Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
-        match (req.method(), req.uri().path()) {
-            (&Method::GET, "/") => Ok(hyper_response(json!({"response": []}))),
-            (&Method::POST, "/echo") => {
-                println!("Echo: {:?}", req.body());
-                Ok(hyper::Response::new(req.into_body().boxed()))
-            }
-            (_, x) => {
-                println!("404: {}", x);
-                Ok(hyper::Response::builder()
-                    .status(StatusCode::NOT_FOUND)
-                    .body(empty())
-                    .unwrap())
-            }
-        }
+        let (_, x) = (req.method(), req.uri().path());
+        println!("-----");
+        println!("Path {}", x);
+        let body = req.boxed();
+        println!("Body {:#?}", body.collect().await);
+            // .collect().await.inspect(|body| {eprintln!("{:#?}", body)});
+        Ok(hyper_response(json!({"response": true})))
     }
 
     pub async fn start() -> Result<JoinHandle<()>, Box<dyn std::error::Error + Send + Sync>> {
-        let addr = SocketAddr::from(([127, 0, 0, 1], 6969));
+        let addr = SocketAddr::from(([127, 0, 0, 1], 4200));
 
         // We create a TcpListener and bind it to 127.0.0.1:3000
         let listener = TcpListener::bind(addr).await?;
