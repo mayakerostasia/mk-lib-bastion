@@ -11,6 +11,8 @@ edition = "2021"
 anyhow = { workspace = true }
 # color-eyre = "0.6.2"
 lazy_static = { workspace = true }
+metrics = "0.23.0"
+metrics-exporter-prometheus = "0.15.1"
 opentelemetry = { version = "0.23.0", features = ["logs", "metrics"] }
 opentelemetry-appender-tracing = "0.4.0"
 opentelemetry-otlp = { version = "0.16.0", features = ["metrics", "logs", "serde", "serialize", "tls", "http", "http-proto"] }
