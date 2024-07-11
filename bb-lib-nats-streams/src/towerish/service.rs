@@ -112,7 +112,7 @@ where
 mod tests {
     use super::*;
     use tower::Service;
-    use tower::ServiceExt;
+    
 
     #[derive(Clone)]
     struct MockService;

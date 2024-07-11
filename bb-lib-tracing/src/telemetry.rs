@@ -5,12 +5,12 @@ use crate::{get_export_config, resource, ConfigType};
 use opentelemetry_otlp::{HttpExporterBuilder, WithExportConfig};
 
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
-use opentelemetry_sdk::{logs::{BatchConfigBuilder, Logger}, runtime, trace::Tracer};
+use opentelemetry_sdk::{logs::{BatchConfigBuilder, LoggerProvider}, runtime, trace::Tracer};
 use tracing_appender::rolling;
 use tracing_opentelemetry::OpenTelemetryLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, Layer};
 
-use tonic::transport::channel::ClientTlsConfig;
+// use tonic::transport::ClientTlsConfig;
 // For Timer
 use tracing_subscriber::fmt::time::ChronoLocal;
 
@@ -26,13 +26,13 @@ fn _http_exporter(endpoint: String) -> HttpExporterBuilder {
         .with_export_config(get_export_config(endpoint, ConfigType::Logs))
 }
 
-fn init_logger(endpoint: String) -> anyhow::Result<Logger, LogError> {
+fn init_logger(endpoint: String) -> anyhow::Result<LoggerProvider, LogError> {
     // // HTTP exporter
     // let exporter = http_exporter(endpoint);
     // // GRPC exporter
     let exporter = opentelemetry_otlp::new_exporter()
         .tonic()
-        .with_tls_config(ClientTlsConfig::default())
+        // .with_tls_config(ClientTlsConfig::default())
         .with_protocol(opentelemetry_otlp::Protocol::Grpc)
         .with_export_config(get_export_config(endpoint, ConfigType::Logs));
 
@@ -61,8 +61,8 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
     // let meter_provider = init_meter_provider(endpoints.metrics)?;
 
     let logger = init_logger(endpoints.logger)?;
-    let log_provider = logger.provider();
-    let log_trace_bridge = OpenTelemetryTracingBridge::new(log_provider);
+    // let log_provider = logger.provider();
+    let log_trace_bridge = OpenTelemetryTracingBridge::new(&logger);
 
     // TODO: Logs directory should be configurable
     let debug_file = rolling::daily("./logs", "log.log");
@@ -120,7 +120,7 @@ pub struct OtelGuard {
     pub writer_guard: WorkerGuard,
     pub tracer_provider: Tracer,
     // pub meter_provider: MeterProvider,
-    pub logger_provider: Logger,
+    pub logger_provider: LoggerProvider,
 }
 
 impl Drop for OtelGuard {
@@ -135,7 +135,7 @@ impl Drop for OtelGuard {
 
         // let _ = opentelemetry::global::shutdown_meter_provider();
 
-        opentelemetry::global::shutdown_logger_provider();
+        // opentelemetry::global::shutdown_logger_provider();
         opentelemetry::global::shutdown_tracer_provider();
     }
 }

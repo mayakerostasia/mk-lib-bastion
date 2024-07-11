@@ -17,7 +17,6 @@ pub mod server {
 
     use serde_json::json;
     use serde_json::Value;
-    use core::panic;
     use std::net::SocketAddr;
     use tokio::{net::TcpListener, task::JoinHandle};
 
@@ -25,17 +24,15 @@ pub mod server {
         body::{self, Bytes},
         server::conn::http1::Builder,
         service::service_fn,
-        StatusCode,
     };
 
     use hyper_util::rt::TokioIo;
-    use reqwest::Method;
 
-    fn empty() -> BoxBody<Bytes, hyper::Error> {
-        Full::new(Bytes::new())
-            .map_err(|never| match never {})
-            .boxed()
-    }
+    // fn empty() -> BoxBody<Bytes, hyper::Error> {
+    //     Full::new(Bytes::new())
+    //         .map_err(|never| match never {})
+    //         .boxed()
+    // }
 
     fn full<T: Into<Bytes>>(chunk: T) -> BoxBody<Bytes, hyper::Error> {
         Full::new(chunk.into())
@@ -60,7 +57,7 @@ pub mod server {
         println!("Path {}", x);
         let body = req.boxed();
         println!("Body {:#?}", body.collect().await);
-            // .collect().await.inspect(|body| {eprintln!("{:#?}", body)});
+        // .collect().await.inspect(|body| {eprintln!("{:#?}", body)});
         Ok(hyper_response(json!({"response": true})))
     }
 

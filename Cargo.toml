@@ -10,7 +10,6 @@ members = [
   "bb-lib-surreal-client",
   "bb-lib-tracing",
   "bb-lib-event",
-  # "bb-lib-event",
 ]
 exclude = [
   "bb-lib-reactor"

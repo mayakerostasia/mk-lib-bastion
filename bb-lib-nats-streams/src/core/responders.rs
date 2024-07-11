@@ -1,18 +1,14 @@
+use super::replies::{echo_request, reply_with_future, reply_with_object};
+use crate::{util::BoxedFutureFn, Decoder, Frame, NSLibError};
 use async_nats::HeaderMap;
 use bytes::Bytes;
 use futures::StreamExt;
-// pub use operations::match_frame;
 use std::{env, future::Future};
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, error, info, info_span, instrument, instrument::Instrumented, Instrument};
-
-use super::replies::{echo_request, reply_with_future, reply_with_object};
-use crate::{util::BoxedFutureFn, Decoder, Frame};
 use tower::{BoxError, Service, ServiceExt};
-
-// mod replies;
-
-// pub use future::FrameFuture;
+use tracing::{
+    error, info, info_span, instrument, instrument::Instrumented, trace, trace_span, Instrument,
+};
 
 pub type Error = crate::NSLibError;
 
@@ -29,7 +25,7 @@ pub async fn new_echo_responder(
         let client = client.clone();
         async move {
             while let Some(request) = requests.next().await {
-                debug!("Request -> {:#?}", request);
+                trace!("Request -> {:#?}", request);
                 echo_request(request, &client).await?;
             }
             Ok::<(), Error>(())
@@ -51,12 +47,12 @@ pub async fn new_object_responder<T>(
     let object: Bytes = object.into();
     // let identity = annotate(|_req: &Bytes | { Box::new(object) });
 
-    info!("Starting responder @ {name}");
+    trace!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
         async move {
             while let Some(request) = requests.next().await {
-                debug!("Request -> {:#?}", request);
+                trace!("Request -> {:#?}", request);
                 reply_with_object(request, &client, object.clone()).await?;
             }
             Ok::<(), BoxError>(())
@@ -67,7 +63,7 @@ pub async fn new_object_responder<T>(
     Ok(handle)
 }
 
-#[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
+#[instrument(skip_all, fields(kong_name = %name, kong_subject = %subject))]
 pub async fn new_service_responder<'a, T>(
     client: &'a async_nats::Client,
     name: &'a str,
@@ -80,7 +76,7 @@ where
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
     // let func = Arc::new(func);
-    let span = info_span!("ServiceResponder");
+    let span = trace_span!("ServiceResponder");
     let handle = tokio::spawn({
         let client = client.clone();
         async move {
@@ -93,7 +89,7 @@ where
                     while let Some(request) = requests.next().await {
                         info!(?request.subject, ?request.payload);
                         let result: T = func().await;
-                        debug!("Result is {:#?}", &result);
+                        trace!("Result is {:#?}", &result);
                         reply_with_object(request, &client, result).await?;
                         };
                         Ok::<(), BoxError>(())
@@ -108,7 +104,7 @@ where
     Ok(handle)
 }
 
-#[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
+#[instrument(skip_all, fields(kong_name = %name, kong_subject = %subject))]
 pub async fn new_service_future_responder<O, T>(
     client: &async_nats::Client,
     name: &str,
@@ -181,27 +177,27 @@ where
                     },
                 _ = async move {
                         while let Some(request) = requests.next().await {
-                            debug!("Msg Received");
+                            trace!("Msg Received");
                             let frame: Frame = match Frame::decode(&request.payload) {
                                 Ok(fr) => fr,
                                 Err(e) => Frame::Error(e.to_string()),
                             };
-                            debug!("Frame Decoded - Calling Service");
+                            trace!("Frame Decoded - Calling Service");
 
-                            debug!("Readying Service");
+                            trace!("Readying Service");
                             let mut srv = service.clone();
                             let mut _srv = match srv.ready().await.map_err(Into::into) {
                                 Ok(serv) => serv,
-                                Err(e) => panic!("Whoops! Service couldn't ready up {e:#?}"),
+                                Err(e) => return Err::<_, BoxError>(NSLibError::ServiceReadyError(format!("Whoops! Service couldn't ready up {e:#?}").to_string()).into()),
                             };
-                            debug!("Service Ready");
+                            trace!("Service Ready");
 
                             let new_frame: <S as Service<Frame>>::Response = match _srv.call(frame).await.map_err(Into::into) {
                                 Ok(fr) => fr,
-                                Err(e) => panic!("Fuck! Couldn't Call the service {e:#?}"),
+                                Err(e) => return Err::<_, BoxError>(NSLibError::NatsError(e).into()),
                             };
 
-                            debug!("Service call completed - Composing Reply");
+                            trace!("Service call completed - Composing Reply");
                             // drop(srv);
 
                             match reply_with_object(request, &client, new_frame).await {
@@ -209,7 +205,7 @@ where
                                 Err(e) => { error!(?e) }
                             };
 
-                            debug!("Replied with object");
+                            trace!("Replied with object");
                         };
                         Ok::<(), BoxError>(())
 
@@ -224,7 +220,7 @@ where
     Ok(handle)
 }
 
-#[instrument]
+// #[instrument]
 pub async fn new_client(url: &str) -> Result<async_nats::Client, anyhow::Error> {
     info!(url = url, "New Nats Client");
     let nats_url = env::var("NATS_ADDR").unwrap_or_else(|_| url.to_string());
@@ -242,7 +238,7 @@ pub async fn make_request(
         .request(addr.clone(), payload.into())
         .await
         .map_err(Error::RequestError)?;
-    debug!("got a response: {:?}", &response);
+    trace!("got a response: {:?}", &response);
     Ok(response)
 }
 
@@ -262,7 +258,7 @@ pub async fn make_timeout_request(
         .send_request(addr.clone(), request)
         .await
         .map_err(Error::RequestError)?;
-    debug!("got a response: {:?}", &response);
+    trace!("got a response: {:?}", &response);
     Ok(response)
 }
 
@@ -278,7 +274,7 @@ pub async fn make_header_request(
         .request_with_headers(addr.clone(), headers, payload.into())
         .await
         .map_err(Error::RequestError)?;
-    debug!("got a response: {:?}", &response);
+    trace!("got a response: {:?}", &response);
     Ok(response)
 }
 

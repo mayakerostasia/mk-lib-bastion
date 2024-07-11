@@ -47,6 +47,8 @@ pub use storable::Storable;
 
 #[cfg(feature = "tower")]
 pub use surreal_tower::DbService;
+// use surrealdb::method::QueryStream;
+// use surrealdb::sql::statements::LiveStatement;
 // #[cfg(feature = "tower")]
 // pub use surreal_tower::DbServiceLayer;
 
@@ -60,7 +62,7 @@ use surrealdb::{
     engine::any::Any,
     opt::{auth::Root, PatchOp},
     sql::{Id, Thing},
-    Response, Surreal,
+    Response, Surreal, Notification,
 };
 use tracing::{debug, instrument, warn};
 
@@ -77,6 +79,7 @@ pub mod prelude {
     pub use surrealdb::sql::Id;
     pub use surrealdb::sql::Thing;
     pub use surrealdb::sql::Value;
+    pub use surrealdb::Notification;
     pub use surrealdb::Error as SDBError;
     pub use surrealdb::Response;
 
@@ -280,22 +283,22 @@ pub async fn relate(edge_table: &str, from: Thing, to: Thing) -> Result<Response
 /// Unimplemented
 pub async fn live_select<'a, T>(
     table: &str,
-    id: Option<Thing>,
 ) -> Result<surrealdb::method::Stream<'a, Any, Vec<T>>, Error>
 where
     T: Debug + Serialize + DeserializeOwned + Sized + Clone,
     T: Send + Sync + 'static,
 {
-    match id {
-        Some(_) => {
-            unimplemented!()
-        }
-        None => {
-            let stream: surrealdb::method::Stream<'_, Any, Vec<T>> =
-                DB.select(table).live().await?;
-            Ok(stream)
-        }
-    }
+    let stream = DB.select(table).live().await?;
+    Ok(stream)
+}
+
+pub async fn live_query<T>(query: &str) -> Result<surrealdb::method::QueryStream<Notification<T>>, Error>
+where
+    T: Debug + Serialize + DeserializeOwned + Sized + Clone + Unpin,
+    T: Send + Sync + 'static,
+{
+    let mut resp = DB.query(query).await?;
+    resp.stream(0).map_err(|e| e.into())
 }
 
 // DBGuard Implementation

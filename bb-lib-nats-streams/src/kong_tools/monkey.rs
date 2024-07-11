@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use crate::core::{make_header_request, make_request, make_timeout_request, new_client};
-use crate::Error;
+use crate::{Error};
 use async_nats::{HeaderMap, HeaderName, HeaderValue};
 use bytes::Bytes;
 use petname::Generator;

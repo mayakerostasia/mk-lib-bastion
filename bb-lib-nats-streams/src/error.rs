@@ -12,4 +12,7 @@ pub enum NSLibError {
     RequestError(#[from] async_nats::RequestError),
     #[error("Boxed Error {0:#?}")]
     Boxed(Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("ServiceReady Error{0:#?}")]
+    ServiceReadyError(String),
 }

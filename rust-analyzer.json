@@ -1,9 +1,0 @@
-{
-  "rust-analyzer.lens.enable": true,
-  "rust-analyzer.lens.debug.enable": true,
-  "rust-analyzer.procMacro.enable": true,
-  "rust-analyzer.inlayHints.maxLength": 10,
-  "rust-analyzer.inlayHints.typeHints.enable": true,
-  "rust-analyzer.inlayHints.parameterHints.enable": true
-}
-

@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use serde::{Deserialize, Serialize};
 use tower::BoxError;
-use tracing::debug;
+use tracing::trace;
 
 #[derive(Serialize, Deserialize)]
 pub struct Encode<T>(pub T);
@@ -27,9 +27,9 @@ pub trait Encoder {
     where
         Self: Serialize + Debug,
     {
-        debug!("Encoder Started");
+        trace!("Encoder Started");
         let ser = bincode::serialize(self)?;
-        debug!("Encoder Finished");
+        trace!("Encoder Finished");
         Ok(ser)
     }
 }
@@ -40,9 +40,9 @@ pub trait Decoder<'de, T> {
         T: Deserialize<'de>,
         T: Debug,
     {
-        debug!("Decoder Started");
+        trace!("Decoder Started");
         let deser = bincode::deserialize::<T>(data)?;
-        debug!("Decoder Finished: {deser:?}");
+        trace!("Decoder Finished: {deser:?}");
         Ok(deser)
     }
 }

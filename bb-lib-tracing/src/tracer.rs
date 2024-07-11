@@ -7,7 +7,7 @@ use opentelemetry_sdk::{
     runtime,
     trace::{RandomIdGenerator, Sampler, SpanLimits, Tracer},
 };
-use tonic::transport::channel::ClientTlsConfig;
+// use tonic::transport::channel::ClientTlsConfig;
 // use sentry::Client;
 
 // fn http_exporter(endpoint: String) -> HttpExporterBuilder {
@@ -23,7 +23,7 @@ use tonic::transport::channel::ClientTlsConfig;
 pub fn init_tracer(endpoint: String) -> anyhow::Result<Tracer, TraceError> {
     let exporter = opentelemetry_otlp::new_exporter()
         .tonic()
-        .with_tls_config(ClientTlsConfig::default())
+        // .with_tls_config(ClientTlsConfig::default())
         .with_protocol(opentelemetry_otlp::Protocol::Grpc)
         .with_export_config(get_export_config(endpoint, ConfigType::Traces));
 

@@ -23,6 +23,7 @@ use crate::tracer::init_tracer;
 mod telemetry;
 // mod sentry_layer;
 mod tracer;
+mod metrics;
 
 #[allow(dead_code)]
 enum ConfigType {
