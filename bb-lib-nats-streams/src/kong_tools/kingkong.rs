@@ -10,7 +10,7 @@ use tower::BoxError;
 use tracing::{debug, error, info, info_span, instrument, instrument::Instrumented, Instrument};
 
 type Error = NSLibError;
-type InstrumentedJoinHandle = Instrumented<JoinHandle<Result<(), BoxError>>>;
+type InstrumentedJoinHandle = JoinHandle<Result<(), BoxError>>;
 type InstrumentedAbortHandle = Instrumented<AbortHandle>;
 
 #[derive(Debug)]

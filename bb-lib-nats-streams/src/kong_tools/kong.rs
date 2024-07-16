@@ -71,7 +71,7 @@ impl Kong {
     pub async fn service<T, U>(
         &self,
         func: fn() -> T,
-    ) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError>
+    ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError>
     where
         T: futures::Future<Output = U> + Send + 'static,
         U: Into<Bytes> + std::fmt::Debug + Send + 'static,
@@ -91,7 +91,7 @@ impl Kong {
         &self,
         func: fn(Frame) -> O,
         // func: fn() -> T,
-    ) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError>
+    ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError>
     where
         O: Future<Output = Result<T, BoxError>> + Send + 'static,
         T: Into<Bytes> + std::fmt::Debug + Send,
@@ -110,7 +110,7 @@ impl Kong {
     pub async fn tower_service<'a, S>(
         &'a self,
         service: S, // func: fn() -> T,
-    ) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError>
+    ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError>
     where
         S: tower::Service<Frame> + Send + Sync + Clone + 'static,
         S::Future: Send + Sync,
