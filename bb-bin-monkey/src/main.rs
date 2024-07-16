@@ -3,7 +3,7 @@
 use anyhow::{anyhow, Error};
 use bb_lib_nats_streams::{Decoder, Frame, Monkey};
 use clap::Parser;
-use std::io::Write;
+use std::{io::Write, time::Duration};
 const DEFAULT_NATS_ADDR: &str = "nats://10.2.4.106:4222";
 use tracing::debug_span;
 
@@ -22,7 +22,7 @@ struct MonkeyCli {
 
     /// Frame::Proc.cmd -> The command string you'd like to send
     #[arg(short, long)]
-    cmd: String,
+    cmd: Option<String>,
 
     /// Frame::Proc.args -> The args you'd like to include in the proc object
     #[arg(short, long)]
@@ -59,12 +59,21 @@ async fn main() -> Result<(), Error> {
     let args = MonkeyCli::parse();
     // Monkey Call
     let monkey = Monkey::new(&args.subject, &args.nats_addr).await;
-    let resp = monkey
-        .msg_timeout(
-            Frame::exec(&args.cmd, args.args.iter().map(|a| a.as_str()).collect()),
-            None,
-        )
-        .await?;
+    let resp = match &args.cmd {
+        Some(cmd) => {
+            monkey
+                .msg_timeout(
+                    Frame::exec(cmd, args.args.iter().map(|a| a.as_str()).collect()),
+                    None,
+                )
+                .await?
+        }
+        None => {
+            monkey
+                .msg_timeout(Frame::ping(), Some(Duration::from_millis(100)))
+                .await?
+        }
+    };
     println!("Payload -> {:#?}", &resp.payload);
     handle_ret_frame(resp.payload).await?;
     Ok(())
