@@ -70,7 +70,7 @@ async fn main() -> Result<(), Error> {
         }
         None => {
             monkey
-                .msg_timeout(Frame::ping(), Some(Duration::from_millis(100)))
+                .msg_timeout(Frame::ping(), Some(Duration::from_millis(500)))
                 .await?
         }
     };

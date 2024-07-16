@@ -5,7 +5,7 @@ use anyhow::anyhow;
 use bytes::Bytes;
 use std::future::Future;
 use tower::BoxError;
-use tracing::{trace, error, info, instrument};
+use tracing::{debug, trace, error, info, instrument};
 
 type Error = crate::NSLibError;
 
@@ -30,7 +30,7 @@ pub async fn reply_with_object(
     client: &async_nats::Client,
     object: impl Into<Bytes>,
 ) -> Result<(), Error> {
-    trace!("Starting Reply with {request:#?}");
+    trace!("reply_with_object() ->{request:#?}");
     if let Some(reply) = request.reply {
         trace!("Trying publish");
         client.publish(reply, object.into()).await?;

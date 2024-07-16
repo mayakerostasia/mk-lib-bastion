@@ -9,7 +9,7 @@ serde_json = { workspace = true }
 anyhow = { workspace = true }
 bb-lib-nats-streams = { path = "../bb-lib-nats-streams" }
 bytes = "1.6.0"
-opentelemetry = "0.23.0"
+opentelemetry = "0.24.0"
 tracing.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 bb-lib-tracing = { path = "../bb-lib-tracing"}

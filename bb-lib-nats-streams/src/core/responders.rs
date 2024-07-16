@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use super::replies::{echo_request, reply_with_future, reply_with_object};
 use crate::{util::BoxedFutureFn, Decoder, Frame, NSLibError};
 use async_nats::HeaderMap;
@@ -6,9 +7,7 @@ use futures::StreamExt;
 use std::{env, future::Future};
 use tokio_util::sync::CancellationToken;
 use tower::{BoxError, Service, ServiceExt};
-use tracing::{
-    error, info, info_span, trace, instrument, Instrument
-};
+use tracing::{debug, error, info, info_span, instrument, trace, Instrument};
 
 pub type Error = crate::NSLibError;
 
@@ -45,12 +44,12 @@ pub async fn new_object_responder<T>(
     let object: Bytes = object.into();
     // let identity = annotate(|_req: &Bytes | { Box::new(object) });
 
-    trace!("Starting responder @ {name}");
+    info!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
         async move {
             while let Some(request) = requests.next().await {
-                trace!("Request -> {:#?}", request);
+                debug!("Request -> {:#?}", request);
                 reply_with_object(request, &client, object.clone()).await?;
             }
             Ok::<(), BoxError>(())
@@ -74,6 +73,7 @@ where
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
     // let func = Arc::new(func);
     // let span = trace_span!("ServiceResponder");
+    info!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
         async move {
@@ -83,20 +83,20 @@ where
                     },
 
                 _ = async move {
-                    while let Some(request) = requests.next().await {
-                        info!(?request.subject, ?request.payload);
-                        let result: T = func().await;
-                        trace!("Result is {:#?}", &result);
-                        reply_with_object(request, &client, result).await?;
+                        while let Some(request) = requests.next().await {
+                            info!(?request.subject, ?request.payload);
+                            let result: T = func().await;
+                            info!("Result is {:#?}", &result);
+                            reply_with_object(request, &client, result).await?;
                         };
                         Ok::<(), BoxError>(())
-                    }
-                    => {
+                    } => {
                         Ok::<(), BoxError>(())
                     }
             }
         }
     });
+    info!("responder listening to {name}.*");
     // .instrument(span);
     Ok(handle)
 }
@@ -118,6 +118,7 @@ where
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
     // let func = Arc::new(func);
     // let span = info_span!("ServiceResponder");
+    info!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
         // let func = Box::new(func);
@@ -161,31 +162,36 @@ where
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
     // let span = info_span!("ServiceResponder");
-
+    let mut service = service.clone();
+    info!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
         // let service = service.clone();
-        // let service = service.clone();
         // let func = Box::new(func);
         async move {
+            let _srv = service.ready().await.map_err(Into::into)?;
             tokio::select! {
                 _ = cancel_token.cancelled() => {
                         Ok::<(), BoxError>(())
                     },
-                _ = async move {
+                result = async move {
+                        let mutsrv = _srv.clone();
                         while let Some(request) = requests.next().await {
-                            trace!("Msg Received");
+                            let mut srv = mutsrv.clone();
                             let frame: Frame = match Frame::decode(&request.payload) {
                                 Ok(fr) => fr,
-                                Err(e) => Frame::Error(e.to_string()),
+                                Err(e) => {
+                                    error!("Unable to decode frame with error -> {e:#?}");
+                                    return Err::<_, BoxError>(NSLibError::FrameDecodeError(format!("Whoops! Bad Frame! {:#?}", e).to_string()).into());
+                                },
                             };
+                            info!("Msg Received -> {frame:#?}");
                             trace!("Frame Decoded - Calling Service");
 
                             trace!("Readying Service");
-                            let mut srv = service.clone();
                             let mut _srv = match srv.ready().await.map_err(Into::into) {
                                 Ok(serv) => serv,
-                                Err(e) => return Err::<_, BoxError>(NSLibError::ServiceReadyError(format!("Whoops! Service couldn't ready up {e:#?}").to_string()).into()),
+                                Err(e) => return Err::<_, BoxError>(NSLibError::ServiceReadyError(format!("Whoops! Service couldn't ready up {:#?}", e).to_string()).into()),
                             };
                             trace!("Service Ready");
 
@@ -195,10 +201,9 @@ where
                             };
 
                             trace!("Service call completed - Composing Reply");
-                            // drop(srv);
 
                             match reply_with_object(request, &client, new_frame).await {
-                                Ok(rep) => { info!(?rep) },
+                                Ok(reply) => { info!(?reply) },
                                 Err(e) => { error!(?e) }
                             };
 
@@ -206,7 +211,10 @@ where
                         };
                         Ok::<(), BoxError>(())
 
-                } => { Ok::<(), BoxError>(()) }
+                } => { 
+                    eprintln!("Nico HEY: Result is {:#?}", result); 
+                    Ok::<(), BoxError>(())
+                }
 
             }
         }
@@ -220,8 +228,8 @@ where
 // #[instrument]
 pub async fn new_client(url: &str) -> Result<async_nats::Client, anyhow::Error> {
     info!(url = url, "New Nats Client");
-    let nats_url = env::var("NATS_ADDR").unwrap_or_else(|_| url.to_string());
-    Ok(async_nats::connect(nats_url).await?)
+    // let nats_url = env::var("NATS_ADDR").unwrap_or_else(|_| url.to_string());
+    Ok(async_nats::connect(url).await?)
 }
 
 #[instrument(skip(payload))]
@@ -236,6 +244,7 @@ pub async fn make_request(
         .await
         .map_err(Error::RequestError)?;
     trace!("got a response: {:?}", &response);
+    eprintln!("Response is {:#?}", &response);
     Ok(response)
 }
 

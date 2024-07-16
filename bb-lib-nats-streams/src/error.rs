@@ -15,4 +15,7 @@ pub enum NSLibError {
 
     #[error("ServiceReady Error{0:#?}")]
     ServiceReadyError(String),
+
+    #[error("Failed Framed -> {0:#?}")]
+    FrameDecodeError(String),
 }

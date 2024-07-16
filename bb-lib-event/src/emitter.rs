@@ -3,7 +3,7 @@ use bb_lib_nats_streams::{Frame, Monkey};
 use tracing::instrument;
 // use crate::event::{BBEvent, BBEventType};
 
-const NATS_ADDR: &str = "nats://10.0.0.27:4222";
+const NATS_ADDR: &str = "nats://10.2.4.106:4222";
 
 #[derive(Debug, Clone, Default)]
 pub struct Emitter;
