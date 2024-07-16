@@ -7,12 +7,11 @@ use std::{env, future::Future};
 use tokio_util::sync::CancellationToken;
 use tower::{BoxError, Service, ServiceExt};
 use tracing::{
-    error, info, info_span, instrument, instrument::Instrumented, trace, trace_span, Instrument,
+    error, info, info_span, trace, instrument, Instrument
 };
 
 pub type Error = crate::NSLibError;
 
-#[instrument]
 pub async fn new_echo_responder(
     client: &async_nats::Client,
     name: &str,
@@ -37,7 +36,6 @@ pub async fn new_echo_responder(
     Ok(handle)
 }
 
-#[instrument(skip(object))]
 pub async fn new_object_responder<T>(
     client: &async_nats::Client,
     name: &str,
@@ -63,20 +61,19 @@ pub async fn new_object_responder<T>(
     Ok(handle)
 }
 
-#[instrument(skip_all, fields(kong_name = %name, kong_subject = %subject))]
 pub async fn new_service_responder<'a, T>(
     client: &'a async_nats::Client,
     name: &'a str,
     subject: &'a str,
     func: BoxedFutureFn<T>,
     cancel_token: CancellationToken,
-) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError>
+) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError>
 where
     T: Send + std::fmt::Debug + Into<Bytes> + 'static,
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
     // let func = Arc::new(func);
-    let span = trace_span!("ServiceResponder");
+    // let span = trace_span!("ServiceResponder");
     let handle = tokio::spawn({
         let client = client.clone();
         async move {
@@ -99,12 +96,12 @@ where
                     }
             }
         }
-    })
-    .instrument(span);
+    });
+    // .instrument(span);
     Ok(handle)
 }
 
-#[instrument(skip_all, fields(kong_name = %name, kong_subject = %subject))]
+// #[instrument(skip_all, fields(kong_name = %name, kong_subject = %subject))]
 pub async fn new_service_future_responder<O, T>(
     client: &async_nats::Client,
     name: &str,
@@ -113,14 +110,14 @@ pub async fn new_service_future_responder<O, T>(
     // func: BoxedFutureFn<T>,
     func: fn(Frame) -> O,
     cancel_token: CancellationToken,
-) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError>
+) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError>
 where
     T: std::fmt::Debug + Into<Bytes> + Send,
     O: Future<Output = Result<T, BoxError>> + Send + 'static,
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
     // let func = Arc::new(func);
-    let span = info_span!("ServiceResponder");
+    // let span = info_span!("ServiceResponder");
     let handle = tokio::spawn({
         let client = client.clone();
         // let func = Box::new(func);
@@ -143,19 +140,19 @@ where
                     }
             }
         }
-    })
-    .instrument(span);
+    });
+    // .instrument(span);
     Ok(handle)
 }
 
-#[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
+// #[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
 pub async fn new_tower_service_responder<'a, S>(
     client: &'a async_nats::Client,
     name: &'a str,
     subject: &'a str,
     service: S,
     cancel_token: CancellationToken,
-) -> Result<Instrumented<tokio::task::JoinHandle<Result<(), BoxError>>>, BoxError>
+) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError>
 where
     S: Clone + Service<Frame> + Send + Sync + 'static,
     S::Future: Send + Sync,
@@ -163,7 +160,7 @@ where
     S::Error: Into<BoxError>,
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
-    let span = info_span!("ServiceResponder");
+    // let span = info_span!("ServiceResponder");
 
     let handle = tokio::spawn({
         let client = client.clone();
@@ -213,8 +210,8 @@ where
 
             }
         }
-    })
-    .instrument(span);
+    });
+    // .instrument(span);
     //
     // todo!("Finish this shit ")
     Ok(handle)
