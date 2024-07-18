@@ -1,0 +1,13 @@
+[package]
+name = "bb-lib-metrics"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+metrics = "0.23.0"
+metrics-exporter-prometheus = { version = "0.15.1", default-features = false, features = ["http-listener", "push-gateway"] }
+aws-lc-sys = { version = "0.19.0", features = ["bindgen", "ssl"] }
+tokio = { version = "1.38.0", features = ["rt-multi-thread", "macros"] }
+anyhow = "1.0.86"
+hyper = "1.4.1"
+tracing = "0.1.40"

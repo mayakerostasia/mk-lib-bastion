@@ -52,6 +52,11 @@ impl Monkey {
         Ok(self._client.clone())
     }
 
+    pub fn set_subject(&mut self, subject: &str) ->Result<(), Error> {
+        self.subject = subject.to_string();
+        Ok(())
+    }
+
     pub fn set_header(&mut self, key: &str, val: &str) -> Result<(), Error> {
         let name: HeaderName = HeaderName::from_str(key)?;
         let value: HeaderValue = HeaderValue::from_str(val)?;
