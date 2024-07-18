@@ -34,27 +34,33 @@ pub async fn init_metrics() -> Result<
     Ok(())
 }
 
-// fn add_counter() -> String {
-//     let counter = counter!("counter.nicotest", "service" => "http");
-//     counter.increment(1);
-//     "Counted".to_string()
-// }
+#[cfg(test)]
+mod tests{
+    fn add_counter() -> String {
+        let counter = counter!("counter.nicotest", "service" => "http");
+        counter.increment(1);
+        "Counted".to_string()
+    }
 
-// #[tokio::main]
-// async fn main() -> Result<(), Error> {
-//     init_metrics().await?;
+    #[tokio::test]
+    async fn test_metrics() -> Result<(), Error> {
+        init_metrics().await?;
 
-//     println!("Hello, world!");
+        println!("Hello, world!");
 
-//     // for _ in 0..10 {
-//     // dbg!(add_counter());
-//     // }
+        // for _ in 0..10 {
+        // dbg!(add_counter());
+        // }
 
-//     // exporter.await?;
-//     loop {
-//         eprintln!("Sleeping");
-//         dbg!(add_counter());
-//         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-//     }
-//     // Ok(())
-// }
+        // exporter.await?;
+        let mut counter = 0;
+        while counter < 10 {
+            eprintln!("Sleeping");
+            dbg!(add_counter());
+            tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+            counter += 1
+        }
+        Ok(())
+    }
+
+}
