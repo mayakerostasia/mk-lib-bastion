@@ -12,7 +12,9 @@ bytes = "1.6.0"
 opentelemetry = "0.24.0"
 tracing.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
-bb-lib-tracing = { path = "../bb-lib-tracing"}
+bb-lib-tracing = { path = "../bb-lib-tracing" }
+bb-lib-metrics = { path = "../bb-lib-metrics" }
+metrics = "0.23.0"
 
 [dev-dependencies]
 tokio = { workspace = true }

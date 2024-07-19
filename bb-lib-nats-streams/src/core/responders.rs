@@ -1,10 +1,9 @@
-use anyhow::anyhow;
 use super::replies::{echo_request, reply_with_future, reply_with_object};
 use crate::{util::BoxedFutureFn, Decoder, Frame, NSLibError};
 use async_nats::HeaderMap;
 use bytes::Bytes;
 use futures::StreamExt;
-use std::{env, future::Future};
+use std::future::Future;
 use tokio_util::sync::CancellationToken;
 use tower::{BoxError, Service, ServiceExt};
 use tracing::{debug, error, info, info_span, instrument, trace, Instrument};
@@ -35,7 +34,7 @@ pub async fn new_echo_responder(
     Ok(handle)
 }
 
-pub async fn new_object_responder<T>(
+pub async fn new_object_responder(
     client: &async_nats::Client,
     name: &str,
     object: impl Into<Bytes>,

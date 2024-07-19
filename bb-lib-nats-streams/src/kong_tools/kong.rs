@@ -13,7 +13,6 @@ use std::future::Future;
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
 use tracing::instrument;
-use tracing::instrument::Instrumented;
 
 pub type Error = crate::NSLibError;
 
@@ -60,11 +59,11 @@ impl Kong {
         new_echo_responder(&self.client, &self.subject).await
     }
 
-    pub async fn serve<T>(
+    pub async fn serve(
         &self,
         object: impl Into<Bytes>,
     ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError> {
-        new_object_responder::<T>(&self.client, &self.subject, object).await
+        new_object_responder(&self.client, &self.subject, object).await
     }
 
     #[instrument(skip(self, func), fields( kong_name = %self.name, kong_subject = %self.subject))]

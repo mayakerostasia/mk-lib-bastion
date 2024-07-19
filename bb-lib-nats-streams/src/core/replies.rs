@@ -5,7 +5,7 @@ use anyhow::anyhow;
 use bytes::Bytes;
 use std::future::Future;
 use tower::BoxError;
-use tracing::{debug, trace, error, info, instrument};
+use tracing::{trace, error, info, instrument};
 
 type Error = crate::NSLibError;
 

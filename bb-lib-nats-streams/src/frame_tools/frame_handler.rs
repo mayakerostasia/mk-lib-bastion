@@ -6,6 +6,8 @@ use tower::BoxError;
 use tracing::{debug, error};
 use async_trait::async_trait;
 
+type ProcFunk = fn(Proc) -> Pin<Box<dyn Future<Output = Result<Frame, BoxError>> + Send + Sync + 'static>>; 
+
 #[async_trait]
 pub trait HandlesFrames<P>
 where
@@ -14,7 +16,7 @@ where
     fn frame_handler(
         &self,
         frame: P,
-        funk: fn(Proc) -> Pin<Box<dyn Future<Output = Result<Frame, BoxError>> + Send + Sync + 'static>>
+        funk: ProcFunk
     ) -> Pin<Box<dyn Future<Output = Result<Frame, BoxError>> + Send + Sync + 'static>> ;
 }
 

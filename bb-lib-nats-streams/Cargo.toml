@@ -19,7 +19,7 @@ thiserror = { workspace = true }
 tokio = { version = "1.37.0", features = ["rt-multi-thread", "macros", "signal", "sync"] }
 tower = "0.4.13"
 tracing = { workspace = true }
-opentelemetry = "0.23.0"
+# opentelemetry = "0.24.0"
 tokio-util = "0.7.11"
 pin-project-lite.workspace = true
 async-trait = "0.1.80"

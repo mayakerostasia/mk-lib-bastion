@@ -1,13 +1,8 @@
-use std::collections::HashMap;
-
-use bb_lib_surreal_client::{
-    prelude::Id,
-    query, Error, Record, Storable, SurrealId,
-};
+use bb_lib_surreal_client::{prelude::Id, Error, Record, Storable};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-
-use tracing::{debug, error, info};
+use std::collections::HashMap;
+use tracing::debug;
 
 const TEST_TABLE: &str = "test_table";
 const TEST_PERSON: &str = "test_person";
@@ -26,18 +21,17 @@ struct Person {
     _extra: HashMap<String, Value>,
 }
 
-impl Into<Record<Person>> for Person {
-    fn into(self) -> Record<Person> {
+impl From<Person> for Record<Person> {
+    fn from(value: Person) -> Self {
         Record::new(
-            self._tb.clone().unwrap().as_str(),
-            Some(self._id.clone().unwrap()),
-            Some(Box::new(self)),
+            TEST_TABLE, 
+            Some(Id::from(TEST_PERSON)),
+            Some(Box::new(value.clone())),
             None,
         )
     }
-}
 
-// impl DBThings for Person {}
+}
 
 // API Call or Factory
 impl Person {}

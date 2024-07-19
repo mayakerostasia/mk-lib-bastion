@@ -338,11 +338,11 @@ checksum = "0c4b4d0bd25bd0b74681c0ad21497610ce1b7c91b1022cd21c80c6fbdd9476b0"
 
 [[package]]
 name = "aws-lc-rs"
-version = "1.8.0"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8a47f2fb521b70c11ce7369a6c5fa4bd6af7e5d62ec06303875bafe7c6ba245"
+checksum = "4ae74d9bd0a7530e8afd1770739ad34b36838829d6ad61818f9230f683f5ad77"
 dependencies = [
- "aws-lc-sys",
+ "aws-lc-sys 0.20.0",
  "mirai-annotations",
  "paste",
  "zeroize",
@@ -353,6 +353,21 @@ name = "aws-lc-sys"
 version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2927c7af777b460b7ccd95f8b67acd7b4c04ec8896bf0c8e80ba30523cffc057"
+dependencies = [
+ "bindgen",
+ "cc",
+ "cmake",
+ "dunce",
+ "fs_extra",
+ "libc",
+ "paste",
+]
+
+[[package]]
+name = "aws-lc-sys"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e89b6941c2d1a7045538884d6e760ccfffdf8e1ffc2613d8efa74305e1f3752"
 dependencies = [
  "bindgen",
  "cc",
@@ -546,9 +561,11 @@ name = "bb-lib-event"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bb-lib-metrics",
  "bb-lib-nats-streams",
  "bb-lib-tracing",
  "bytes",
+ "metrics",
  "opentelemetry 0.24.0",
  "serde",
  "serde_json",
@@ -577,7 +594,7 @@ name = "bb-lib-metrics"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "aws-lc-sys",
+ "aws-lc-sys 0.19.0",
  "hyper 1.4.1",
  "metrics",
  "metrics-exporter-prometheus",
@@ -597,7 +614,6 @@ dependencies = [
  "bincode",
  "bytes",
  "futures",
- "opentelemetry 0.23.0",
  "petname",
  "pin-project-lite",
  "rand",
