@@ -302,6 +302,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "async_once"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ce4f10ea3abcd6617873bae9f91d1c5332b4a778bd9ce34d0cd517474c1de82"
+
+[[package]]
 name = "atomic-polyfill"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -561,10 +567,13 @@ name = "bb-lib-event"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async_once",
  "bb-lib-metrics",
  "bb-lib-nats-streams",
  "bb-lib-tracing",
  "bytes",
+ "config",
+ "lazy_static",
  "metrics",
  "opentelemetry 0.24.0",
  "serde",
