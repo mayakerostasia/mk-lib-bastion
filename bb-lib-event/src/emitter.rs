@@ -14,9 +14,9 @@ impl Emitter {
     }
 
     #[instrument(skip(self))]
-    pub async fn emit_event(&self, event_name: &str, frame: Frame) -> Result<(), Error> {
-        let nats_addr = std::env::var("NATS_ADDR").unwrap_or(NATS_ADDR.to_string());
-        let monkey = Monkey::new("bastion-event.log", &nats_addr).await;
+    pub async fn emit_event(&self, event_name: &str, frame: Frame, nats_addr: &str) -> Result<(), Error> {
+        // let nats_addr = std::env::var("NATS_ADDR").unwrap_or(NATS_ADDR.to_string());
+        let monkey = Monkey::new("bastion-event.log", nats_addr).await;
         monkey.msg(frame).await?;
         Ok(())
     }
