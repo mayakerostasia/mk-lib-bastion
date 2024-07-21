@@ -1,3 +1,5 @@
+use clap::Parser;
+
 #[cfg(not(feature = "echoserver"))]
 fn main() {
     println!("This example requires the 'server' feature to be enabled");
@@ -6,9 +8,19 @@ fn main() {
 #[cfg(feature = "echoserver")]
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let handle = server::start().await?;
+    let args = Argue::parse();
+    let handle = server::start(&args.bind, &args.port).await?;
     handle.await?;
     Ok(())
+}
+
+#[derive(Debug, Clone, Parser)]
+#[command(version, about, long_about = None)]
+struct Argue { 
+    #[arg(short, long)]
+    bind: String,
+    #[arg(short, long)]
+    port: String,
 }
 
 #[cfg(feature = "echoserver")]
@@ -18,6 +30,7 @@ pub mod server {
     use serde_json::json;
     use serde_json::Value;
     use std::net::SocketAddr;
+    use std::str::FromStr;
     use tokio::{net::TcpListener, task::JoinHandle};
 
     use hyper::{
@@ -61,8 +74,8 @@ pub mod server {
         Ok(hyper_response(json!({"response": true})))
     }
 
-    pub async fn start() -> Result<JoinHandle<()>, Box<dyn std::error::Error + Send + Sync>> {
-        let addr = SocketAddr::from(([127, 0, 0, 1], 4200));
+    pub async fn start(bind: &str, port:&str) -> Result<JoinHandle<()>, Box<dyn std::error::Error + Send + Sync>> {
+        let addr = SocketAddr::from_str(format!("{}:{}",bind, port).as_str())?;
 
         // We create a TcpListener and bind it to 127.0.0.1:3000
         let listener = TcpListener::bind(addr).await?;
