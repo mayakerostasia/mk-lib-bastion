@@ -70,7 +70,7 @@ async fn main() -> Result<(), Error> {
     let cfg = setup();
     connect(&cfg).await?;
     let query = "event";
-    let mut stream = live_select(query).await?;
+    let mut stream = live_select(query, "test").await?;
     while let Some(event) = stream.next().await {
         handle(event).await
     }

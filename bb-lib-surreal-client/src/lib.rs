@@ -283,12 +283,13 @@ pub async fn relate(edge_table: &str, from: Thing, to: Thing) -> Result<Response
 /// Unimplemented
 pub async fn live_select<'a, T>(
     table: &str,
-) -> Result<surrealdb::method::Stream<'a, Any, Vec<T>>, Error>
+    id: &str,
+) -> Result<surrealdb::method::Stream<'a, Any, Option<T>>, Error>
 where
     T: Debug + Serialize + DeserializeOwned + Sized + Clone,
     T: Send + Sync + 'static,
 {
-    let stream = DB.select(table).live().await?;
+    let stream = DB.select((table, id)).live().await?;
     Ok(stream)
 }
 

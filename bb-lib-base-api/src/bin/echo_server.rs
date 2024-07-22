@@ -8,7 +8,7 @@ fn main() {
 #[cfg(feature = "echoserver")]
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let args = Argue::parse();
+    let args = Args::parse();
     let handle = server::start(&args.bind, &args.port).await?;
     handle.await?;
     Ok(())
@@ -16,7 +16,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
 #[derive(Debug, Clone, Parser)]
 #[command(version, about, long_about = None)]
-struct Argue { 
+struct Args { 
     #[arg(short, long)]
     bind: String,
     #[arg(short, long)]
