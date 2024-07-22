@@ -34,11 +34,16 @@ struct MonkeyCli {
 }
 
 pub async fn handle_ret_frame(frame: bytes::Bytes) -> Result<Frame, Error> {
-    let fram = Frame::decode(&frame).map_err(|e| anyhow!(e))?;
+    let fram: Frame = Frame::decode(&frame).map_err(|e| anyhow!(e))?;
+    // let fram = Frame::decode(&frame).map_err(|e| anyhow!(e))?;
     match fram.clone() {
         Frame::Msg(stri) => {
             eprintln!("Ret frame = Msg");
             writeln!(std::io::stdout(), "Message -> {:#?}", stri)?;
+        }
+        Frame::Bytes(byte) => {
+            let val: serde_json::Value = serde_json::from_slice(&byte)?;
+            serde_json::to_writer_pretty(std::io::stdout(), &val)?;
         }
         Frame::Json(val) => {
             eprintln!("Ret frame = Json");
