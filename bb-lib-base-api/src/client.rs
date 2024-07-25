@@ -115,6 +115,7 @@ impl Rest {
         if let Some(form) = call.form() {
             req = req.form(&form);
         }
+
         debug!("--> Request: {:#?}", req);
         let resp = req.send().await?;
         debug!("<-- Response Status: {:?}", resp.status());
