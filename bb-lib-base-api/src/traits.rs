@@ -16,7 +16,8 @@ where
     fn path(&self) -> String;
     fn method(&self) -> Method;
     fn query(&self) -> Option<Value>;
-    fn body(&self) -> Option<String>;
+    fn body(&self) -> Option<Value>;
+    fn form(&self) -> Option<Value>;
     fn paged(
         &self,
         response: IntermediateResponse,

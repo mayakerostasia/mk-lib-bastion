@@ -110,7 +110,10 @@ impl Rest {
             req = req.query(&query);
         }
         if let Some(body) = call.body() {
-            req = req.body(body);
+            req = req.body(serde_json::to_string(&body).unwrap());
+        }
+        if let Some(form) = call.form() {
+            req = req.form(&form);
         }
         debug!("--> Request: {:#?}", req);
         let resp = req.send().await?;
