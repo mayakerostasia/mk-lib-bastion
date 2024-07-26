@@ -27,7 +27,6 @@ pub async fn new_echo_responder(
             }
             Ok::<(), Error>(())
         }
-        .instrument(info_span!("Kong"))
     });
     info!("listening to {name}.*");
 
@@ -70,8 +69,6 @@ where
     T: Send + std::fmt::Debug + Into<Bytes> + 'static,
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
-    // let func = Arc::new(func);
-    // let span = trace_span!("ServiceResponder");
     info!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
@@ -105,8 +102,6 @@ pub async fn new_service_future_responder<O, T>(
     client: &async_nats::Client,
     name: &str,
     subject: &str,
-    // func: fn(Frame) -> T,
-    // func: BoxedFutureFn<T>,
     func: fn(Frame) -> O,
     cancel_token: CancellationToken,
 ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError>
@@ -115,12 +110,9 @@ where
     O: Future<Output = Result<T, BoxError>> + Send + 'static,
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
-    // let func = Arc::new(func);
-    // let span = info_span!("ServiceResponder");
     info!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
-        // let func = Box::new(func);
         async move {
             tokio::select! {
                 _ = cancel_token.cancelled() => {
@@ -128,7 +120,7 @@ where
                     },
 
                 _ = async move {
-                    while let Some(request) = requests.next().await {
+                        while let Some(request) = requests.next().await {
                             info!(?request.subject, ?request.payload);
                             reply_with_future(request, &client, func).await?;
                         };
@@ -141,7 +133,6 @@ where
             }
         }
     });
-    // .instrument(span);
     Ok(handle)
 }
 
@@ -160,13 +151,10 @@ where
     S::Error: Into<BoxError>,
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
-    // let span = info_span!("ServiceResponder");
     let mut service = service.clone();
     info!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
-        // let service = service.clone();
-        // let func = Box::new(func);
         async move {
             let _srv = service.ready().await.map_err(Into::into)?;
             tokio::select! {
@@ -210,7 +198,7 @@ where
                         };
                         Ok::<(), BoxError>(())
 
-                } => {
+                }.instrument(info_span!("TowerServiceSpan")) => {
                     eprintln!("Nico HEY: Result is {:#?}", result);
                     Ok::<(), BoxError>(())
                 }
