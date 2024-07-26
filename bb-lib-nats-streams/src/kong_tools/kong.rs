@@ -103,8 +103,8 @@ impl Kong {
         .await
     }
 
-    pub async fn tower_service<'a, S>(
-        &'a self,
+    pub async fn tower_service<S>(
+        &self,
         service: S, // func: fn() -> T,
     ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError>
     where
