@@ -66,12 +66,15 @@ impl Server {
                     .timer(TokioTimer)
                     .serve_connection(socket, hyper_service)
                     .with_upgrades();
+
                 let mut conn = std::pin::pin!(conn);
+
                 loop {
                     tokio::select! {
                         result = conn.as_mut() => {
                             if let Err(err) = result {
                                 debug!("failed to serve connection: {err:#}");
+                            }
                             break;
                         }
                         _ = shutdown_signal() => {
@@ -80,7 +83,9 @@ impl Server {
                         }
                     }
                 }
+
                 debug!("connection {remote_addr} closed");
+
                 drop(close_rx);
             });
         }
