@@ -84,7 +84,7 @@ pub fn initialize() -> anyhow::Result<OtelGuard> {
     let collector_endpoint: String =
         std::env::var("COLLECTOR_ENDPOINT").unwrap_or("http://localhost:4317".to_string());
     let logs_endpoint: String =
-        std::env::var("LOGGER_ENDPOINT").unwrap_or("http://loki:3100".to_string());
+        std::env::var("LOGGER_ENDPOINT").unwrap_or("http://localhost:4317".to_string());
     // let tracer_endpoint: String =
     //     std::env::var("TRACER_ENDPOINT").unwrap_or(collector_endpoint.clone());
     // let _metrics_endpoint: String =

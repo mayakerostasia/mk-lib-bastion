@@ -1,14 +1,8 @@
 use opentelemetry_sdk::trace::TracerProvider;
 #[allow(unused_imports)]
 use opentelemetry::trace::{Tracer, TraceError, TracerProvider as _};
-// use tracing::{error, span};
-// use tracing_subscriber::layer::SubscriberExt;
-// use tracing_subscriber::Registry;
 use crate::{get_export_config, resource, ConfigType};
-// use opentelemetry::global::{self, BoxedTracer};
-// use opentelemetry::trace::{Tracer, TraceError, TracerProvider};
 use opentelemetry_otlp::WithExportConfig;
-// use opentelemetry_sdk::logs::BatchConfigBuilder;
 use opentelemetry_sdk::trace::BatchConfigBuilder;
 use opentelemetry_sdk::{
     runtime,
