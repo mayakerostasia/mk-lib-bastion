@@ -1,17 +1,17 @@
-use opentelemetry_sdk::logs::LoggerProvider;
+// use opentelemetry_sdk::logs::LoggerProvider;
 #[allow(unused_imports)]
 use opentelemetry::logs::{LogError, LoggerProvider as _};
 use opentelemetry::trace::TracerProvider;
 #[allow(unused_imports)]
 use opentelemetry::trace::{Tracer, TraceError, TracerProvider as _};
-use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
+// use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
 // use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
-use tracing_opentelemetry::OpenTelemetryLayer;
+// use tracing_opentelemetry::OpenTelemetryLayer;
 use tracing_subscriber::fmt::time::ChronoLocal;
 use tracing::debug;
-use crate::{init_tracer, init_logger, loki_logger};
+use crate::{init_tracer, /* init_logger,*/ loki_logger};
 
 
 // Initialize tracing-subscriber and return OtelGuard for opentelemetry-related termination processing
@@ -76,7 +76,7 @@ impl Drop for OtelGuard {
 
 struct Endpoints {
     tracer: String,
-    logger: String,
+    // logger: String,
     loki: String,
     // metrics: String,
 }
@@ -85,8 +85,8 @@ pub fn initialize() -> anyhow::Result<OtelGuard> {
     debug!("Initializing telemetry");
     let collector_endpoint: String =
         std::env::var("COLLECTOR_ENDPOINT").unwrap_or("http://otel:4317".to_string());
-    let logs_endpoint: String =
-        std::env::var("LOGGER_ENDPOINT").unwrap_or("http://otel:4317".to_string());
+    // let logs_endpoint: String =
+    //     std::env::var("LOGGER_ENDPOINT").unwrap_or("http://otel:4317".to_string());
     let loki_endpoint: String =
         std::env::var("LOKI_ENDPOINT").unwrap_or("http://loki:3100".to_string());
     // let tracer_endpoint: String =
@@ -95,7 +95,7 @@ pub fn initialize() -> anyhow::Result<OtelGuard> {
     //     std::env::var("METRICS_ENDPOINT").unwrap_or(collector_endpoint.clone());
 
     let endpoints = Endpoints {
-        logger: logs_endpoint,
+        // logger: logs_endpoint,
         tracer: collector_endpoint,
         loki: loki_endpoint,
         // metrics: metrics_endpoint,
