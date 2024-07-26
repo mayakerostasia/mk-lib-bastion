@@ -34,7 +34,7 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::from_default_env())
         .with(otel_trace_layer)
-        .with(log_layer)
+        // .with(log_layer)
         .with(loki_layer)
         .with(
             tracing_subscriber::fmt::layer()

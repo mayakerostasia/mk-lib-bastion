@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::core::{make_header_request, make_request, make_timeout_request, new_client};
+use crate::core::{make_timeout_header_request, make_header_request, make_request, make_timeout_request, new_client};
 use crate::Error;
 use async_nats::{HeaderMap, HeaderName, HeaderValue};
 use bytes::Bytes;
@@ -41,7 +41,9 @@ impl Monkey {
             .generate(&mut rng, 2, "-")
             .expect("Petname Failed");
         let mut headers = HeaderMap::new();
+
         headers.insert("monkey_name", name.as_str());
+
         Monkey {
             name,
             subject: subject.to_string(),
@@ -72,11 +74,12 @@ impl Monkey {
         payload: impl Into<Bytes>,
         timeout: Option<std::time::Duration>,
     ) -> Result<async_nats::Message, Error> {
-        Ok(make_timeout_request(
+        Ok(make_timeout_header_request(
             self.client()?,
             self.subject.to_string(),
             payload.into(),
             timeout,
+            self.headers.clone()
         )
         .await?)
     }

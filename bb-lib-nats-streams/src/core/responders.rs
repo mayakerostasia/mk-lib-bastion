@@ -264,16 +264,16 @@ pub async fn make_timeout_request(
         .await
         .map_err(Error::RequestError)?;
 
-    debug!(
-        "subject={} from={}",
-        addr.clone(),
-        response
-            .headers
-            .as_ref()
-            .expect("getting headers")
-            .get("monkey_name")
-            .expect("getting monkey name")
-    );
+    // debug!(
+    //     "subject={} from={}",
+    //     addr.clone(),
+    //     response
+    //         .headers
+    //         .
+    //         // .expect("getting headers")
+    //         // .get("monkey_name")
+    //         // .expect("getting monkey name")
+    // );
 
     trace!("got a response: {:?}", &response);
     Ok(response)
@@ -302,12 +302,7 @@ pub async fn make_timeout_header_request(
     debug!(
         "subject={} from={}",
         addr.clone(),
-        response
-            .headers
-            .as_ref()
-            .expect("getting headers")
-            .get("monkey_name")
-            .expect("getting monkey name")
+        super::extractors::get_header_key(response.clone(), "monkey_name").unwrap()
     );
 
     trace!("Nats Response is: {:?}", &response);
