@@ -28,5 +28,3 @@ tracing-opentelemetry = "0.25.0"
 tracing-subscriber = { version = "0.3.18", features = ["registry", "chrono", "json", "serde", "serde_json", "tracing", "tracing-serde", "env-filter"] }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 url = "2.5.2"
-
-[dev-dependencies]
