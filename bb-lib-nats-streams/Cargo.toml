@@ -1,6 +1,6 @@
 [package]
 name = "bb-lib-nats-streams"
-version = "v1.0.0"
+version = "v1.2.0"
 edition = "2021"
 exclude = [ "logs", ".scratch" ]
 
