@@ -1,6 +1,6 @@
 [package]
 name = "bb-lib-surreal-client"
-version = "v1.2.0"
+version = "1.2.0"
 edition = "2021"
 
 [dependencies]
@@ -25,7 +25,7 @@ futures = { workspace = true, optional = true }
 bytes = { workspace = true }
 
 [dev-dependencies]
-bb-lib-tracing = { path = "../bb-lib-tracing", version = "0.1.0" }
+bb-lib-tracing = { path = "../bb-lib-tracing" }
 
 [features]
 tower = ["dep:tower", "dep:futures" ]

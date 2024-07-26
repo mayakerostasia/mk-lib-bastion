@@ -1,12 +1,12 @@
 [package]
 name = "bb-bin-monkey"
-version = "v1.2.0"
+version = "1.2.0"
 edition = "2021"
 
 [dependencies]
 clap = { workspace = true, features = ["derive"] }
 bb-lib-nats-streams = { path = "../bb-lib-nats-streams" }
-bb-lib-tracing = { path = "../bb-lib-tracing", version = "0.1.0" }
+bb-lib-tracing = { path = "../bb-lib-tracing" }
 tokio = { workspace = true, features = ["macros", "rt"] }
 tower = "0.4.13"
 anyhow.workspace = true
