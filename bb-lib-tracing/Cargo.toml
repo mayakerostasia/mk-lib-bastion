@@ -1,6 +1,6 @@
 [package]
 name = "bb-lib-tracing"
-version = "0.1.0"
+version = "v1.0.0"
 edition = "2021"
 
 # [[bin]]
