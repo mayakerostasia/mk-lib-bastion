@@ -66,7 +66,6 @@ impl Kong {
         new_object_responder(&self.client, &self.subject, object).await
     }
 
-    #[instrument(skip(self, func), fields( kong_name = %self.name, kong_subject = %self.subject))]
     pub async fn service<T, U>(
         &self,
         func: fn() -> T,
@@ -85,7 +84,6 @@ impl Kong {
         .await
     }
 
-    #[instrument(skip(self, func), fields( kong_name = %self.name, kong_subject = %self.subject))]
     pub async fn service_future<O, T>(
         &self,
         func: fn(Frame) -> O,
@@ -105,7 +103,6 @@ impl Kong {
         .await
     }
 
-    #[instrument(skip(self, service), fields( kong_name = %self.name, kong_subject = %self.subject))]
     pub async fn tower_service<'a, S>(
         &'a self,
         service: S, // func: fn() -> T,

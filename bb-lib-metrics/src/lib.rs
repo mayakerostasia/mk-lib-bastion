@@ -1,6 +1,6 @@
+use anyhow::Error;
 use metrics_exporter_prometheus::PrometheusBuilder;
 use std::net::SocketAddr;
-use anyhow::Error;
 
 pub async fn init_metrics() -> Result<(), Error> {
     PrometheusBuilder::new()
@@ -10,8 +10,14 @@ pub async fn init_metrics() -> Result<(), Error> {
         //     Duration::from_secs(1),
         //     None, None)?
         .with_http_listener(SocketAddr::new(
-            "0.0.0.0".parse().expect("Couldn't Parse IP"),
-            9010,
+            std::env::var("METRIC_BIND")
+                .expect("Please set ENV var : METRIC_BIND")
+                .parse()
+                .expect("Couldn't Parse IP"),
+            std::env::var("METRIC_PORT")
+                .expect("Please set ENV var : METRIC_BIND")
+                .parse()
+                .expect("Couldn't Parse Port"),
         ))
         .install()?;
     Ok(())
