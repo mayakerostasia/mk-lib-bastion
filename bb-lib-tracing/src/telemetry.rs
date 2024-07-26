@@ -19,12 +19,12 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
     // let tracer = tracing::Subscriber
     let tracer_provider = init_tracer(endpoints.tracer)?;
     let tracer = tracer_provider.tracer("bb-trace");
-    // let (loki_layer, log_task) = loki_logger(dbg!(endpoints.logger.clone()))?;
+    let (loki_layer, log_task) = loki_logger(dbg!(endpoints.logger.clone()))?;
     let log_layer_provider = init_logger(dbg!(endpoints.logger))?;
     let log_layer = OpenTelemetryTracingBridge::new(&log_layer_provider);
-    let otel_trace_layer = OpenTelemetryLayer::new(tracer);
-    // let otel_trace_layer = tracing_opentelemetry::layer()
-    //     .with_tracer(tracer);
+    // let otel_trace_layer = OpenTelemetryLayer::new(tracer);
+    let otel_trace_layer = tracing_opentelemetry::layer()
+        .with_tracer(tracer);
     
     // // TODO: Logs directory should be configurable
     // let debug_file = rolling::daily("./logs", "log.log");
@@ -33,22 +33,22 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
 
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::from_default_env())
-        .with(log_layer)
         .with(otel_trace_layer)
+        .with(log_layer)
+        .with(loki_layer)
         .with(
             tracing_subscriber::fmt::layer()
                 .pretty()
                 .with_target(true)
                 .with_timer(ChronoLocal::rfc_3339()),
         )
-        // .with(loki_layer)
         .init();
 
-    // let log_handle = tokio::spawn(log_task);
+    let log_handle = tokio::spawn(log_task);
 
     let _guard = OtelGuard {
         // writer_guard: _guard,
-        // log_handle,
+        log_handle,
         // tracer_provider: tracer,
         // meter_provider,
         // logger_provider: log_layer_provider,
@@ -59,7 +59,7 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
 
 pub struct OtelGuard {
     // pub writer_guard: WorkerGuard,
-    // pub log_handle: tokio::task::JoinHandle<()>,
+    pub log_handle: tokio::task::JoinHandle<()>,
     // pub tracer_provider: TracerProvider,
     // pub meter_provider: MeterProvider,
     // pub logger_provider: LoggerProvider,
@@ -68,8 +68,9 @@ pub struct OtelGuard {
 impl Drop for OtelGuard {
     fn drop(&mut self) {
         // opentelemetry::global::shutdown_logger_provider();
+        // self.log_handle.
         // self.log_handle.abort();
-        opentelemetry::global::shutdown_tracer_provider();
+        // opentelemetry::global::shutdown_tracer_provider();
     }
 }
 

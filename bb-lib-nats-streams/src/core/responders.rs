@@ -210,8 +210,8 @@ where
                         };
                         Ok::<(), BoxError>(())
 
-                } => { 
-                    eprintln!("Nico HEY: Result is {:#?}", result); 
+                } => {
+                    eprintln!("Nico HEY: Result is {:#?}", result);
                     Ok::<(), BoxError>(())
                 }
 
@@ -263,7 +263,54 @@ pub async fn make_timeout_request(
         .send_request(addr.clone(), request)
         .await
         .map_err(Error::RequestError)?;
+
+    debug!(
+        "subject={} from={}",
+        addr.clone(),
+        response
+            .headers
+            .as_ref()
+            .expect("getting headers")
+            .get("monkey_name")
+            .expect("getting monkey name")
+    );
+
     trace!("got a response: {:?}", &response);
+    Ok(response)
+}
+
+#[instrument(skip(payload))]
+pub async fn make_timeout_header_request(
+    client: async_nats::Client,
+    addr: String,
+    payload: impl Into<Bytes>,
+    timeout: Option<core::time::Duration>,
+    headers: HeaderMap,
+) -> Result<async_nats::Message, Error> {
+    let request = async_nats::Request::new()
+        // .inbox(format!("monkey@{}", addr))
+        .timeout(timeout)
+        .headers(headers)
+        .payload(payload.into());
+
+    let response = client
+        .clone()
+        .send_request(addr.clone(), request)
+        .await
+        .map_err(Error::RequestError)?;
+
+    debug!(
+        "subject={} from={}",
+        addr.clone(),
+        response
+            .headers
+            .as_ref()
+            .expect("getting headers")
+            .get("monkey_name")
+            .expect("getting monkey name")
+    );
+
+    trace!("Nats Response is: {:?}", &response);
     Ok(response)
 }
 

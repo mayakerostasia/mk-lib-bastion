@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use crate::core::{make_header_request, make_request, make_timeout_request, new_client};
-use crate::{Error};
+use crate::Error;
 use async_nats::{HeaderMap, HeaderName, HeaderValue};
 use bytes::Bytes;
 use petname::Generator;
@@ -40,10 +40,12 @@ impl Monkey {
         let name = petname::Petnames::default()
             .generate(&mut rng, 2, "-")
             .expect("Petname Failed");
+        let mut headers = HeaderMap::new();
+        headers.insert("monkey_name", name.as_str());
         Monkey {
             name,
             subject: subject.to_string(),
-            headers: HeaderMap::new(),
+            headers,
             _client: new_client(nats_url).await.unwrap(),
         }
     }
@@ -52,7 +54,7 @@ impl Monkey {
         Ok(self._client.clone())
     }
 
-    pub fn set_subject(&mut self, subject: &str) ->Result<(), Error> {
+    pub fn set_subject(&mut self, subject: &str) -> Result<(), Error> {
         self.subject = subject.to_string();
         Ok(())
     }
@@ -81,7 +83,13 @@ impl Monkey {
 
     #[instrument(skip(payload, self), fields(monkey_name = %self.name, monkey_subject = %self.subject))]
     pub async fn msg(&self, payload: impl Into<Bytes>) -> Result<async_nats::Message, Error> {
-        Ok(make_request(self.client()?, self.subject.to_string(), payload.into()).await?)
+        Ok(make_header_request(
+            self.client()?,
+            self.subject.to_string(),
+            payload.into(),
+            self.headers.clone(),
+        )
+        .await?)
     }
 
     #[instrument(skip(payload, self), fields(monkey_name = %self.name, monkey_subject = %self.subject))]

@@ -35,11 +35,6 @@ pub fn init_logger(endpoint: String) -> Result<LoggerProvider, LogError> {
     let log_provider = opentelemetry_otlp::new_pipeline()
         .logging()
         .with_resource(resource())
-        .with_batch_config(
-            opentelemetry_sdk::logs::BatchConfig::default()
-                // .with_resource(resource()), // .with_id_generator(RandomIdGenerator::default()),
-        )
-        // .with_batch_config(BatchConfig::default())
         .with_exporter(exporter)
         .with_batch_config(BatchConfigBuilder::default()
             .with_max_queue_size(8192)

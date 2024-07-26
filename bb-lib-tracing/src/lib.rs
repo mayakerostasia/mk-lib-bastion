@@ -35,7 +35,7 @@ enum ConfigType {
 struct ServiceNames {
     service_name: String,
     service_version: String,
-    deployment_environment: String,
+    service_environment: String,
 }
 
 impl ServiceNames {
@@ -43,7 +43,7 @@ impl ServiceNames {
         Self {
             service_name: std::env::var("SERVICE_NAME").unwrap_or("default".into()),
             service_version: std::env::var("SERVICE_VERSION").unwrap_or("0.1.0".into()),
-            deployment_environment: std::env::var("SERVICE_ENV").unwrap_or("dev".into()),
+            service_environment: std::env::var("SERVICE_ENV").unwrap_or("dev".into()),
         }
     }
 
@@ -51,7 +51,7 @@ impl ServiceNames {
         (
             self.service_name.to_string(),
             self.service_version.to_string(),
-            self.deployment_environment.to_string(),
+            self.service_environment.to_string(),
         )
     }
 }
