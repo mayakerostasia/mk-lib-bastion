@@ -19,9 +19,9 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
     // let tracer = tracing::Subscriber
     let tracer_provider = init_tracer(endpoints.tracer)?;
     let tracer = tracer_provider.tracer("bb-trace");
-    let (loki_layer, log_task) = loki_logger(dbg!(endpoints.logger.clone()))?;
-    let log_layer_provider = init_logger(dbg!(endpoints.logger))?;
-    let log_layer = OpenTelemetryTracingBridge::new(&log_layer_provider);
+    let (loki_layer, log_task) = loki_logger(endpoints.loki.clone())?;
+    // let log_layer_provider = init_logger(dbg!(endpoints.logger))?
+    // let log_layer = OpenTelemetryTracingBridge::new(&log_layer_provider);
     // let otel_trace_layer = OpenTelemetryLayer::new(tracer);
     let otel_trace_layer = tracing_opentelemetry::layer()
         .with_tracer(tracer);
@@ -77,15 +77,18 @@ impl Drop for OtelGuard {
 struct Endpoints {
     tracer: String,
     logger: String,
+    loki: String,
     // metrics: String,
 }
 
 pub fn initialize() -> anyhow::Result<OtelGuard> {
     debug!("Initializing telemetry");
     let collector_endpoint: String =
-        std::env::var("COLLECTOR_ENDPOINT").unwrap_or("http://localhost:4317".to_string());
+        std::env::var("COLLECTOR_ENDPOINT").unwrap_or("http://otel:4317".to_string());
     let logs_endpoint: String =
-        std::env::var("LOGGER_ENDPOINT").unwrap_or("http://localhost:4317".to_string());
+        std::env::var("LOGGER_ENDPOINT").unwrap_or("http://otel:4317".to_string());
+    let loki_endpoint: String =
+        std::env::var("LOKI_ENDPOINT").unwrap_or("http://loki:3100".to_string());
     // let tracer_endpoint: String =
     //     std::env::var("TRACER_ENDPOINT").unwrap_or(collector_endpoint.clone());
     // let _metrics_endpoint: String =
@@ -94,6 +97,7 @@ pub fn initialize() -> anyhow::Result<OtelGuard> {
     let endpoints = Endpoints {
         logger: logs_endpoint,
         tracer: collector_endpoint,
+        loki: loki_endpoint,
         // metrics: metrics_endpoint,
     };
 

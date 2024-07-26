@@ -21,7 +21,7 @@ pub fn loki_logger(endpoint: String) -> Result<(tracing_loki::Layer, tracing_lok
     let (layer, task) = tracing_loki::builder()
         .label("logger", "nico")?
         .extra_field("pid", format!("{}", process::id()))?
-        .build_url(Url::parse("http://10.2.4.106:3100").unwrap())?;
+        .build_url(Url::parse(&endpoint).unwrap())?;
     Ok((layer, task))
 }
 
