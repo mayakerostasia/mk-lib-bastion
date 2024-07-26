@@ -70,7 +70,7 @@ impl Drop for OtelGuard {
         // opentelemetry::global::shutdown_logger_provider();
         // self.log_handle.
         // self.log_handle.abort();
-        // opentelemetry::global::shutdown_tracer_provider();
+        opentelemetry::global::shutdown_tracer_provider();
     }
 }
 
