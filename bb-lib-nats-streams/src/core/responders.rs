@@ -235,7 +235,7 @@ pub async fn make_request(
     Ok(response)
 }
 
-#[instrument(skip(payload))]
+#[instrument(skip(payload, client, addr), fields(nats_addr = %addr))]
 pub async fn make_timeout_request(
     client: async_nats::Client,
     addr: String,
@@ -252,16 +252,11 @@ pub async fn make_timeout_request(
         .await
         .map_err(Error::RequestError)?;
 
-    // debug!(
-    //     "subject={} from={}",
-    //     addr.clone(),
-    //     response
-    //         .headers
-    //         .
-    //         // .expect("getting headers")
-    //         // .get("monkey_name")
-    //         // .expect("getting monkey name")
-    // );
+    debug!(
+        "subject={} from={}",
+        &addr,
+        super::extractors::get_header_key(response.clone(), "monkey_name").unwrap()
+    );
 
     trace!("got a response: {:?}", &response);
     Ok(response)
@@ -297,7 +292,6 @@ pub async fn make_timeout_header_request(
     Ok(response)
 }
 
-#[instrument(skip(payload))]
 pub async fn make_header_request(
     client: async_nats::Client,
     addr: String,
