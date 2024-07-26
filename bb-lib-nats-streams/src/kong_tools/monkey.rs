@@ -68,7 +68,6 @@ impl Monkey {
         Ok(())
     }
 
-    #[instrument(skip(payload, self), fields(monkey_name = %self.name, monkey_subject = %self.subject))]
     pub async fn msg_timeout(
         &self,
         payload: impl Into<Bytes>,
@@ -84,7 +83,6 @@ impl Monkey {
         .await?)
     }
 
-    #[instrument(skip(payload, self), fields(monkey_name = %self.name, monkey_subject = %self.subject))]
     pub async fn msg(&self, payload: impl Into<Bytes>) -> Result<async_nats::Message, Error> {
         Ok(make_header_request(
             self.client()?,
@@ -95,7 +93,6 @@ impl Monkey {
         .await?)
     }
 
-    #[instrument(skip(payload, self), fields(monkey_name = %self.name, monkey_subject = %self.subject))]
     pub async fn hmsg(&self, payload: impl Into<Bytes>) -> Result<async_nats::Message, Error> {
         Ok(make_header_request(
             self.client()?,
