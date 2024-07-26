@@ -23,8 +23,10 @@ rand = { workspace = true }
 tonic = { version = "0.12.0", default-features = false, features = ["tls", "transport"] }
 tracing = { workspace = true }
 tracing-appender = "0.2.3"
+tracing-loki = "0.2.5"
 tracing-opentelemetry = "0.25.0"
 tracing-subscriber = { version = "0.3.18", features = ["registry", "chrono", "json", "serde", "serde_json", "tracing", "tracing-serde", "env-filter"] }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+url = "2.5.2"
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

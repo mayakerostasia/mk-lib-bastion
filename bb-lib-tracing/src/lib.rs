@@ -18,10 +18,12 @@ use opentelemetry_semantic_conventions::{
     SCHEMA_URL,
 };
 
-use crate::tracer::init_tracer;
+use tracer::init_tracer;
+use logger::{init_logger, loki_logger};
 
 mod telemetry;
 // mod sentry_layer;
+mod logger;
 mod tracer;
 mod metrics;
 

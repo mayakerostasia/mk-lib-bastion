@@ -474,7 +474,7 @@ checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
 name = "bb-bin-monkey"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "anyhow",
  "bb-lib-nats-streams",
@@ -489,7 +489,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-base-api"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "clap",
  "futures",
@@ -507,7 +507,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-config"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "anyhow",
  "cargo-make",
@@ -519,7 +519,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-event"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "anyhow",
  "async_once",
@@ -540,7 +540,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-http-listener"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "anyhow",
  "axum",
@@ -555,7 +555,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-metrics"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "anyhow",
  "aws-lc-sys 0.19.0",
@@ -568,7 +568,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-nats-streams"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "anyhow",
  "async-nats",
@@ -593,7 +593,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-surreal-client"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -619,7 +619,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-tracing"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "anyhow",
  "lazy_static",
@@ -634,8 +634,10 @@ dependencies = [
  "tonic",
  "tracing",
  "tracing-appender",
+ "tracing-loki",
  "tracing-opentelemetry 0.25.0",
  "tracing-subscriber",
+ "url",
 ]
 
 [[package]]
@@ -1028,7 +1030,7 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 
 [[package]]
 name = "cfg_creator"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "bb-lib-config",
  "clap",
@@ -2684,6 +2686,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
+name = "loki-api"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "674883a98273598ac3aad4301724c56734bea90574c5033af067e8f9fb5eb399"
+dependencies = [
+ "prost 0.12.6",
+ "prost-types",
+]
+
+[[package]]
 name = "matchers"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3165,7 +3177,7 @@ dependencies = [
  "opentelemetry-http",
  "opentelemetry-proto",
  "opentelemetry_sdk 0.24.1",
- "prost",
+ "prost 0.13.1",
  "serde",
  "serde_json",
  "thiserror",
@@ -3181,7 +3193,7 @@ checksum = "30ee9f20bff9c984511a02f082dc8ede839e4a9bf15cc2487c8d6fea5ad850d9"
 dependencies = [
  "opentelemetry 0.24.0",
  "opentelemetry_sdk 0.24.1",
- "prost",
+ "prost 0.13.1",
  "tonic",
 ]
 
@@ -3600,12 +3612,35 @@ dependencies = [
 
 [[package]]
 name = "prost"
+version = "0.12.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "deb1435c188b76130da55f17a466d252ff7b1418b2ad3e037d127b94e3411f29"
+dependencies = [
+ "bytes",
+ "prost-derive 0.12.6",
+]
+
+[[package]]
+name = "prost"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e13db3d3fde688c61e2446b4d843bc27a7e8af269a69440c0308021dc92333cc"
 dependencies = [
  "bytes",
- "prost-derive",
+ "prost-derive 0.13.1",
+]
+
+[[package]]
+name = "prost-derive"
+version = "0.12.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81bddcdb20abf9501610992b6759a4c888aef7d1a7247ef75e2404275ac24af1"
+dependencies = [
+ "anyhow",
+ "itertools 0.12.1",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.72",
 ]
 
 [[package]]
@@ -3619,6 +3654,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.72",
+]
+
+[[package]]
+name = "prost-types"
+version = "0.12.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9091c90b0a32608e984ff2fa4091273cbdd755d54935c51d520887f4a1dbd5b0"
+dependencies = [
+ "prost 0.12.6",
 ]
 
 [[package]]
@@ -5285,7 +5329,7 @@ dependencies = [
  "hyper-util",
  "percent-encoding",
  "pin-project",
- "prost",
+ "prost 0.13.1",
  "rustls-pemfile 2.1.2",
  "socket2",
  "tokio",
@@ -5376,6 +5420,17 @@ dependencies = [
 
 [[package]]
 name = "tracing-log"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f751112709b4e791d8ce53e32c4ed2d353565a795ce84da2285393f41557bdf2"
+dependencies = [
+ "log",
+ "once_cell",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-log"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
@@ -5383,6 +5438,27 @@ dependencies = [
  "log",
  "once_cell",
  "tracing-core",
+]
+
+[[package]]
+name = "tracing-loki"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fea6023f9fe4b69267ccd3ed7d203d931c43c5f82dbaa0f07202bc17193a5f43"
+dependencies = [
+ "loki-api",
+ "reqwest 0.12.5",
+ "serde",
+ "serde_json",
+ "snap",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+ "tracing-core",
+ "tracing-log 0.1.4",
+ "tracing-serde",
+ "tracing-subscriber",
+ "url",
 ]
 
 [[package]]
@@ -5398,7 +5474,7 @@ dependencies = [
  "smallvec",
  "tracing",
  "tracing-core",
- "tracing-log",
+ "tracing-log 0.2.0",
  "tracing-subscriber",
  "web-time",
 ]
@@ -5416,7 +5492,7 @@ dependencies = [
  "smallvec",
  "tracing",
  "tracing-core",
- "tracing-log",
+ "tracing-log 0.2.0",
  "tracing-subscriber",
  "web-time",
 ]
@@ -5449,7 +5525,7 @@ dependencies = [
  "thread_local",
  "tracing",
  "tracing-core",
- "tracing-log",
+ "tracing-log 0.2.0",
  "tracing-serde",
 ]
 

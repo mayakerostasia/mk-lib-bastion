@@ -45,6 +45,10 @@ impl RestCall for TestCall {
         None
     }
 
+    fn form(&self) -> Option<Value> {
+        None
+    }
+
     fn paged(
         &self,
         response: IntermediateResponse,
@@ -109,6 +113,10 @@ impl RestCall for TestEchoCall {
 
     fn body(&self) -> Option<Value> {
         Some(serde_json::to_value(self.clone()).unwrap())
+    }
+
+    fn form(&self) -> Option<Value> {
+        None
     }
 
     fn paged(
