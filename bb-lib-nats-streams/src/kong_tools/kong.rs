@@ -25,12 +25,12 @@ pub struct Kong {
     // bastion: Option<Bastion>,
 }
 
-// impl Drop for Kong {
-//     fn drop(&mut self) {
-//         self.token.cancel();
-//         let _ = *self;
-//     }
-// }
+impl Drop for Kong {
+    fn drop(&mut self) {
+        self.token.cancel();
+        let _ = *self;
+    }
+}
 
 impl Kong {
     pub async fn new(subject: &str, nats_url: &str) -> Result<Self, Error> {

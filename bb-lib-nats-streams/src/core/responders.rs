@@ -73,17 +73,28 @@ where
     let handle = tokio::spawn({
         let client = client.clone();
         async move {
+            let cancel_token = cancel_token.clone();
+            let _cancel_token = cancel_token.clone();
             tokio::select! {
                 _ = cancel_token.cancelled() => {
                         Ok::<(), BoxError>(())
                     },
 
                 _ = async move {
+                        let cancel = _cancel_token.clone();
                         while let Some(request) = requests.next().await {
-                            info!(?request.subject, ?request.payload);
+                            info!(%request.subject, ?request.payload);
                             let result: T = func().await;
                             info!("Result is {:#?}", &result);
-                            reply_with_object(request, &client, result).await?;
+                            match reply_with_object(request, &client, result).await {
+                                Ok(resp) => {
+                                    trace!("Response is {:#?}", resp);
+                                },
+                                Err(e) => {
+                                    error!("Whoops! Error in Service -> {e:#?}");
+                                    cancel.cancel();
+                                }
+                            };
                         };
                         Ok::<(), BoxError>(())
                     } => {
@@ -113,6 +124,8 @@ where
     info!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
+        let cancel_token = cancel_token.clone();
+        let _cancel_token = cancel_token.clone();
         async move {
             tokio::select! {
                 _ = cancel_token.cancelled() => {
@@ -120,9 +133,18 @@ where
                     },
 
                 _ = async move {
+                        let cancel = _cancel_token.clone();
                         while let Some(request) = requests.next().await {
-                            info!(?request.subject, ?request.payload);
-                            reply_with_future(request, &client, func).await?;
+                            info!(%request.subject, ?request.payload);
+                            match reply_with_future(request, &client, func).await {
+                                Ok(resp) => {
+                                    trace!("Response is {:#?}", resp);
+                                },
+                                Err(e) => {
+                                    error!("Whoops! Error in Service -> {e:#?}");
+                                    cancel.cancel();
+                                }
+                            };
                         };
                         Ok::<(), BoxError>(())
                     }
@@ -155,6 +177,8 @@ where
     info!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
+        let cancel_token = cancel_token.clone();
+        let _cancel_token = cancel_token.clone();
         async move {
             let _srv = service.ready().await.map_err(Into::into)?;
             tokio::select! {
@@ -162,6 +186,7 @@ where
                         Ok::<(), BoxError>(())
                     },
                 result = async move {
+                        let cancel = _cancel_token.clone();
                         let mutsrv = _srv.clone();
                         while let Some(request) = requests.next().await {
                             let mut srv = mutsrv.clone();
@@ -169,6 +194,7 @@ where
                                 Ok(fr) => fr,
                                 Err(e) => {
                                     error!("Unable to decode frame with error -> {e:#?}");
+                                    cancel.cancel();
                                     return Err::<_, BoxError>(NSLibError::FrameDecodeError(format!("Whoops! Bad Frame! {:#?}", e).to_string()).into());
                                 },
                             };
@@ -178,20 +204,32 @@ where
                             trace!("Readying Service");
                             let mut _srv = match srv.ready().await.map_err(Into::into) {
                                 Ok(serv) => serv,
-                                Err(e) => return Err::<_, BoxError>(NSLibError::ServiceReadyError(format!("Whoops! Service couldn't ready up {:#?}", e).to_string()).into()),
+                                Err(e) => {
+                                    error!("Service couldn't ready up {:#?}", e);
+                                    cancel.cancel();
+                                    return Err::<_, BoxError>(NSLibError::ServiceReadyError(format!("Whoops! Service couldn't ready up {:#?}", e).to_string()).into())
+                                },
                             };
                             trace!("Service Ready");
 
                             let new_frame: <S as Service<Frame>>::Response = match _srv.call(frame).await.map_err(Into::into) {
                                 Ok(fr) => fr,
-                                Err(e) => return Err::<_, BoxError>(NSLibError::NatsError(e).into()),
+                                Err(e) => {
+                                    error!("Service Failed to call {:#?}", e);
+                                    cancel.cancel();
+                                    return Err::<_, BoxError>(NSLibError::NatsError(e).into())
+                                },
                             };
 
                             trace!("Service call completed - Composing Reply");
 
                             match reply_with_object(request, &client, new_frame).await {
                                 Ok(reply) => { info!(?reply) },
-                                Err(e) => { error!(?e) }
+                                Err(e) => { 
+                                    error!(?e);
+                                    cancel.cancel();
+                                    return Err::<_, BoxError>(NSLibError::NatsError(Box::new(e)).into())
+                                }
                             };
 
                             trace!("Replied with object");

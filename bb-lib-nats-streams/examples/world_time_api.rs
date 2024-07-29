@@ -1,5 +1,7 @@
+use anyhow::anyhow;
 use bb_lib_nats_streams::{Decoder, Frame, KingKong, Monkey, Proc};
 use serde_json::Value;
+use tracing::debug;
 use std::future::Future;
 use std::pin::Pin;
 
@@ -21,7 +23,7 @@ async fn call_time(frame: Frame) -> Result<Frame, Error> {
 fn process_frame(frame: Frame) -> Result<Proc, Error> {
     match frame {
         Frame::Exec(proc) => Ok(proc),
-        _ => unimplemented!(),
+        _ => Err(anyhow!("Failing Frame").into()),
     }
 }
 
@@ -43,10 +45,14 @@ async fn main() -> Result<(), Error> {
     let mut kkong = KingKong::new("time", nats_addr.as_str(), "0.0.0.0:6662");
     // Register the service
     kkong.new_future_kong("new_york", call_time_future).await?;
+    let kong_handle = tokio::task::spawn(async move { Ok::<_, Error>(kkong.wait().await?) });
 
+    // let kong_handle = tokio::task::spawn(async move { kkong.wait().await });
+    tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
     // Other Process
     // Initialize a Monkey to send the request
     let monkey = Monkey::new("time.new_york", nats_addr.as_str()).await;
+    debug!("Monkey is {:#?}", monkey);
     let resp = monkey.msg(Frame::exec("America/New_York", vec![])).await?;
 
     let frame = Frame::decode(&resp.payload);
@@ -57,6 +63,9 @@ async fn main() -> Result<(), Error> {
         }
         _ => unimplemented!("Not Allowed!"),
     }
-    // tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+    tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+
+    // Kong Survive
+    let _ = tokio::join!(kong_handle);
     Ok(())
 }
