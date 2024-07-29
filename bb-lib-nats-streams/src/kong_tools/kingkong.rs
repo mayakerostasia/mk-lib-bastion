@@ -8,7 +8,8 @@ use rand::thread_rng;
 use std::collections::HashMap;
 use tokio::task::{AbortHandle, JoinHandle, JoinSet};
 use tower::BoxError;
-use tracing::{debug, error, info, info_span, instrument, instrument::Instrumented, Instrument};
+use tokio_util::sync::CancellationToken;
+use tracing::{debug, error, info, info_span, instrument::{self, Instrumented}, warn, Instrument};
 
 type Error = NSLibError;
 type InstrumentedJoinHandle = JoinHandle<Result<(), BoxError>>;
@@ -22,6 +23,7 @@ pub struct KingKong {
     addr_table: HashMap<String, String>,
     listeners: JoinSet<Result<InstrumentedJoinHandle, BoxError>>,
     abort_handles: Vec<InstrumentedAbortHandle>,
+    cancel_token: CancellationToken,
     _http_listener: Option<Server>,
     _http_started: bool,
 }
@@ -41,6 +43,7 @@ impl KingKong {
             addr_table: HashMap::new(),
             listeners: JoinSet::new(),
             abort_handles: Vec::new(),
+            cancel_token: CancellationToken::new(),
             _http_listener: Some(server),
             _http_started: false,
         }
@@ -133,11 +136,15 @@ impl KingKong {
                 Err(err) => Err(anyhow!("Unable to listen for shutdown signal: {}", err)),
             }
         };
-
         let fut2 = async { self._http_listener.clone().unwrap().listen().await };
+        let cancel_token = self.cancel_token.cancelled();
         tokio::select! {
             _ = fut1 => {}
             _ = fut2 => {}
+            _ = cancel_token => {
+                warn!("Kancelled! Exiting!");
+                return Ok(())
+            }
         };
         Ok(())
     }
