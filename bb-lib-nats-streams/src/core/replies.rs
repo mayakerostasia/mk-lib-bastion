@@ -9,7 +9,7 @@ use tracing::{trace, error, info, instrument};
 
 type Error = crate::NSLibError;
 
-// #[instrument(skip(request, client), fields(monkey_name, monkey_payload))]
+#[instrument(skip(request, client), fields(monkey_name, monkey_payload))]
 pub async fn echo_request(
     request: async_nats::Message,
     client: &async_nats::Client,
@@ -24,7 +24,7 @@ pub async fn echo_request(
     Ok(())
 }
 
-// #[instrument(skip(request, client, object))]
+#[instrument(skip(request, client, object))]
 pub async fn reply_with_object(
     request: async_nats::Message,
     client: &async_nats::Client,
@@ -42,7 +42,7 @@ pub async fn reply_with_object(
     Ok(())
 }
 
-// #[instrument(skip(request, client, fut))]
+#[instrument(skip(request, client, fut))]
 pub async fn reply_with_future<O, T>(
     request: async_nats::Message,
     client: &async_nats::Client,

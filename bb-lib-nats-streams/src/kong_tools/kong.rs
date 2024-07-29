@@ -12,7 +12,7 @@ use rand::thread_rng;
 use std::future::Future;
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
-use tracing::instrument;
+use tracing::debug;
 
 pub type Error = crate::NSLibError;
 
@@ -27,7 +27,8 @@ pub struct Kong {
 
 impl Drop for Kong {
     fn drop(&mut self) {
-        self.token.cancel();
+        debug!(kong_name = %self.name, kong_subject = %self.subject, "Kong Dropping");
+        // self.token.cancel();
         let _ = *self;
     }
 }

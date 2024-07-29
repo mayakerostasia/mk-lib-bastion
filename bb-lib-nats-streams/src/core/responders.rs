@@ -149,6 +149,7 @@ where
                         };
                         Ok::<(), BoxError>(())
                     } => {
+                        eprintln!("Nico : Result is {:#?}", result);
                         error!("Nico : Result is {:#?}", result);
                         Err::<(), BoxError>(anyhow!("Fuck!").into())
 

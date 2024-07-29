@@ -26,7 +26,7 @@ pub struct KingKong {
     nats_addr: String,
     addr_table: HashMap<String, String>,
     listeners: JoinSet<Result<InstrumentedJoinHandle, BoxError>>,
-    // abort_handles: Vec<InstrumentedAbortHandle>,
+    kongs: Vec<Kong>,
     cancel_token: CancellationToken,
     _http_listener: Option<Server>,
     _http_started: bool,
@@ -46,7 +46,7 @@ impl KingKong {
             nats_addr: nats_addr.to_string(),
             addr_table: HashMap::new(),
             listeners: JoinSet::new(),
-            // abort_handles: Vec::new(),
+            kongs: Vec::new(),
             cancel_token: CancellationToken::new(),
             _http_listener: Some(server),
             _http_started: false,
@@ -92,7 +92,10 @@ impl KingKong {
         U: Send + Into<Bytes> + std::fmt::Debug + 'static,
     {
         let (nats_subject, name, kong) = self.init_kong(subject).await?;
-        self.start_kong(async move { kong.service(func).await })
+        self.start_kong(async move { 
+            let kong = kong;
+            kong.service(func).await 
+        })
             .await?;
         info!(%nats_subject, king_kong_name = self.name, kong_name = name, kong_subject = subject, "Kong Up");
         Ok::<_, BoxError>(())
