@@ -7,9 +7,13 @@ use petname::Generator;
 use rand::thread_rng;
 use std::collections::HashMap;
 use tokio::task::{AbortHandle, JoinHandle, JoinSet};
-use tower::BoxError;
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, error, info, info_span, instrument::{self, Instrumented}, warn, Instrument};
+use tower::BoxError;
+use tracing::{
+    debug, error, info, info_span,
+    instrument::{self, Instrumented},
+    warn, Instrument,
+};
 
 type Error = NSLibError;
 type InstrumentedJoinHandle = JoinHandle<Result<(), BoxError>>;
@@ -22,7 +26,7 @@ pub struct KingKong {
     nats_addr: String,
     addr_table: HashMap<String, String>,
     listeners: JoinSet<Result<InstrumentedJoinHandle, BoxError>>,
-    abort_handles: Vec<InstrumentedAbortHandle>,
+    // abort_handles: Vec<InstrumentedAbortHandle>,
     cancel_token: CancellationToken,
     _http_listener: Option<Server>,
     _http_started: bool,
@@ -42,7 +46,7 @@ impl KingKong {
             nats_addr: nats_addr.to_string(),
             addr_table: HashMap::new(),
             listeners: JoinSet::new(),
-            abort_handles: Vec::new(),
+            // abort_handles: Vec::new(),
             cancel_token: CancellationToken::new(),
             _http_listener: Some(server),
             _http_started: false,
@@ -50,7 +54,7 @@ impl KingKong {
     }
 
     async fn init_kong(&mut self, subject: &str) -> Result<(String, String, Kong), Error> {
-        let nats_subject = format!("{}.{}", self.subject, subject);
+        let nats_subject = format!("{}.{}", self.subject.as_str(), subject);
         let kong = Kong::new(&nats_subject, self.nats_addr.as_str()).await?;
         let name = kong.name.clone();
         self.addr_table.insert(nats_subject.clone(), name.clone());
@@ -63,7 +67,7 @@ impl KingKong {
             + Send
             + 'static,
     ) -> Result<(), BoxError> {
-        self.abort_handles.push(self.listeners.spawn(async move {
+        self.listeners.spawn(async move {
             match fut.await {
                 Ok(handle) => {
                     debug!("Kong Started");
@@ -74,7 +78,7 @@ impl KingKong {
                     Err(Error::Anyhow(anyhow!(e)))?
                 }
             }
-        }));
+        });
         Ok(())
     }
 
@@ -137,14 +141,14 @@ impl KingKong {
             }
         };
         let fut2 = async { self._http_listener.clone().unwrap().listen().await };
-        let cancel_token = self.cancel_token.cancelled();
+        // let cancel_token = self.cancel_token.cancelled();
         tokio::select! {
             _ = fut1 => {}
             _ = fut2 => {}
-            _ = cancel_token => {
-                warn!("Kancelled! Exiting!");
-                return Ok(())
-            }
+            // _ = cancel_token => {
+            //     warn!("Kancelled! Exiting!");
+            //     return Ok(())
+            // }
         };
         Ok(())
     }

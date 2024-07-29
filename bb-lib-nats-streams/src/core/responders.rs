@@ -1,5 +1,6 @@
 use super::replies::{echo_request, reply_with_future, reply_with_object};
 use crate::{util::BoxedFutureFn, Decoder, Frame, NSLibError};
+use anyhow::anyhow;
 use async_nats::HeaderMap;
 use bytes::Bytes;
 use futures::StreamExt;
@@ -129,10 +130,10 @@ where
         async move {
             tokio::select! {
                 _ = cancel_token.cancelled() => {
-                        Ok::<(), BoxError>(())
+                        Err::<(), BoxError>(anyhow!("Cancelled").into())
                     },
 
-                _ = async move {
+                result = async move {
                         let cancel = _cancel_token.clone();
                         while let Some(request) = requests.next().await {
                             info!(%request.subject, ?request.payload);
@@ -147,9 +148,9 @@ where
                             };
                         };
                         Ok::<(), BoxError>(())
-                    }
-                    => {
-                        Ok::<(), BoxError>(())
+                    } => {
+                        error!("Nico : Result is {:#?}", result);
+                        Err::<(), BoxError>(anyhow!("Fuck!").into())
 
                     }
             }
@@ -183,7 +184,7 @@ where
             let _srv = service.ready().await.map_err(Into::into)?;
             tokio::select! {
                 _ = cancel_token.cancelled() => {
-                        Ok::<(), BoxError>(())
+                        Err::<(), BoxError>(anyhow!("Cancelled").into())
                     },
                 result = async move {
                         let cancel = _cancel_token.clone();
@@ -236,8 +237,8 @@ where
                         };
                         Ok::<(), BoxError>(())
 
-                }.instrument(info_span!("TowerServiceSpan")) => {
-                    eprintln!("Nico HEY: Result is {:#?}", result);
+                } => {
+                    error!("Nico : Result is {:#?}", result);
                     Ok::<(), BoxError>(())
                 }
 
