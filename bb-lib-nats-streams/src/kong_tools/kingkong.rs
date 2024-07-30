@@ -10,13 +10,12 @@ use tokio::task::{AbortHandle, JoinHandle, JoinSet};
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
 use tracing::{
-    debug, error, info, info_span,
-    warn, instrument,
+    debug, error, info, instrument,
 };
 
 type Error = NSLibError;
-type InstrumentedJoinHandle = JoinHandle<Result<(), BoxError>>;
-type InstrumentedAbortHandle = AbortHandle;
+type JoinHandleResult = JoinHandle<Result<(), BoxError>>;
+// type InstrumentedAbortHandle = AbortHandle;
 
 #[derive(Debug)]
 pub struct KingKong {
@@ -26,7 +25,7 @@ pub struct KingKong {
     addr_table: HashMap<String, String>,
     abort_handles: Vec<AbortHandle>,
     kongs: Vec<Kong>,
-    listeners: JoinSet<Result<InstrumentedJoinHandle, BoxError>>,
+    listeners: JoinSet<Result<JoinHandleResult, BoxError>>,
     cancel_token: CancellationToken,
     _http_listener: Option<Server>,
     _http_started: bool,
@@ -66,7 +65,7 @@ impl KingKong {
 
     async fn start_kong(
         &mut self,
-        fut: impl std::future::Future<Output = Result<InstrumentedJoinHandle, BoxError>>
+        fut: impl std::future::Future<Output = Result<JoinHandleResult, BoxError>>
             + Send
             + 'static,
     ) -> Result<(), BoxError> {

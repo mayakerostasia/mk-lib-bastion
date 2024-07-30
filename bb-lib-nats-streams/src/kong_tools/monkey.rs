@@ -1,12 +1,11 @@
 use std::str::FromStr;
 
-use crate::core::{make_timeout_header_request, make_header_request, make_request, make_timeout_request, new_client};
+use crate::core::{make_timeout_header_request, make_header_request, new_client};
 use crate::Error;
 use async_nats::{HeaderMap, HeaderName, HeaderValue};
 use bytes::Bytes;
 use petname::Generator;
 use rand::thread_rng;
-use tracing::instrument;
 
 #[derive(Debug, Clone)]
 pub struct Monkey {

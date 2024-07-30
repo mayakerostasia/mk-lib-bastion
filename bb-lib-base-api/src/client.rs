@@ -90,10 +90,7 @@ pub struct Rest {
 
 impl Rest {
     fn _build_headers(headers: Option<HeaderMap>) -> header::HeaderMap {
-        let mut headers = headers.unwrap_or_default();
-        // headers.insert(header::ACCEPT, "application/json".parse().unwrap());
-        // headers.insert(header::CONTENT_TYPE, "application/json".parse().unwrap());
-        headers
+        headers.unwrap_or_default()
     }
 
     #[instrument(skip_all)]

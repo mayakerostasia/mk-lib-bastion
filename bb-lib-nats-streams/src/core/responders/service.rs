@@ -1,15 +1,12 @@
-use super::super::replies::{echo_request, reply_with_future, reply_with_object};
-use crate::{util::BoxedFutureFn, Decoder, Frame, NSLibError};
-use anyhow::anyhow;
-use async_nats::HeaderMap;
+use super::super::replies::reply_with_object;
+use crate::util::BoxedFutureFn;
 use bytes::Bytes;
 use futures::StreamExt;
-use std::future::Future;
 use tokio_util::sync::CancellationToken;
-use tower::{BoxError, Service, ServiceExt};
-use tracing::{debug, error, info, info_span, instrument, trace, Instrument};
+use tower::BoxError;
+use tracing::{error, info, instrument, trace};
 
-pub type Error = crate::NSLibError;
+// pub type Error = crate::NSLibError;
 
 #[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
 pub async fn new_service_responder<'a, T>(

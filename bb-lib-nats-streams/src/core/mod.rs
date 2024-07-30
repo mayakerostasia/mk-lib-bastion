@@ -1,5 +1,6 @@
+#[allow(unused_imports)]
 pub use requests::{
-    make_header_request, make_request, make_timeout_header_request, make_timeout_request,
+    make_header_request, make_request, make_timeout_header_request,
     new_client,
 };
 pub use responders::{

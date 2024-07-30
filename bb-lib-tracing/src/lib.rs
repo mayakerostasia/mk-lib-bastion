@@ -19,7 +19,7 @@ use opentelemetry_semantic_conventions::{
 };
 
 use tracer::init_tracer;
-use logger::{init_logger, loki_logger};
+use logger::loki_logger;
 
 mod telemetry;
 // mod sentry_layer;

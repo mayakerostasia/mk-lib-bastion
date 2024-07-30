@@ -19,13 +19,8 @@ use config::Config;
 use lazy_static::lazy_static;
 use metrics::counter;
 use serde::Deserialize;
-use std::{env, future::Future, pin::Pin};
+use std::{future::Future, pin::Pin};
 use tracing::{info, info_span};
-
-const BB_NATS_ADDR: &str = "nats://10.0.0.27:4222";
-const BB_ENDPOINT: &str = "bb";
-const BB_PATH: &str = "log";
-const BB_HEALTHZ_BIND: &str = "0.0.0.0:4200";
 
 lazy_static! {
     static ref CONF: AsyncOnce<EventEmitterSettings> =

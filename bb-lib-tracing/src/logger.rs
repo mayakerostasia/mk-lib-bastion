@@ -25,7 +25,7 @@ pub fn loki_logger(endpoint: String) -> Result<(tracing_loki::Layer, tracing_lok
     Ok((layer, task))
 }
 
-pub fn init_logger(endpoint: String) -> Result<LoggerProvider, LogError> {
+pub fn _init_logger(endpoint: String) -> Result<LoggerProvider, LogError> {
     let exporter = opentelemetry_otlp::new_exporter()
         .tonic()
         // .with_tls_config(ClientTlsConfig::default())

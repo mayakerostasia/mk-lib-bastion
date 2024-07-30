@@ -1,6 +1,6 @@
-use super::super::replies::{echo_request, reply_with_future, reply_with_object};
+use super::super::replies::echo_request;
 use futures::StreamExt;
-use tracing::{info, info_span, instrument, trace, Instrument};
+use tracing::{info_span, instrument, Instrument};
 
 type Error = crate::NSLibError;
 
@@ -42,7 +42,7 @@ mod tests {
     #[tokio::test]
     async fn test_echo_responder() -> Result<(), Error> {
         let client = new_client(NATS_ADDR).await.unwrap();
-        let echo_responder = new_echo_responder(&client, "test-echo").await?;
+        let _echo_responder = new_echo_responder(&client, "test-echo").await?;
         let monkey = Monkey::new("test-echo.hi", NATS_ADDR).await;
         let pong = monkey.msg(Frame::ping()).await?;
         let pong_frame = Frame::decode(&pong.payload).unwrap();

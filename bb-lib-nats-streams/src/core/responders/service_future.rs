@@ -6,7 +6,6 @@ use futures::StreamExt;
 use std::future::Future;
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
-use tracing::debug;
 
 // type Error = crate::NSLibError;
 
@@ -71,14 +70,14 @@ mod tests {
     
     const NATS_ADDR: &str = "nats://10.2.4.106:4222";
 
-    async fn frame_funk(frame: Frame) -> Result<Frame, BoxError> {
+    async fn frame_funk(_frame: Frame) -> Result<Frame, BoxError> {
         Ok(Frame::pong())
     }
 
     #[tokio::test]
     async fn test_service_future_responder() -> Result<(), BoxError> {
         let client = new_client(NATS_ADDR).await.unwrap();
-        let echo_responder = new_service_future_responder(
+        let _echo_responder = new_service_future_responder(
             &client, 
             "test-name",
             "test-echo",

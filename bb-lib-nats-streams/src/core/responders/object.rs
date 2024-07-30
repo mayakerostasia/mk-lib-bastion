@@ -4,7 +4,7 @@ use futures::StreamExt;
 use tower::BoxError;
 use tracing::{info, instrument, debug};
 
-pub type Error = crate::NSLibError;
+// pub type Error = crate::NSLibError;
 
 #[instrument(skip_all, fields(health = "unset", kong_name = %name))]
 pub async fn new_object_responder(

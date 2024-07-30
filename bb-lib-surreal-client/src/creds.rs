@@ -2,7 +2,7 @@ use serde::Serialize;
 // use surrealdb::opt::auth::Scope;
 
 #[derive(Debug, Serialize)]
-pub struct Credentials<'a> {
+pub struct _Credentials<'a> {
     botname: &'a str,
     secret: &'a str,
 }

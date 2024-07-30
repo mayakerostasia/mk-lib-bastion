@@ -104,7 +104,7 @@ mod tests {
     use std::pin::Pin;
     use std::future::Future;
     use crate::Decoder;
-    use anyhow::Error;
+    
     use crate::Frame;
     use crate::{core::new_client, Monkey};
 
@@ -140,7 +140,7 @@ mod tests {
     #[tokio::test]
     async fn test_tower_service_responder() -> Result<(), BoxError> {
         let client = new_client(NATS_ADDR).await.unwrap();
-        let echo_responder = new_tower_service_responder(
+        let _echo_responder = new_tower_service_responder(
             &client, 
             "test-name",
             "test-echo",
