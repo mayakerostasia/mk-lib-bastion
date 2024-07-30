@@ -61,3 +61,34 @@ where
     Ok(handle)
 }
 
+#[cfg(test)]
+mod tests {
+    use crate::Decoder;
+    use crate::Frame;
+    use crate::{core::new_client, Monkey};
+
+    use super::*;
+    
+    const NATS_ADDR: &str = "nats://10.2.4.106:4222";
+
+    async fn frame_funk(frame: Frame) -> Result<Frame, BoxError> {
+        Ok(Frame::pong())
+    }
+
+    #[tokio::test]
+    async fn test_service_future_responder() -> Result<(), BoxError> {
+        let client = new_client(NATS_ADDR).await.unwrap();
+        let echo_responder = new_service_future_responder(
+            &client, 
+            "test-name",
+            "test-echo",
+            frame_funk,
+            CancellationToken::new()
+        ).await?;
+        let monkey = Monkey::new("test-echo", NATS_ADDR).await;
+        let pong = monkey.msg(Frame::ping()).await?;
+        let pong_frame = Frame::decode(&pong.payload).unwrap();
+        assert_eq!(Frame::ping(), pong_frame);
+        Ok(())
+    }
+}

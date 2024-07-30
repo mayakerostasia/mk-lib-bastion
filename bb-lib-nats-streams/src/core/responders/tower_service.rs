@@ -136,6 +136,7 @@ mod tests {
             Box::pin(fut)
         }
     }
+
     #[tokio::test]
     async fn test_tower_service_responder() -> Result<(), BoxError> {
         let client = new_client(NATS_ADDR).await.unwrap();
