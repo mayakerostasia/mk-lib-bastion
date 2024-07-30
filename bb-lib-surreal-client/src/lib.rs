@@ -62,7 +62,7 @@ use surrealdb::{
     engine::any::Any,
     opt::{auth::Root, PatchOp},
     sql::{Id, Thing},
-    Response, Surreal, Notification,
+    Notification, Response, Surreal,
 };
 use tracing::{debug, instrument, warn};
 
@@ -74,13 +74,12 @@ mod storable;
 #[cfg(feature = "tower")]
 mod surreal_tower;
 
-
 pub mod prelude {
     pub use surrealdb::sql::Id;
     pub use surrealdb::sql::Thing;
     pub use surrealdb::sql::Value;
-    pub use surrealdb::Notification;
     pub use surrealdb::Error as SDBError;
+    pub use surrealdb::Notification;
     pub use surrealdb::Response;
 
     // pub use super::live::subscribe;
@@ -293,7 +292,9 @@ where
     Ok(stream)
 }
 
-pub async fn live_query<T>(query: &str) -> Result<surrealdb::method::QueryStream<Notification<T>>, Error>
+pub async fn live_query<T>(
+    query: &str,
+) -> Result<surrealdb::method::QueryStream<Notification<T>>, Error>
 where
     T: Debug + Serialize + DeserializeOwned + Sized + Clone + Unpin,
     T: Send + Sync + 'static,

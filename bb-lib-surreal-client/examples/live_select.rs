@@ -1,11 +1,11 @@
 use std::fmt::Display;
 
-use futures_lite::StreamExt;
 use anyhow::Error;
 use bb_lib_surreal_client::{connect, live_select, setup, SurrealId};
-use surrealdb::Notification;
-use serde::{Serialize, Deserialize};
+use futures_lite::StreamExt;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use surrealdb::Notification;
 // Handle the result of the live query notification
 //{
 // 	id: event:[
@@ -27,10 +27,13 @@ struct Event {
 
 impl Display for Event {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} -> {} @ {}",  self.issue_id, self.eventType, self.id.0.id)
+        write!(
+            f,
+            "{} -> {} @ {}",
+            self.issue_id, self.eventType, self.id.0.id
+        )
     }
 }
-
 
 async fn handle_created(event: Event) -> Result<(), Error> {
     println!("Issue Created! -> {}", event);
@@ -52,15 +55,17 @@ async fn handle(result: Result<Notification<Event>, surrealdb::Error>) {
             match event.eventType.as_ref() {
                 "IssueCreated" => {
                     handle_created(event).await.expect("Couldn't handle_splunk");
-                },
+                }
                 "CommentCreated" => {
-                    handle_comment(event).await.expect("Couldn't handle_comment");
+                    handle_comment(event)
+                        .await
+                        .expect("Couldn't handle_comment");
                 }
                 _ => {
                     println!("{event:}");
                 }
             }
-        },
+        }
         Err(error) => eprintln!("{error}"),
     }
 }

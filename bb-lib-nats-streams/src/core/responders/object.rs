@@ -2,7 +2,7 @@ use super::super::replies::reply_with_object;
 use bytes::Bytes;
 use futures::StreamExt;
 use tower::BoxError;
-use tracing::{info, instrument, debug};
+use tracing::{debug, info, instrument};
 
 // pub type Error = crate::NSLibError;
 
@@ -31,4 +31,3 @@ pub async fn new_object_responder(
 
     Ok(handle)
 }
-

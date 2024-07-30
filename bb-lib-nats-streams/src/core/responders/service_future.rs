@@ -67,7 +67,7 @@ mod tests {
     use crate::{core::new_client, Monkey};
 
     use super::*;
-    
+
     const NATS_ADDR: &str = "nats://10.2.4.106:4222";
 
     async fn frame_funk(_frame: Frame) -> Result<Frame, BoxError> {
@@ -78,12 +78,13 @@ mod tests {
     async fn test_service_future_responder() -> Result<(), BoxError> {
         let client = new_client(NATS_ADDR).await.unwrap();
         let _echo_responder = new_service_future_responder(
-            &client, 
+            &client,
             "test-name",
             "test-echo",
             frame_funk,
-            CancellationToken::new()
-        ).await?;
+            CancellationToken::new(),
+        )
+        .await?;
         let monkey = Monkey::new("test-echo", NATS_ADDR).await;
         let pong = monkey.msg(Frame::ping()).await?;
         let pong_frame = Frame::decode(&pong.payload).unwrap();

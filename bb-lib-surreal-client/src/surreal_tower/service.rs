@@ -1,13 +1,13 @@
+use crate::Error;
 use crate::Record;
 use crate::Storable;
 use crate::{connect, DbConfig, DbGuard};
-use crate::Error;
 use anyhow::anyhow;
-use serde::{Deserialize, Serialize};
 use bb_lib_nats_streams::Frame;
 use bytes::Bytes;
 use futures::executor;
 use pin_project_lite::pin_project;
+use serde::{Deserialize, Serialize};
 use std::{future::Future, marker::PhantomData, pin::Pin, task::Poll};
 use tower::{BoxError, Service};
 use tracing::debug;
@@ -15,7 +15,7 @@ use tracing::debug;
 pin_project! {
     #[derive(Clone)]
     pub struct DbService<T>
-    // where 
+    // where
     //     T: Debug + Serialize + DeserializeOwned + Sized + Clone,
     //     T: Send + Sync + 'static,
     {
@@ -77,7 +77,8 @@ where
 {
     type Response = Frame;
     type Error = BoxError;
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send + Sync + 'static>>;
+    type Future =
+        Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send + Sync + 'static>>;
 
     fn poll_ready(
         &mut self,
@@ -108,10 +109,10 @@ where
 
     fn call(&mut self, request: Record<T>) -> Self::Future {
         Box::pin(async move {
-                    let okee = request.update();
-                    let resp = executor::block_on(okee);
-                    debug!(record_debug = ?resp, "Record Updated");
-                    Ok::<_, BoxError>(Frame::Fin)
+            let okee = request.update();
+            let resp = executor::block_on(okee);
+            debug!(record_debug = ?resp, "Record Updated");
+            Ok::<_, BoxError>(Frame::Fin)
         })
     }
 }

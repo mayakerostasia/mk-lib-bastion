@@ -27,7 +27,7 @@ pub use error::NSLibError;
 pub use frame_tools::{
     encoder::{Decoder, Encoder},
     frame::Frame,
-    frame_handler::{HandlesFrames, FrameHandler},
+    frame_handler::{FrameHandler, HandlesFrames},
     future::{FrameFuture, PinnedFuture},
     proc::Proc,
 };
@@ -35,8 +35,8 @@ pub use kong_tools::KingKong;
 pub use kong_tools::Kong;
 pub use kong_tools::Monkey;
 
-pub use towerish::NatsSend;
 pub use towerish::NatsLayer;
+pub use towerish::NatsSend;
 pub use towerish::ResponseFuture;
 
 use tower::BoxError;

@@ -18,7 +18,9 @@ pub async fn new_echo_responder(
         async move {
             while let Some(request) = requests.next().await {
                 eprintln!("Request -> {:#?}", request);
-                echo_request(request, &client).instrument(info_span!("Echo Request")).await?;
+                echo_request(request, &client)
+                    .instrument(info_span!("Echo Request"))
+                    .await?;
             }
             Ok::<(), Error>(())
         }
@@ -31,12 +33,12 @@ pub async fn new_echo_responder(
 #[cfg(test)]
 mod tests {
     use crate::Decoder;
-    use anyhow::Error;
     use crate::Frame;
     use crate::{core::new_client, Monkey};
+    use anyhow::Error;
 
     use super::*;
-    
+
     const NATS_ADDR: &str = "nats://10.2.4.106:4222";
 
     #[tokio::test]

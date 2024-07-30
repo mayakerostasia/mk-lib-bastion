@@ -16,7 +16,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
 #[derive(Debug, Clone, Parser)]
 #[command(version, about, long_about = None)]
-struct Args { 
+struct Args {
     #[arg(short, long)]
     bind: String,
     #[arg(short, long)]
@@ -74,8 +74,11 @@ pub mod server {
         Ok(hyper_response(json!({"response": true})))
     }
 
-    pub async fn start(bind: &str, port:&str) -> Result<JoinHandle<()>, Box<dyn std::error::Error + Send + Sync>> {
-        let addr = SocketAddr::from_str(format!("{}:{}",bind, port).as_str())?;
+    pub async fn start(
+        bind: &str,
+        port: &str,
+    ) -> Result<JoinHandle<()>, Box<dyn std::error::Error + Send + Sync>> {
+        let addr = SocketAddr::from_str(format!("{}:{}", bind, port).as_str())?;
 
         // We create a TcpListener and bind it to 127.0.0.1:3000
         let listener = TcpListener::bind(addr).await?;

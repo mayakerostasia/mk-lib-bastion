@@ -1,9 +1,9 @@
 use anyhow::Error;
-use url::Url;
-use std::process;
-use opentelemetry_sdk::logs::LoggerProvider;
 #[allow(unused_imports)]
 use opentelemetry::logs::{LogError, LoggerProvider as _};
+use opentelemetry_sdk::logs::LoggerProvider;
+use std::process;
+use url::Url;
 
 use crate::{get_export_config, resource, ConfigType};
 use opentelemetry_otlp::WithExportConfig;
@@ -17,7 +17,9 @@ use opentelemetry_sdk::{logs::BatchConfigBuilder, runtime};
 //         .with_export_config(get_export_config(endpoint, ConfigType::Logs))
 // }
 
-pub fn loki_logger(endpoint: String) -> Result<(tracing_loki::Layer, tracing_loki::BackgroundTask), Error> {
+pub fn loki_logger(
+    endpoint: String,
+) -> Result<(tracing_loki::Layer, tracing_loki::BackgroundTask), Error> {
     let (layer, task) = tracing_loki::builder()
         .label("logger", "nico")?
         .extra_field("pid", format!("{}", process::id()))?
@@ -36,10 +38,11 @@ pub fn _init_logger(endpoint: String) -> Result<LoggerProvider, LogError> {
         .logging()
         .with_resource(resource())
         .with_exporter(exporter)
-        .with_batch_config(BatchConfigBuilder::default()
-            .with_max_queue_size(8192)
-            // .with_max_export_batch_size(8192)
-            .build()
+        .with_batch_config(
+            BatchConfigBuilder::default()
+                .with_max_queue_size(8192)
+                // .with_max_export_batch_size(8192)
+                .build(),
         )
         .install_batch(runtime::Tokio)?;
 

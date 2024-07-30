@@ -1,10 +1,10 @@
 use crate::{error::SurrealClientError, Storable};
-use bb_lib_nats_streams::{Encoder, Decoder};
+use bb_lib_nats_streams::{Decoder, Encoder};
+use bytes::Bytes;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use tracing::error;
 use std::fmt::Debug;
 use surrealdb::sql::{Id, Thing};
-use bytes::Bytes;
+use tracing::error;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Record<D: Send + Clone> {
@@ -19,10 +19,10 @@ pub struct Record<D: Send + Clone> {
     _meta: Option<Box<D>>,
 }
 
-impl<T> Encoder for Record<T> where T: Into<Bytes> + Clone + Send, {}
-impl<'a, T> Decoder<'a, T> for Record<T> where T: Into<Bytes> + Clone + Send, {}
+impl<T> Encoder for Record<T> where T: Into<Bytes> + Clone + Send {}
+impl<'a, T> Decoder<'a, T> for Record<T> where T: Into<Bytes> + Clone + Send {}
 
-impl<T> From<Record<T>> for Bytes 
+impl<T> From<Record<T>> for Bytes
 where
     T: Clone + Send + Debug + Serialize,
     Record<T>: Encoder,
@@ -32,9 +32,9 @@ where
     }
 }
 
-impl<T> From<Bytes> for Record<T> 
+impl<T> From<Bytes> for Record<T>
 where
-    T: Clone + Send + Debug + for <'de> Deserialize<'de> + Serialize + Into<Bytes>,
+    T: Clone + Send + Debug + for<'de> Deserialize<'de> + Serialize + Into<Bytes>,
 {
     fn from(value: Bytes) -> Self {
         match Record::decode(&value) {
@@ -45,7 +45,6 @@ where
             }
         }
     }
-
 }
 
 impl<D: Send + Clone> Record<D> {

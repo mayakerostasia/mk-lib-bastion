@@ -18,14 +18,14 @@ use opentelemetry_semantic_conventions::{
     SCHEMA_URL,
 };
 
-use tracer::init_tracer;
 use logger::loki_logger;
+use tracer::init_tracer;
 
 mod telemetry;
 // mod sentry_layer;
 mod logger;
-mod tracer;
 mod metrics;
+mod tracer;
 
 #[allow(dead_code)]
 enum ConfigType {
@@ -74,7 +74,6 @@ fn get_export_config(endpoint: String, config_type: ConfigType) -> ExportConfig 
             endpoint,
             protocol: Protocol::HttpBinary,
             timeout: std::time::Duration::from_secs(3),
-            
         },
         // ConfigType::Metrics => ExportConfig {
         //     endpoint: endpoint,

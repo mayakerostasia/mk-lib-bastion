@@ -9,9 +9,7 @@ use std::collections::HashMap;
 use tokio::task::{AbortHandle, JoinHandle, JoinSet};
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
-use tracing::{
-    debug, error, info, instrument,
-};
+use tracing::{debug, error, info, instrument};
 
 type Error = NSLibError;
 type JoinHandleResult = JoinHandle<Result<(), BoxError>>;
@@ -65,9 +63,7 @@ impl KingKong {
 
     async fn start_kong(
         &mut self,
-        fut: impl std::future::Future<Output = Result<JoinHandleResult, BoxError>>
-            + Send
-            + 'static,
+        fut: impl std::future::Future<Output = Result<JoinHandleResult, BoxError>> + Send + 'static,
     ) -> Result<(), BoxError> {
         debug!("Kong Starting");
         let handle = self.listeners.spawn(async move {
@@ -97,9 +93,7 @@ impl KingKong {
         U: Send + Into<Bytes> + std::fmt::Debug + 'static,
     {
         let (nats_subject, name, kong) = self.init_kong(subject).await?;
-        self.start_kong(async move { 
-            kong.service(func).await 
-        })
+        self.start_kong(async move { kong.service(func).await })
             .await?;
         info!(%nats_subject, king_kong_name = self.name, kong_name = name, kong_subject = subject, "Kong Up");
         Ok::<_, BoxError>(())

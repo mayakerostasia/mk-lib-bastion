@@ -12,7 +12,11 @@ async fn main() -> Result<(), Error> {
     let emitter = Emitter::new();
     for _ in [..10] {
         emitter
-            .emit_event("bastion-event.log", Frame::Msg("Emitted".to_string()), NATS_ADDR)
+            .emit_event(
+                "bastion-event.log",
+                Frame::Msg("Emitted".to_string()),
+                NATS_ADDR,
+            )
             .await?;
     }
     Ok(())

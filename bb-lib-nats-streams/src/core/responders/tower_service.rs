@@ -74,7 +74,7 @@ where
 
                             match reply_with_object(request, &client, new_frame).await {
                                 Ok(reply) => { eprintln!("Reply : {:#?}", reply) },
-                                Err(e) => { 
+                                Err(e) => {
                                     eprintln!("Error is : {e:#?}");
                                     cancel.cancel();
                                     return Err::<_, BoxError>(NSLibError::NatsError(Box::new(e)).into())
@@ -99,20 +99,20 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::task::Poll;
-    use std::task::Context;
-    use std::pin::Pin;
-    use std::future::Future;
     use crate::Decoder;
-    
+    use std::future::Future;
+    use std::pin::Pin;
+    use std::task::Context;
+    use std::task::Poll;
+
     use crate::Frame;
     use crate::{core::new_client, Monkey};
 
     use super::*;
-    
+
     const NATS_ADDR: &str = "nats://10.2.4.106:4222";
 
-    use tower::{BoxError, Service };
+    use tower::{BoxError, Service};
 
     #[derive(Clone)]
     struct MockService;
@@ -141,12 +141,13 @@ mod tests {
     async fn test_tower_service_responder() -> Result<(), BoxError> {
         let client = new_client(NATS_ADDR).await.unwrap();
         let _echo_responder = new_tower_service_responder(
-            &client, 
+            &client,
             "test-name",
             "test-echo",
-            MockService { },
-            CancellationToken::new()
-        ).await?;
+            MockService {},
+            CancellationToken::new(),
+        )
+        .await?;
         let monkey = Monkey::new("test-echo.hi", NATS_ADDR).await;
         let pong = monkey.msg(Frame::ping()).await?;
         let pong_frame = Frame::decode(&pong.payload).unwrap();

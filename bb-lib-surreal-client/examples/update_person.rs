@@ -24,13 +24,12 @@ struct Person {
 impl From<Person> for Record<Person> {
     fn from(value: Person) -> Self {
         Record::new(
-            TEST_TABLE, 
+            TEST_TABLE,
             Some(Id::from(TEST_PERSON)),
             Some(Box::new(value.clone())),
             None,
         )
     }
-
 }
 
 // API Call or Factory

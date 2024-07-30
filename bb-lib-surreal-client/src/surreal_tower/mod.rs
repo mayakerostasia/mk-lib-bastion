@@ -5,8 +5,8 @@
 
 mod error;
 mod future;
-mod service;
 mod layer;
+mod service;
 
 pub use service::DbService;
 // pub use layer::DbServiceLayer;
@@ -21,11 +21,11 @@ pub use service::DbService;
 
 #[cfg(test)]
 mod tests {
+    use bb_lib_nats_streams::Frame;
     use std::task::Context;
     use std::task::Poll;
     use std::{future::Future, pin::Pin};
-    use tower::{BoxError, Service };
-    use bb_lib_nats_streams::Frame;
+    use tower::{BoxError, Service};
 
     #[derive(Clone)]
     struct MockService;

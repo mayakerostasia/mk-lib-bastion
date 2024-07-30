@@ -3,16 +3,15 @@
 use opentelemetry::logs::{LogError, LoggerProvider as _};
 use opentelemetry::trace::TracerProvider;
 #[allow(unused_imports)]
-use opentelemetry::trace::{Tracer, TraceError, TracerProvider as _};
+use opentelemetry::trace::{TraceError, Tracer, TracerProvider as _};
 // use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
 // use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 // use tracing_opentelemetry::OpenTelemetryLayer;
-use tracing_subscriber::fmt::time::ChronoLocal;
-use tracing::debug;
 use crate::{init_tracer, /* init_logger,*/ loki_logger};
-
+use tracing::debug;
+use tracing_subscriber::fmt::time::ChronoLocal;
 
 // Initialize tracing-subscriber and return OtelGuard for opentelemetry-related termination processing
 fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
@@ -23,9 +22,8 @@ fn mk_registry(endpoints: Endpoints) -> anyhow::Result<OtelGuard> {
     // let log_layer_provider = init_logger(dbg!(endpoints.logger))?
     // let log_layer = OpenTelemetryTracingBridge::new(&log_layer_provider);
     // let otel_trace_layer = OpenTelemetryLayer::new(tracer);
-    let otel_trace_layer = tracing_opentelemetry::layer()
-        .with_tracer(tracer);
-    
+    let otel_trace_layer = tracing_opentelemetry::layer().with_tracer(tracer);
+
     // // TODO: Logs directory should be configurable
     // let debug_file = rolling::daily("./logs", "log.log");
     // let all_files = debug_file;

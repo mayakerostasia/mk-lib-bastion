@@ -73,8 +73,14 @@ async fn main() -> Result<(), Error> {
     //  Get Configureation
     let conf = CONF.get().await;
 
-    let mut kkong = KingKong::new(&conf.king_kong_subject, &conf.nats_addr, &conf.kong_bind_addr);
-    let _listener = kkong.new_future_kong(&conf.kong_subject, frame_handler).await;
+    let mut kkong = KingKong::new(
+        &conf.king_kong_subject,
+        &conf.nats_addr,
+        &conf.kong_bind_addr,
+    );
+    let _listener = kkong
+        .new_future_kong(&conf.kong_subject, frame_handler)
+        .await;
     kkong.wait().await?;
 
     Ok(())

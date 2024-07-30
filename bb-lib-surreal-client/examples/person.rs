@@ -1,8 +1,7 @@
 // use nico_surreal_client::prelude::*;
-use bb_lib_surreal_client::{Record, Error, Storable };
+use bb_lib_surreal_client::{Error, Record, Storable};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Id;
-
 
 const TEST_TABLE: &str = "test_table";
 const TEST_PERSON: &str = "test_person";
@@ -15,12 +14,11 @@ struct Person {
     age: u8,
 }
 
-
 // API Call or Factory
-fn person_factory(table: &str, id: Id, name: &str, age: u8) -> Option<Record<Person>>{
+fn person_factory(table: &str, id: Id, name: &str, age: u8) -> Option<Record<Person>> {
     let person = Person {
         name: name.to_string(),
-        age
+        age,
     };
     Some(Record::new(table, Some(id), Some(Box::new(person)), None))
 }
