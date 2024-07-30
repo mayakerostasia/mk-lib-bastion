@@ -11,8 +11,7 @@ use tokio_util::sync::CancellationToken;
 use tower::BoxError;
 use tracing::{
     debug, error, info, info_span,
-    instrument::{self, Instrumented},
-    warn, Instrument,
+    warn, instrument,
 };
 
 type Error = NSLibError;
@@ -25,8 +24,9 @@ pub struct KingKong {
     subject: String,
     nats_addr: String,
     addr_table: HashMap<String, String>,
-    listeners: JoinSet<Result<InstrumentedJoinHandle, BoxError>>,
+    abort_handles: Vec<AbortHandle>,
     kongs: Vec<Kong>,
+    listeners: JoinSet<Result<InstrumentedJoinHandle, BoxError>>,
     cancel_token: CancellationToken,
     _http_listener: Option<Server>,
     _http_started: bool,
@@ -46,6 +46,7 @@ impl KingKong {
             nats_addr: nats_addr.to_string(),
             addr_table: HashMap::new(),
             listeners: JoinSet::new(),
+            abort_handles: Vec::new(),
             kongs: Vec::new(),
             cancel_token: CancellationToken::new(),
             _http_listener: Some(server),
@@ -54,10 +55,12 @@ impl KingKong {
     }
 
     async fn init_kong(&mut self, subject: &str) -> Result<(String, String, Kong), Error> {
+        debug!("Init Kong @ {subject}");
         let nats_subject = format!("{}.{}", self.subject.as_str(), subject);
         let kong = Kong::new(&nats_subject, self.nats_addr.as_str()).await?;
         let name = kong.name.clone();
         self.addr_table.insert(nats_subject.clone(), name.clone());
+        // self.kongs.insert(name.clone(), kong);
         Ok((nats_subject, name, kong))
     }
 
@@ -67,7 +70,8 @@ impl KingKong {
             + Send
             + 'static,
     ) -> Result<(), BoxError> {
-        self.listeners.spawn(async move {
+        debug!("Kong Starting");
+        let handle = self.listeners.spawn(async move {
             match fut.await {
                 Ok(handle) => {
                     debug!("Kong Started");
@@ -79,6 +83,8 @@ impl KingKong {
                 }
             }
         });
+        self.abort_handles.push(handle);
+        debug!("Exiting kong_start");
         Ok(())
     }
 
@@ -93,7 +99,6 @@ impl KingKong {
     {
         let (nats_subject, name, kong) = self.init_kong(subject).await?;
         self.start_kong(async move { 
-            let kong = kong;
             kong.service(func).await 
         })
             .await?;
@@ -101,6 +106,7 @@ impl KingKong {
         Ok::<_, BoxError>(())
     }
 
+    #[instrument]
     pub async fn new_future_kong<'a, O, T>(
         &'a mut self,
         subject: &'a str,

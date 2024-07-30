@@ -29,7 +29,7 @@ impl Drop for Kong {
     fn drop(&mut self) {
         debug!(kong_name = %self.name, kong_subject = %self.subject, "Kong Dropping");
         // self.token.cancel();
-        let _ = *self;
+        // let _ = *self;
     }
 }
 
