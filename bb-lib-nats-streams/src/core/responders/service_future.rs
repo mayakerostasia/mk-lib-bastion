@@ -88,7 +88,7 @@ mod tests {
         let monkey = Monkey::new("test-echo", NATS_ADDR).await;
         let pong = monkey.msg(Frame::ping()).await?;
         let pong_frame = Frame::decode(&pong.payload).unwrap();
-        assert_eq!(Frame::ping(), pong_frame);
+        assert_eq!(Frame::pong(), pong_frame);
         Ok(())
     }
 }
