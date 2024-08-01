@@ -63,7 +63,7 @@ impl Kong {
         &self,
         object: impl Into<Bytes>,
     ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError> {
-        new_object_responder(&self.client, &self.subject, object).await
+        new_object_responder(&self.client, &self.name, &self.subject, object).await
     }
 
     pub async fn service<T, U>(
