@@ -1,3 +1,4 @@
+// use super::super::replies::reply_with_object_headers;
 use super::super::replies::reply_with_object;
 use bytes::Bytes;
 use futures::StreamExt;
@@ -23,6 +24,7 @@ pub async fn new_object_responder(
             while let Some(request) = requests.next().await {
                 debug!("Request -> {:#?}", request);
                 reply_with_object(request, &client, object.clone()).await?;
+                // reply_with_object_headers(request, &client, object.clone()).await?;
             }
             Ok::<(), BoxError>(())
         }

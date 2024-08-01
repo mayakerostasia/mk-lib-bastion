@@ -1,5 +1,5 @@
 use super::super::replies::reply_with_object;
-use crate::{Decoder, Frame, NSLibError};
+use crate::{core::replies::reply_with_object_headers, Decoder, Frame, NSLibError};
 use anyhow::anyhow;
 use bytes::Bytes;
 use futures::StreamExt;
@@ -23,9 +23,13 @@ where
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
     let mut service = service.clone();
-    eprintln!("Starting responder @ {name}");
+    eprintln!("Starting responder name={name} subject={subject}");
+    let mut headers = async_nats::HeaderMap::new();
+    headers.insert("monkey_name", name);
+
     let handle = tokio::spawn({
         let client = client.clone();
+        let headers = headers.clone();
         let cancel_token = cancel_token.clone();
         let _cancel_token = cancel_token.clone();
         async move {
@@ -37,6 +41,7 @@ where
                 result = async move {
                         let cancel = _cancel_token.clone();
                         let mutsrv = _srv.clone();
+                        let headers = headers.clone();
                         while let Some(request) = requests.next().await {
                             let mut srv = mutsrv.clone();
                             let frame: Frame = match Frame::decode(&request.payload) {
@@ -72,7 +77,7 @@ where
 
                             eprintln!("Service call completed - Composing Reply");
 
-                            match reply_with_object(request, &client, new_frame).await {
+                            match reply_with_object_headers(request, &client, headers.clone(), new_frame).await {
                                 Ok(reply) => { eprintln!("Reply : {:#?}", reply) },
                                 Err(e) => {
                                     eprintln!("Error is : {e:#?}");
@@ -148,7 +153,7 @@ mod tests {
             CancellationToken::new(),
         )
         .await?;
-        let monkey = Monkey::new("test-echo.hi", NATS_ADDR).await;
+        let monkey = Monkey::new("test-echo", NATS_ADDR).await;
         let pong = monkey.msg(Frame::ping()).await?;
         let pong_frame = Frame::decode(&pong.payload).unwrap();
         assert_eq!(Frame::ping(), pong_frame);
