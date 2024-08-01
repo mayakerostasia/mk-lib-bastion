@@ -1,10 +1,9 @@
-use super::super::replies::reply_with_object;
-use crate::{core::replies::reply_with_object_headers, util::{boxed_future_generator, BoxedFutureFn}};
+use crate::{core::replies::reply_with_object_headers, util::BoxedFutureFn};
 use bytes::Bytes;
 use futures::StreamExt;
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
-use tracing::{error, info, instrument, trace, debug};
+use tracing::{error, info, trace, debug};
 
 // pub type Error = crate::NSLibError;
 
@@ -67,6 +66,7 @@ where
 mod tests {
     use crate::Decoder;
     use crate::Frame;
+    use crate::util::boxed_future_generator;
     use crate::{core::new_client, Monkey};
 
     use super::*;

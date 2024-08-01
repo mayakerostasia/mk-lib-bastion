@@ -5,7 +5,7 @@ use anyhow::anyhow;
 use bytes::Bytes;
 use std::future::Future;
 use tower::BoxError;
-use tracing::{error, info, instrument, trace};
+use tracing::{error, info, trace};
 
 type Error = crate::NSLibError;
 
@@ -33,22 +33,22 @@ pub async fn echo_request(
 }
 
 // #[instrument(skip(request, client, object))]
-pub async fn reply_with_object(
-    request: async_nats::Message,
-    client: &async_nats::Client,
-    object: impl Into<Bytes>,
-) -> Result<(), Error> {
-    trace!("reply_with_object() ->{request:#?}");
-    if let Some(reply) = request.reply {
-        trace!("Trying publish");
-        client.publish(reply, object.into()).await?;
-    } else {
-        error!("There's no Reply here");
-        return Err(crate::NSLibError::Anyhow(anyhow!("No reply in request")));
-    }
-    trace!("Reply Finished");
-    Ok(())
-}
+// pub async fn reply_with_object(
+//     request: async_nats::Message,
+//     client: &async_nats::Client,
+//     object: impl Into<Bytes>,
+// ) -> Result<(), Error> {
+//     trace!("reply_with_object() ->{request:#?}");
+//     if let Some(reply) = request.reply {
+//         trace!("Trying publish");
+//         client.publish(reply, object.into()).await?;
+//     } else {
+//         error!("There's no Reply here");
+//         return Err(crate::NSLibError::Anyhow(anyhow!("No reply in request")));
+//     }
+//     trace!("Reply Finished");
+//     Ok(())
+// }
 
 pub async fn reply_with_object_headers(
     request: async_nats::Message,

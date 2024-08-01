@@ -1,5 +1,5 @@
-// use super::super::replies::reply_with_object_headers;
-use super::super::replies::reply_with_object;
+use super::super::replies::reply_with_object_headers;
+// use super::super::replies::reply_with_object;
 use bytes::Bytes;
 use futures::StreamExt;
 use tower::BoxError;
@@ -15,16 +15,17 @@ pub async fn new_object_responder(
 ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError> {
     let mut requests = client.subscribe(format!("{}.*", name)).await.unwrap();
     let object: Bytes = object.into();
-    // let identity = annotate(|_req: &Bytes | { Box::new(object) });
+    let mut headers = async_nats::HeaderMap::new();
+    headers.insert("monkey_name", name);
 
     info!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
+        let headers = headers.clone();
         async move {
             while let Some(request) = requests.next().await {
                 debug!("Request -> {:#?}", request);
-                reply_with_object(request, &client, object.clone()).await?;
-                // reply_with_object_headers(request, &client, object.clone()).await?;
+                reply_with_object_headers(request, &client, headers.clone(), object.clone()).await?;
             }
             Ok::<(), BoxError>(())
         }
