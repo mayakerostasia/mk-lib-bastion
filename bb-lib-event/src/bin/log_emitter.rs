@@ -77,7 +77,7 @@ async fn main() -> Result<(), Error> {
         &conf.king_kong_subject,
         &conf.nats_addr,
         &conf.kong_bind_addr,
-    );
+    ).await;
     let _listener = kkong
         .new_future_kong(&conf.kong_subject, frame_handler)
         .await;
