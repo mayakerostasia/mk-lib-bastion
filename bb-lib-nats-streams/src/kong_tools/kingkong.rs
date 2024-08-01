@@ -36,7 +36,7 @@ impl KingKong {
             .expect("Petname Failed");
 
         let mut kk = KingKong {
-            name,
+            name: name.clone(),
             subject: subject.to_string(),
             nats_addr: nats_addr.to_string(),
             addr_table: HashMap::new(),
@@ -47,7 +47,7 @@ impl KingKong {
             _http_started: false,
             monkey: Monkey::new(subject,nats_addr).await,
         };
-        kk.new_kong("health", || async { Frame::pong() }).await.expect("Failed to start Kong");
+        kk.new_kong(format!("{}-health", name.clone()).as_str(), || async { Frame::pong() }).await.expect("Failed to start Kong");
         kk
     }
 

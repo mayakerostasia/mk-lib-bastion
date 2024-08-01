@@ -147,13 +147,13 @@ mod tests {
         let client = new_client(NATS_ADDR).await.unwrap();
         let _echo_responder = new_tower_service_responder(
             &client,
-            "test-name",
-            "test-echo",
+            "test-tower-service",
+            "test-tower-service",
             MockService {},
             CancellationToken::new(),
         )
         .await?;
-        let monkey = Monkey::new("test-echo", NATS_ADDR).await;
+        let monkey = Monkey::new("test-tower-service", NATS_ADDR).await;
         let pong = monkey.msg(Frame::ping()).await?;
         let pong_frame = Frame::decode(&pong.payload).unwrap();
         assert_eq!(Frame::ping(), pong_frame);

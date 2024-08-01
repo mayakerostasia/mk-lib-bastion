@@ -14,7 +14,7 @@ pub async fn new_object_responder(
     subject: &str,
     object: impl Into<Bytes>,
 ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError> {
-    let mut requests = client.subscribe(format!("{}", subject)).await.unwrap();
+    let mut requests = client.subscribe(subject.to_string()).await.unwrap();
     let object: Bytes = object.into();
     let mut headers = async_nats::HeaderMap::new();
     headers.insert("monkey_name", name);
