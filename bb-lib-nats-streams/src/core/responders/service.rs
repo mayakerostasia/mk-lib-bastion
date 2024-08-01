@@ -1,5 +1,5 @@
 use super::super::replies::reply_with_object;
-use crate::util::{BoxedFutureFn, boxed_future_generator};
+use crate::{core::replies::reply_with_object_headers, util::{boxed_future_generator, BoxedFutureFn}};
 use bytes::Bytes;
 use futures::StreamExt;
 use tokio_util::sync::CancellationToken;
@@ -20,9 +20,13 @@ where
     T: Send + std::fmt::Debug + Into<Bytes> + 'static,
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
+    let mut headers = async_nats::HeaderMap::new();
+    headers.insert("monkey_name", name);
     info!("Starting service responder @ {name}");
+
     let handle = tokio::spawn({
         let client = client.clone();
+        let headers = headers.clone();
         async move {
             let cancel_token = cancel_token.clone();
             let _cancel_token = cancel_token.clone();
@@ -37,7 +41,7 @@ where
                             debug!(%request.subject, ?request.payload);
                             let result: T = func().await;
                             debug!("Result is {:#?}", &result);
-                            match reply_with_object(request, &client, result).await {
+                            match reply_with_object_headers(request, &client, headers.clone(), result).await {
                                 Ok(resp) => {
                                     trace!("Response is {:#?}", resp);
                                 },
