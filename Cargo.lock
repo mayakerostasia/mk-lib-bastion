@@ -474,7 +474,7 @@ checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
 name = "bb-bin-monkey"
-version = "1.2.4"
+version = "1.2.8"
 dependencies = [
  "anyhow",
  "bb-lib-nats-streams",
@@ -489,7 +489,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-base-api"
-version = "1.2.4"
+version = "1.2.8"
 dependencies = [
  "clap",
  "futures",
@@ -507,7 +507,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-config"
-version = "1.2.4"
+version = "1.2.8"
 dependencies = [
  "anyhow",
  "cargo-make",
@@ -519,7 +519,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-event"
-version = "1.2.4"
+version = "1.2.8"
 dependencies = [
  "anyhow",
  "async_once",
@@ -540,7 +540,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-http-listener"
-version = "1.2.4"
+version = "1.2.8"
 dependencies = [
  "anyhow",
  "axum",
@@ -555,7 +555,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-metrics"
-version = "1.2.4"
+version = "1.2.8"
 dependencies = [
  "anyhow",
  "aws-lc-sys 0.19.0",
@@ -568,7 +568,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-nats-streams"
-version = "1.2.4"
+version = "1.2.8"
 dependencies = [
  "anyhow",
  "async-nats",
@@ -593,7 +593,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-surreal-client"
-version = "1.2.4"
+version = "1.2.8"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -619,7 +619,7 @@ dependencies = [
 
 [[package]]
 name = "bb-lib-tracing"
-version = "1.2.4"
+version = "1.2.8"
 dependencies = [
  "anyhow",
  "lazy_static",
@@ -1030,7 +1030,7 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 
 [[package]]
 name = "cfg_creator"
-version = "1.2.4"
+version = "1.2.8"
 dependencies = [
  "bb-lib-config",
  "clap",

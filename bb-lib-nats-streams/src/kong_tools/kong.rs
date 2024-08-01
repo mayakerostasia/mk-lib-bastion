@@ -22,7 +22,6 @@ pub struct Kong {
     subject: String,
     client: async_nats::Client,
     token: CancellationToken,
-    // bastion: Option<Bastion>,
 }
 
 impl Drop for Kong {

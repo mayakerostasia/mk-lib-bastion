@@ -60,7 +60,7 @@ async fn main() -> Result<(), BoxError> {
         // .layer(MakoLayer::new(1, 1))
         .service(FrameHandler);
 
-    let mut kkong = KingKong::new("time", NATS_ADDR, "0.0.0.0:6661");
+    let mut kkong = KingKong::new("time", NATS_ADDR, "0.0.0.0:6661").await;
     kkong.new_tower_kong("time", srv).await?;
 
     // Monkey Call

@@ -1,11 +1,11 @@
-use crate::{Frame, Kong, NSLibError};
+use crate::{Frame, Kong, NSLibError, Monkey, Decoder};
 use anyhow::anyhow;
 use bb_lib_http_listener::Server;
 use bytes::Bytes;
 use core::future::Future;
 use petname::Generator;
 use rand::thread_rng;
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 use tokio::task::{AbortHandle, JoinHandle, JoinSet};
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
@@ -13,42 +13,76 @@ use tracing::{debug, error, info, instrument};
 
 type Error = NSLibError;
 type JoinHandleResult = JoinHandle<Result<(), BoxError>>;
-// type InstrumentedAbortHandle = AbortHandle;
 
 #[derive(Debug)]
 pub struct KingKong {
     pub name: String,
-    subject: String,
+    pub subject: String,
     nats_addr: String,
     addr_table: HashMap<String, String>,
     abort_handles: Vec<AbortHandle>,
-    kongs: Vec<Kong>,
     listeners: JoinSet<Result<JoinHandleResult, BoxError>>,
     cancel_token: CancellationToken,
-    _http_listener: Option<Server>,
+    http_listener: Server,
     _http_started: bool,
+    monkey: Monkey,
 }
 
 impl KingKong {
-    pub fn new(subject: &str, nats_addr: &str, health_bind: &str) -> Self {
+    pub async fn new(subject: &str, nats_addr: &str, health_bind: &str) -> Self {
         let mut rng = thread_rng();
         let name = petname::Petnames::default()
             .generate(&mut rng, 2, "-")
             .expect("Petname Failed");
 
-        let server = Server::new(health_bind);
-        KingKong {
+        let mut kk = KingKong {
             name,
             subject: subject.to_string(),
             nats_addr: nats_addr.to_string(),
             addr_table: HashMap::new(),
             listeners: JoinSet::new(),
             abort_handles: Vec::new(),
-            kongs: Vec::new(),
             cancel_token: CancellationToken::new(),
-            _http_listener: Some(server),
+            http_listener: Server::new(health_bind),
             _http_started: false,
+            monkey: Monkey::new(subject,nats_addr).await,
+        };
+        kk.new_kong("health", || async { Frame::pong() }).await.expect("Failed to start Kong");
+        kk
+    }
+
+    pub fn get_subjects(&self) ->HashMap<String, String> {
+        self.addr_table.clone()
+    }
+
+    async fn check_subject(&self, subject: &str) -> bool {
+        eprintln!("Checking Subject");
+        let mut monk = self.monkey.clone();
+        monk.set_subject(subject).expect("Failed to set monkey subject");
+        let resp = monk.msg_timeout(Frame::ping(), Some(Duration::from_millis(500))).await;
+        match resp {
+            Ok(resp_msg) => {
+                let resp_frame = Frame::decode(&resp_msg.payload).expect("Failed to decode Frame");
+                Frame::pong() == resp_frame
+            },
+            Err(e) => {
+                eprintln!("Error! -> {e:#?}");
+                false
+            }
         }
+    }
+
+    pub async fn health(&self) -> bool {
+        eprintln!("Checking Health");
+        for (subject, name) in self.get_subjects().iter() {
+            if self.check_subject(subject).await {
+                eprintln!("subject={} name={} OK!", subject, name);
+                continue;
+            } else {
+                return false;
+            }
+        }
+        true
     }
 
     async fn init_kong(&mut self, subject: &str) -> Result<(String, String, Kong), Error> {
@@ -57,7 +91,6 @@ impl KingKong {
         let kong = Kong::new(&nats_subject, self.nats_addr.as_str()).await?;
         let name = kong.name.clone();
         self.addr_table.insert(nats_subject.clone(), name.clone());
-        // self.kongs.insert(name.clone(), kong);
         Ok((nats_subject, name, kong))
     }
 
@@ -142,15 +175,30 @@ impl KingKong {
                 Err(err) => Err(anyhow!("Unable to listen for shutdown signal: {}", err)),
             }
         };
-        let fut2 = async { self._http_listener.clone().unwrap().listen().await };
-        // let cancel_token = self.cancel_token.cancelled();
+        let fut2 = async { self.http_listener.clone().listen().await };
+        let cancel_token = self.cancel_token.cancelled();
+
+        let health_failure = async {
+            loop {
+                tokio::time::sleep(Duration::from_secs(10)).await;
+                if self.health().await {
+                    eprintln!("Health OK!");
+                } else {
+                    return Err::<(), _>(NSLibError::Anyhow(anyhow!("Health Failure!")));
+                };
+            };
+        };
+
         tokio::select! {
             _ = fut1 => {}
             _ = fut2 => {}
-            // _ = cancel_token => {
-            //     warn!("Kancelled! Exiting!");
-            //     return Ok(())
-            // }
+            _ = cancel_token => {
+                eprintln!("Kancelled! Exiting!");
+                return Ok(())
+            }
+            _ = health_failure => {
+                eprintln!("King Kong Unhealthy Going down!");
+            }
         };
         Ok(())
     }
