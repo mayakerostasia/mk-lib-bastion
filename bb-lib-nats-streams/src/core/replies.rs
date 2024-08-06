@@ -59,7 +59,9 @@ pub async fn reply_with_object_headers(
     trace!("reply_with_object_headers() ->{request:#?}");
     if let Some(reply) = request.reply {
         trace!("Trying publish");
-        client.publish_with_headers(reply, headers, object.into()).await?;
+        client
+            .publish_with_headers(reply, headers, object.into())
+            .await?;
     } else {
         error!("There's no Reply here");
         return Err(crate::NSLibError::Anyhow(anyhow!("No reply in request")));
@@ -67,7 +69,6 @@ pub async fn reply_with_object_headers(
     trace!("Reply Finished");
     Ok(())
 }
-
 
 // #[instrument(skip(request, client, fut))]
 pub async fn reply_with_future<O, T>(

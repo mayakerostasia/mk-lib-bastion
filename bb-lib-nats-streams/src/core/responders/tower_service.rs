@@ -5,7 +5,7 @@ use bytes::Bytes;
 use futures::StreamExt;
 use tokio_util::sync::CancellationToken;
 use tower::{BoxError, Service, ServiceExt};
-// use tracing::{debug, error, info, info_span, instrument, trace, Instrument};
+use tracing::{error, trace};
 
 // #[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
 pub async fn new_tower_service_responder<'a, S>(
@@ -23,7 +23,7 @@ where
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
     let mut service = service.clone();
-    eprintln!("Starting responder name={name} subject={subject}");
+    trace!("Starting responder name={name} subject={subject}");
     let mut headers = async_nats::HeaderMap::new();
     headers.insert("monkey_name", name);
 
@@ -43,6 +43,8 @@ where
                         let mutsrv = _srv.clone();
                         let headers = headers.clone();
                         while let Some(request) = requests.next().await {
+                            eprintln!("tower_service_responder:Request -> {:#?}", request);
+
                             let mut srv = mutsrv.clone();
                             let frame: Frame = match Frame::decode(&request.payload) {
                                 Ok(fr) => fr,
@@ -52,10 +54,10 @@ where
                                     return Err::<_, BoxError>(NSLibError::FrameDecodeError(format!("Whoops! Bad Frame! {:#?}", e).to_string()).into());
                                 },
                             };
-                            eprintln!("Msg Received -> {frame:#?}");
-                            eprintln!("Frame Decoded - Calling Service");
+                            trace!("Msg Received -> {frame:#?}");
+                            trace!("Frame Decoded - Calling Service");
 
-                            eprintln!("Readying Service");
+                            trace!("Readying Service");
                             let mut _srv = match srv.ready().await.map_err(Into::into) {
                                 Ok(serv) => serv,
                                 Err(e) => {
@@ -64,33 +66,34 @@ where
                                     return Err::<_, BoxError>(NSLibError::ServiceReadyError(format!("Whoops! Service couldn't ready up {:#?}", e).to_string()).into())
                                 },
                             };
-                            eprintln!("Service Ready");
+                            trace!("Service Ready");
 
                             let new_frame: <S as Service<Frame>>::Response = match _srv.call(frame).await.map_err(Into::into) {
                                 Ok(fr) => fr,
                                 Err(e) => {
-                                    eprintln!("Service Failed to call {:#?}", e);
+                                    error!("Service Failed to call {:#?}", e);
                                     cancel.cancel();
                                     return Err::<_, BoxError>(NSLibError::NatsError(e).into())
                                 },
                             };
 
-                            eprintln!("Service call completed - Composing Reply");
+                            trace!("Service call completed - Composing Reply");
 
                             match reply_with_object_headers(request, &client, headers.clone(), new_frame).await {
                                 Ok(reply) => { eprintln!("Reply : {:#?}", reply) },
                                 Err(e) => {
-                                    eprintln!("Error is : {e:#?}");
+                                    error!("ERROR: tower_service_responder -> {e:#?}");
                                     cancel.cancel();
                                     return Err::<_, BoxError>(NSLibError::NatsError(Box::new(e)).into())
                                 }
                             };
 
-                            eprintln!("Replied with object");
+                            eprintln!("tower_service_responder:OK");
+                            trace!("Replied with object");
                         };
                         Ok::<(), BoxError>(())
                 } => {
-                    eprintln!("EXITING : Result is {:#?}", result);
+                    error!("EXITING : Result is {:#?}", result);
                     Ok::<(), BoxError>(())
                 }
             }

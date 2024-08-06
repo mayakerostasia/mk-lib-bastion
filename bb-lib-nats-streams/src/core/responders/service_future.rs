@@ -6,6 +6,7 @@ use futures::StreamExt;
 use std::future::Future;
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
+use tracing::{error, trace, warn};
 
 // type Error = crate::NSLibError;
 
@@ -22,7 +23,7 @@ where
     O: Future<Output = Result<T, BoxError>> + Send + 'static,
 {
     let mut requests = client.clone().subscribe(subject.to_string()).await.unwrap();
-    eprintln!("Starting service_future responder @ {name}");
+    trace!("Starting service_future responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
         let cancel_token = cancel_token.clone();
@@ -30,33 +31,34 @@ where
         async move {
             tokio::select! {
                 _ = cancel_token.cancelled() => {
-                    eprintln!("Cancel Token Popped");
+                    warn!("Cancel Token Popped");
                     Err::<(), BoxError>(anyhow!("Cancelled").into())
                 }
                 result = async move {
                         // let cancel = _cancel_token.clone();
                         while let Some(request) = requests.next().await {
-                            eprintln!("subject={} payload={:#?}", request.subject, request.payload);
+                            eprintln!("service_future_responder:Request -> {:#?}", request);
+                            trace!("subject={} payload={:#?}", request.subject, request.payload);
                             match reply_with_future(request, &client, func).await {
                                 Ok(resp) => {
-                                    eprintln!("Response is {:#?}", resp);
+                                    trace!("Response is {:#?}", resp);
                                 },
                                 Err(e) => {
-                                    eprintln!("Whoops! Error in Service -> {e:#?}");
+                                    error!("Whoops! Error in Service -> {e:#?}");
                                     // cancel.cancel();
                                 }
                             };
+                            eprintln!("service_future_responder:OK")
                         };
                         Ok::<(), BoxError>(())
                     } => {
-                        eprintln!("Nico : Result is {:#?}", result);
-                        eprintln!("Nico : Result is {:#?}", result);
+                        error!("ERROR: service_future -> {:#?}", result);
                         Err::<(), BoxError>(anyhow!("Fuck!").into())
                     }
             }
         }
     });
-    eprintln!("Returning handle");
+    trace!("Returning handle");
     Ok(handle)
 }
 

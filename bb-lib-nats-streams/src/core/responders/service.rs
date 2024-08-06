@@ -3,7 +3,7 @@ use bytes::Bytes;
 use futures::StreamExt;
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
-use tracing::{error, info, trace, debug};
+use tracing::{error, info, trace};
 
 // pub type Error = crate::NSLibError;
 
@@ -37,9 +37,10 @@ where
                 _ = async move {
                         let cancel = _cancel_token.clone();
                         while let Some(request) = requests.next().await {
-                            debug!(%request.subject, ?request.payload);
+                            eprintln!("service_responder:Request -> {:#?}", request);
+                            trace!(%request.subject, ?request.payload);
                             let result: T = func().await;
-                            debug!("Result is {:#?}", &result);
+                            trace!("Result is {:#?}", &result);
                             match reply_with_object_headers(request, &client, headers.clone(), result).await {
                                 Ok(resp) => {
                                     trace!("Response is {:#?}", resp);
@@ -49,6 +50,7 @@ where
                                     cancel.cancel();
                                 }
                             };
+                            eprintln!("service_responder:OK")
                         };
                         Ok::<(), BoxError>(())
                     } => {
@@ -64,9 +66,9 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::util::boxed_future_generator;
     use crate::Decoder;
     use crate::Frame;
-    use crate::util::boxed_future_generator;
     use crate::{core::new_client, Monkey};
 
     use super::*;

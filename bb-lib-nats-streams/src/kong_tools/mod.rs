@@ -8,9 +8,9 @@ pub use monkey::Monkey;
 
 #[cfg(test)]
 mod tests {
-    use tokio::time::Duration;
-    use anyhow::Error;
     use super::*;
+    use anyhow::Error;
+    use tokio::time::Duration;
 
     const NATS_ADDR: &str = "nats://10.2.4.106:4222";
     const HEALTH_BIND: &str = "127.0.0.1:4202";
@@ -32,6 +32,4 @@ mod tests {
         wait_handle.abort();
         Ok(())
     }
-
-
 }

@@ -1,4 +1,4 @@
-use crate::{Frame, Kong, NSLibError, Monkey, Decoder};
+use crate::{Decoder, Frame, Kong, Monkey, NSLibError};
 use anyhow::anyhow;
 use bb_lib_http_listener::Server;
 use bytes::Bytes;
@@ -45,26 +45,33 @@ impl KingKong {
             cancel_token: CancellationToken::new(),
             http_listener: Server::new(health_bind),
             _http_started: false,
-            monkey: Monkey::new(subject,nats_addr).await,
+            monkey: Monkey::new(subject, nats_addr).await,
         };
-        kk.new_kong(format!("{}-health", name.clone()).as_str(), || async { Frame::pong() }).await.expect("Failed to start Kong");
+        kk.new_kong(format!("{}-health", name.clone()).as_str(), || async {
+            Frame::pong()
+        })
+        .await
+        .expect("Failed to start Kong");
         kk
     }
 
-    pub fn get_subjects(&self) ->HashMap<String, String> {
+    pub fn get_subjects(&self) -> HashMap<String, String> {
         self.addr_table.clone()
     }
 
     async fn check_subject(&self, subject: &str) -> bool {
         eprintln!("Checking Subject");
         let mut monk = self.monkey.clone();
-        monk.set_subject(subject).expect("Failed to set monkey subject");
-        let resp = monk.msg_timeout(Frame::ping(), Some(Duration::from_millis(500))).await;
+        monk.set_subject(subject)
+            .expect("Failed to set monkey subject");
+        let resp = monk
+            .msg_timeout(Frame::ping(), Some(Duration::from_millis(500)))
+            .await;
         match resp {
             Ok(resp_msg) => {
                 let resp_frame = Frame::decode(&resp_msg.payload).expect("Failed to decode Frame");
                 Frame::pong() == resp_frame
-            },
+            }
             Err(e) => {
                 eprintln!("Error! -> {e:#?}");
                 false
@@ -186,7 +193,7 @@ impl KingKong {
                 } else {
                     return Err::<(), _>(NSLibError::Anyhow(anyhow!("Health Failure!")));
                 };
-            };
+            }
         };
 
         tokio::select! {

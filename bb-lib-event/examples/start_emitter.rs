@@ -18,7 +18,7 @@ async fn main() -> Result<(), Error> {
 
     let _span = info_span!("{}/{}", endpoint, path).entered();
 
-    let mut kkong = KingKong::new(&endpoint, &nats_addr, &healthz_bind);
+    let mut kkong = KingKong::new(&endpoint, &nats_addr, &healthz_bind).await;
 
     let _listener = kkong
         .new_future_kong(BB_PATH, |frame| async {

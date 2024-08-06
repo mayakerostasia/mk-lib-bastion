@@ -3,11 +3,11 @@ use super::super::replies::reply_with_object_headers;
 use bytes::Bytes;
 use futures::StreamExt;
 use tower::BoxError;
-use tracing::{debug, info, instrument};
+use tracing::trace;
 
 // pub type Error = crate::NSLibError;
 
-#[instrument(skip_all, fields(health = "unset", kong_name = %name))]
+// #[instrument(skip_all, fields(health = "unset", kong_name = %name))]
 pub async fn new_object_responder(
     client: &async_nats::Client,
     name: &str,
@@ -19,19 +19,22 @@ pub async fn new_object_responder(
     let mut headers = async_nats::HeaderMap::new();
     headers.insert("monkey_name", name);
 
-    info!("Starting responder @ {name}");
+    trace!("Starting responder @ {name}");
     let handle = tokio::spawn({
         let client = client.clone();
         let headers = headers.clone();
         async move {
             while let Some(request) = requests.next().await {
-                debug!("Request -> {:#?}", request);
-                reply_with_object_headers(request, &client, headers.clone(), object.clone()).await?;
+                eprintln!("object_responder:Request -> {:#?}", request);
+                trace!("Request -> {:#?}", request);
+                reply_with_object_headers(request, &client, headers.clone(), object.clone())
+                    .await?;
+                eprintln!("object_responder:OK");
             }
             Ok::<(), BoxError>(())
         }
     });
-    info!("responder listening to {name}.*");
+    trace!("responder listening to {name}.*");
 
     Ok(handle)
 }

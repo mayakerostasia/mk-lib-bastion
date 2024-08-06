@@ -139,7 +139,7 @@ mod tests {
     async fn test_nats_send() -> Result<(), BoxError> {
         // let subject = "test_subject";
         // let nats_url = "nats://10.2.4.106:4222";
-        // let inner_service = MockService;
+        let inner_service = MockService;
         // let mut nats_send = NatsSend::new(subject, nats_url, inner_service.clone());
         // let sender = nats_send.ready().await;
         // assert!(sender.is_ok());
