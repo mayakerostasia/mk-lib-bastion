@@ -23,6 +23,8 @@ jobs:
       - name: Build Rust Artifacts
         uses: bluebastion/dev-bb-rust-action@master
         with:
+          fmt: true
+          check: true
           read_artifacts_pat: ${{ secrets.READ_ARTIFACTS_PAT }}
           ssh_key: ${{ secrets.RUNNER_10_2_4_50_SSH }}
 
