@@ -1,4 +1,6 @@
-# bb-lib-bastion
+# bb-lib-bastion  
+[![Docker](https://github.com/BlueBastion/DEV-bb-lib-bastion/actions/workflows/docker_build.yaml/badge.svg)](https://github.com/BlueBastion/DEV-bb-lib-bastion/actions/workflows/docker_build.yaml)
+[![Rust Build](https://github.com/BlueBastion/DEV-bb-lib-bastion/actions/workflows/rust_build.yaml/badge.svg)](https://github.com/BlueBastion/DEV-bb-lib-bastion/actions/workflows/rust_build.yaml)  
 
 This project is a collection of Rust libraries and binaries. The main components of the project are:
 
