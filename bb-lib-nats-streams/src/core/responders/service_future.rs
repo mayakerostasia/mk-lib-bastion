@@ -37,7 +37,13 @@ where
                 result = async move {
                         // let cancel = _cancel_token.clone();
                         while let Some(request) = requests.next().await {
-                            eprintln!("service_future_responder:Request -> {:#?}", request);
+                            eprintln!("service_future_responder:Request -> {}", request.subject);
+                            if request.headers.is_some() {
+                                let headers = request.headers.clone().unwrap();
+                                let monkey_name = headers.get("monkey_name").expect("Header Name isn't 'monkey_name'");
+                                eprintln!("from: {}", monkey_name);
+                                trace!("from={}", monkey_name);
+                            };
                             trace!("subject={} payload={:#?}", request.subject, request.payload);
                             match reply_with_future(request, &client, func).await {
                                 Ok(resp) => {
@@ -48,7 +54,8 @@ where
                                     // cancel.cancel();
                                 }
                             };
-                            eprintln!("service_future_responder:OK")
+                            eprintln!("service_future_responder:OK");
+                            trace!("service_future_responder:OK");
                         };
                         Ok::<(), BoxError>(())
                     } => {

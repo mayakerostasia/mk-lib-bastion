@@ -43,20 +43,28 @@ where
                         let mutsrv = _srv.clone();
                         let headers = headers.clone();
                         while let Some(request) = requests.next().await {
-                            eprintln!("tower_service_responder:Request -> {:#?}", request);
+                            eprintln!("tower_service_responder:Request -> {}", request.subject);
+                            if request.headers.is_some() {
+                                let headers = request.headers.clone().unwrap();
+                                let monkey_name = headers.get("monkey_name").expect("Header Name isn't 'monkey_name'");
+                                eprintln!("from: {}", monkey_name);
+                                trace!("from={}", monkey_name);
+                            };
 
                             let mut srv = mutsrv.clone();
                             let frame: Frame = match Frame::decode(&request.payload) {
-                                Ok(fr) => fr,
+                                Ok(fr) => {
+                                    trace!("Frame Decoded");
+                                    fr
+                                },
                                 Err(e) => {
                                     eprintln!("Unable to decode frame with error -> {e:#?}");
                                     cancel.cancel();
                                     return Err::<_, BoxError>(NSLibError::FrameDecodeError(format!("Whoops! Bad Frame! {:#?}", e).to_string()).into());
                                 },
                             };
-                            trace!("Msg Received -> {frame:#?}");
-                            trace!("Frame Decoded - Calling Service");
 
+                            trace!("Msg Received -> {frame:#?}");
                             trace!("Readying Service");
                             let mut _srv = match srv.ready().await.map_err(Into::into) {
                                 Ok(serv) => serv,
@@ -89,7 +97,7 @@ where
                             };
 
                             eprintln!("tower_service_responder:OK");
-                            trace!("Replied with object");
+                            trace!("tower_service_responder:OK");
                         };
                         Ok::<(), BoxError>(())
                 } => {

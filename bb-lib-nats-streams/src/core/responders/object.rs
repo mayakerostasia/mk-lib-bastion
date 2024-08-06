@@ -25,7 +25,13 @@ pub async fn new_object_responder(
         let headers = headers.clone();
         async move {
             while let Some(request) = requests.next().await {
-                eprintln!("object_responder:Request -> {:#?}", request);
+                eprintln!("object_responder:Request -> {}", request.subject);
+                if request.headers.is_some() {
+                    let headers = request.headers.clone().unwrap();
+                    let monkey_name = headers.get("monkey_name").expect("Header Name isn't 'monkey_name'");
+                    eprintln!("from: {}", monkey_name);
+                    trace!("from={}", monkey_name);
+                };
                 trace!("Request -> {:#?}", request);
                 reply_with_object_headers(request, &client, headers.clone(), object.clone())
                     .await?;

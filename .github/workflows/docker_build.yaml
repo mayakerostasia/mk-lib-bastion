@@ -31,8 +31,10 @@ jobs:
         containers: 
           - dockerfile: "docker/Dockerfile"
             name: "bluebastion/bb-monkey"
+            rust_bin: bb-bin-monkey
           - dockerfile: "docker/Dockerfile.log_emitter"
             name: "bluebastion/bb-log-emitter"
+            rust_bin: log_emitter
           # - third: "Dockerfile"
         
     steps:

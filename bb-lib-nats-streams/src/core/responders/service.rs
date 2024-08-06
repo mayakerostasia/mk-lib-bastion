@@ -37,7 +37,13 @@ where
                 _ = async move {
                         let cancel = _cancel_token.clone();
                         while let Some(request) = requests.next().await {
-                            eprintln!("service_responder:Request -> {:#?}", request);
+                            eprintln!("service_responder:Request -> {}", request.subject);
+                            if request.headers.is_some() {
+                                let headers = request.headers.clone().unwrap();
+                                let monkey_name = headers.get("monkey_name").expect("Header Name isn't 'monkey_name'");
+                                eprintln!("from: {}", monkey_name);
+                                trace!("from={}", monkey_name);
+                            };
                             trace!(%request.subject, ?request.payload);
                             let result: T = func().await;
                             trace!("Result is {:#?}", &result);
@@ -50,7 +56,8 @@ where
                                     cancel.cancel();
                                 }
                             };
-                            eprintln!("service_responder:OK")
+                            eprintln!("service_responder:OK");
+                            trace!("service_responder:OK");
                         };
                         Ok::<(), BoxError>(())
                     } => {
