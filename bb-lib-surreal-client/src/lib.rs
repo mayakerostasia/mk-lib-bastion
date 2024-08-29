@@ -64,7 +64,7 @@ use surrealdb::{
     sql::{Id, Thing},
     Notification, Response, Surreal,
 };
-use tracing::{debug, instrument, warn, error};
+use tracing::{debug, error, instrument, warn};
 
 mod config;
 mod creds;
