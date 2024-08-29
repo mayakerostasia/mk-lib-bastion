@@ -64,7 +64,7 @@ use surrealdb::{
     sql::{Id, Thing},
     Notification, Response, Surreal,
 };
-use tracing::{debug, instrument, warn};
+use tracing::{debug, instrument, warn, error};
 
 mod config;
 mod creds;
@@ -109,6 +109,18 @@ pub fn prespopt<T: Send>(rpo: Result<Option<T>, Error>) -> Result<T, Error> {
         Ok(Some(rec)) => Ok(rec),
         Ok(None) => Err(SurrealClientError::NoRecord.into()),
         Err(e) => Err(SurrealClientError::NoRecordMsg(e.to_string()).into()),
+    }
+}
+
+/// needs `connect` to be called first
+pub async fn health_check() -> Result<(), Error> {
+    match DB.health().await {
+        Ok(_) => Ok(()),
+        Err(e) => {
+            error!("Surreal Health Error: {e:#?}");
+            eprintln!("Surreal Health Error: {e:#?}");
+            Err(SurrealClientError::UnhealthyClient.into())
+        }
     }
 }
 

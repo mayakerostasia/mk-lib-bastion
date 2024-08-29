@@ -3,6 +3,9 @@ pub type Error = anyhow::Error;
 /// Error type for the SurrealDB Client
 #[derive(thiserror::Error, Debug)]
 pub enum SurrealClientError {
+    #[error("Client Unhealthy")]
+    UnhealthyClient,
+
     #[error("No Record")]
     NoRecord,
 
