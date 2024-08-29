@@ -28,7 +28,9 @@ pub async fn new_object_responder(
                 eprintln!("object_responder:Request -> {}", request.subject);
                 if request.headers.is_some() {
                     let headers = request.headers.clone().unwrap();
-                    let monkey_name = headers.get("monkey_name").expect("Header Name isn't 'monkey_name'");
+                    let monkey_name = headers
+                        .get("monkey_name")
+                        .expect("Header Name isn't 'monkey_name'");
                     eprintln!("from: {}", monkey_name);
                     trace!("from={}", monkey_name);
                 };
