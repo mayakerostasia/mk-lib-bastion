@@ -1,6 +1,5 @@
 use std::str::FromStr;
-
-use crate::core::{make_header_request, make_timeout_header_request, new_client};
+use crate::core::{make_publish, make_header_request, make_timeout_header_request, new_client};
 use crate::Error;
 use async_nats::{HeaderMap, HeaderName, HeaderValue};
 use bytes::Bytes;
@@ -80,6 +79,14 @@ impl Monkey {
             self.headers.clone(),
         )
         .await?)
+    }
+
+    pub async fn publish(&self, payload: impl Into<Bytes>) -> Result<(), Error> {
+        Ok(make_publish(
+            self.client()?,
+            self.subject.to_string(),
+            payload.into(),
+        ).await?)
     }
 
     pub async fn msg(&self, payload: impl Into<Bytes>) -> Result<async_nats::Message, Error> {

@@ -12,6 +12,17 @@ pub async fn new_client(url: &str) -> Result<async_nats::Client, anyhow::Error> 
 }
 
 #[instrument(skip(payload))]
+pub async fn make_publish(
+    client: async_nats::Client,
+    addr: String,
+    payload: impl Into<Bytes>
+) -> Result<(), Error>
+{
+    client.publish(addr, payload.into()).await?;
+    Ok(())
+}
+
+#[instrument(skip(payload))]
 pub async fn make_request(
     client: async_nats::Client,
     addr: String,

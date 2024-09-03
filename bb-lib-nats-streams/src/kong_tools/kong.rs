@@ -1,8 +1,7 @@
 use crate::{
     boxed_future_generator,
     core::{
-        new_client, new_echo_responder, new_object_responder, new_service_future_responder,
-        new_service_responder, new_tower_service_responder,
+        make_publish, new_client, new_echo_responder, new_object_responder, new_publish_subscriber, new_service_future_responder, new_service_responder, new_tower_service_responder
     },
     Frame, NSLibError,
 };
@@ -57,6 +56,17 @@ impl Kong {
 
     pub async fn listen(&self) -> Result<tokio::task::JoinHandle<Result<(), Error>>, Error> {
         new_echo_responder(&self.client, &self.subject).await
+    }
+
+    pub async fn subscribe<O, T>(
+        &self,
+        func: fn(Frame) -> O,
+    ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError>
+    where
+        O: Future<Output = Result<T, BoxError>> + Send + 'static,
+        T: Into<Bytes> + std::fmt::Debug + Send,
+    {
+        new_publish_subscriber(&self.client, &self.name, &self.subject, func, self.token.clone()).await
     }
 
     pub async fn serve(
