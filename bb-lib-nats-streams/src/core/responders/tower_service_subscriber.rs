@@ -28,7 +28,7 @@ where
     headers.insert("monkey_name", name);
 
     let handle = tokio::spawn({
-        // let client = client.clone();
+        let client = client.clone();
         let headers = headers.clone();
         let cancel_token = cancel_token.clone();
         let _cancel_token = cancel_token.clone();
@@ -89,16 +89,16 @@ where
                             trace!("Service call completed ret_frame={new_frame:#?}");
                             debug!("Subscriber ret frame -> {:#?}", new_frame);
 
-                            // Tower Service Subscriber does no Reply
+                            // Tower Service Subscriber does not Reply
                             // TODO: Clean me up
-                            // match reply_with_object_headers(request, &client, headers.clone(), new_frame).await {
-                            //     Ok(reply) => { eprintln!("Reply : {:#?}", reply) },
-                            //     Err(e) => {
-                            //         error!("ERROR: tower_service_responder -> {e:#?}");
-                            //         cancel.cancel();
-                            //         return Err::<_, BoxError>(NSLibError::NatsError(Box::new(e)).into())
-                            //     }
-                            // };
+                            match reply_with_object_headers(request, &client, headers.clone(), new_frame).await {
+                                Ok(reply) => { eprintln!("Reply : {:#?}", reply) },
+                                Err(e) => {
+                                    error!("ERROR: tower_service_responder -> {e:#?}");
+                                    cancel.cancel();
+                                    return Err::<_, BoxError>(NSLibError::NatsError(Box::new(e)).into())
+                                }
+                            };
 
                             eprintln!("tower_service_responder:OK");
                             trace!("tower_service_responder:OK");

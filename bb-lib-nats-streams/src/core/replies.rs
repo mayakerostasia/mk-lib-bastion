@@ -5,7 +5,7 @@ use anyhow::anyhow;
 use bytes::Bytes;
 use std::future::Future;
 use tower::BoxError;
-use tracing::{error, info, trace};
+use tracing::{error, info, trace, debug};
 
 type Error = crate::NSLibError;
 
@@ -63,8 +63,7 @@ pub async fn reply_with_object_headers(
             .publish_with_headers(reply, headers, object.into())
             .await?;
     } else {
-        error!("There's no Reply here");
-        return Err(crate::NSLibError::Anyhow(anyhow!("No reply in request")));
+        debug!("No Reply");
     }
     trace!("Reply Finished");
     Ok(())
