@@ -19,7 +19,7 @@ where
 {
     let mut subscription = client.clone().subscribe(subject.to_string()).await.unwrap();
     let handle = tokio::spawn( {
-        let client = client.clone();
+        // let client = client.clone();
         async move {
             let cancel_token = cancel_token.clone();
             let _cancel_token = cancel_token.clone();
@@ -52,6 +52,7 @@ where
                                     trace!("Publish OK");
                                 },
                                 Err(e) => {
+                                    cancel.cancel();
                                     error!("Error in Subscription Receiver -> {e:#?}");
                                 }
                             };

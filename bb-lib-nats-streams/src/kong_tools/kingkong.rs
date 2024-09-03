@@ -193,6 +193,24 @@ impl KingKong {
         Ok::<_, BoxError>(())
     }
 
+    pub async fn new_tower_subscriber_kong<'a, S>(
+        &'a mut self,
+        subject: &'a str,
+        service: S, // bytes: Bytes,
+    ) -> Result<(), BoxError>
+    where
+        S: Clone + tower::Service<Frame> + Send + Sync + 'static,
+        S::Future: Send + Sync,
+        S::Response: Into<Bytes> + Send + Sync + std::fmt::Debug,
+        S::Error: Into<BoxError>,
+    {
+        let (nats_subject, name, kong) = self.init_kong(subject).await?;
+        self.start_kong(async move { kong.tower_service_subscriber(service).await })
+            .await?;
+        info!(%nats_subject, king_kong_name = self.name, kong_name = name, kong_subject = subject, "Kong Up");
+        Ok::<_, BoxError>(())
+    }
+
     pub async fn wait(&self) -> Result<(), Error> {
         let fut1 = async {
             match tokio::signal::ctrl_c().await {

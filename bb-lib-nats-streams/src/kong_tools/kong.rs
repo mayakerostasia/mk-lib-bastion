@@ -1,7 +1,9 @@
 use crate::{
     boxed_future_generator,
     core::{
-        make_publish, new_client, new_echo_responder, new_object_responder, new_publish_subscriber, new_service_future_responder, new_service_responder, new_tower_service_responder
+        new_client, new_echo_responder, new_object_responder, new_publish_subscriber,
+        new_service_future_responder, new_service_responder, new_tower_service_responder,
+        new_tower_service_subscriber,
     },
     Frame, NSLibError,
 };
@@ -66,7 +68,14 @@ impl Kong {
         O: Future<Output = Result<T, BoxError>> + Send + 'static,
         T: Into<Bytes> + std::fmt::Debug + Send,
     {
-        new_publish_subscriber(&self.client, &self.name, &self.subject, func, self.token.clone()).await
+        new_publish_subscriber(
+            &self.client,
+            &self.name,
+            &self.subject,
+            func,
+            self.token.clone(),
+        )
+        .await
     }
 
     pub async fn serve(
@@ -124,6 +133,26 @@ impl Kong {
         S::Error: Into<BoxError>,
     {
         new_tower_service_responder::<S>(
+            &self.client,
+            &self.name,
+            &self.subject,
+            service,
+            self.token.clone(),
+        )
+        .await
+    }
+
+    pub async fn tower_service_subscriber<S>(
+        &self,
+        service: S, // func: fn() -> T,
+    ) -> Result<tokio::task::JoinHandle<Result<(), BoxError>>, BoxError>
+    where
+        S: tower::Service<Frame> + Send + Sync + Clone + 'static,
+        S::Future: Send + Sync,
+        S::Response: Into<Bytes> + Send + Sync + std::fmt::Debug,
+        S::Error: Into<BoxError>,
+    {
+        new_tower_service_subscriber::<S>(
             &self.client,
             &self.name,
             &self.subject,
