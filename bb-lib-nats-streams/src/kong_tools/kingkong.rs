@@ -157,6 +157,24 @@ impl KingKong {
         Ok::<_, BoxError>(())
     }
 
+    #[instrument]
+    pub async fn new_publish_kong<'a, O, T>(
+        &'a mut self,
+        subject: &'a str,
+        func: fn(Frame) -> O,
+        // func: fn(T) -> U,
+    ) -> Result<(), BoxError>
+    where
+        O: Future<Output = Result<T, BoxError>> + Send + 'static,
+        T: Into<Bytes> + std::fmt::Debug + Send,
+    {
+        let (nats_subject, name, kong) = self.init_kong(subject).await?;
+        self.start_kong(async move { kong.subscribe(func).await })
+            .await?;
+        info!(%nats_subject, king_kong_name = self.name, kong_name = name, kong_subject = subject, "Kong Up");
+        Ok::<_, BoxError>(())
+    }
+
     pub async fn new_tower_kong<'a, S>(
         &'a mut self,
         subject: &'a str,
