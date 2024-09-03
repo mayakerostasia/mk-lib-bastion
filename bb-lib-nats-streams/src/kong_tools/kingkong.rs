@@ -223,7 +223,7 @@ impl KingKong {
 
         let health_failure = async {
             loop {
-                tokio::time::sleep(Duration::from_secs(10)).await;
+                tokio::time::sleep(Duration::from_secs(120)).await;
                 if self.health().await {
                     eprintln!("Health OK!");
                 } else {
