@@ -65,7 +65,7 @@ impl KingKong {
         monk.set_subject(subject)
             .expect("Failed to set monkey subject");
         let resp = monk
-            .msg_timeout(Frame::ping(), Some(Duration::from_millis(500)))
+            .msg_timeout(Frame::ping(), Some(Duration::from_secs(120)))
             .await;
         match resp {
             Ok(resp_msg) => {
