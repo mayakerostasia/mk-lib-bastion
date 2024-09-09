@@ -19,9 +19,14 @@ use opentelemetry_sdk::{logs::BatchConfigBuilder, runtime};
 
 pub fn loki_logger(
     endpoint: String,
+    environment: String,
+    service_name: String,
+    service_version: String,
 ) -> Result<(tracing_loki::Layer, tracing_loki::BackgroundTask), Error> {
     let (layer, task) = tracing_loki::builder()
-        .label("logger", "nico")?
+        .label("environment", environment)?
+        .label("service_name", service_name)?
+        .label("service_version", service_version)?
         .extra_field("pid", format!("{}", process::id()))?
         .build_url(Url::parse(&endpoint).unwrap())?;
     Ok((layer, task))
