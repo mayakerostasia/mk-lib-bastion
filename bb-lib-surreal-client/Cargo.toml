@@ -19,7 +19,7 @@ thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 tracing = { workspace = true }
 lazy_static = { workspace = true }
-surrealdb = "1.5.4"
+surrealdb = "1.5.5"
 tower = { workspace = true, optional = true }
 futures = { workspace = true, optional = true }
 bytes = { workspace = true }
