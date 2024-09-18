@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::Thing;
+use surrealdb::sql::{Thing, Id};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SurrealId(pub Thing);
@@ -11,13 +11,13 @@ impl SurrealId {
         SurrealId(Thing::from((tb.to_string(), id.to_string())))
     }
 
+    fn _new(tb: &str, id: Id) -> Self {
+        SurrealId(Thing::from((tb.to_string(), id)))
+    }
+
     pub fn random(tb: &str) -> Self {
-        let id = surrealdb::sql::Id::rand();
-        let thing = Thing {
-            tb: tb.to_string(),
-            id,
-        };
-        SurrealId(thing)
+        let id = surrealdb::sql::Id::uuid();
+        SurrealId::_new(tb, id)
     }
 
     pub fn get_thing(&self) -> surrealdb::sql::Thing {
