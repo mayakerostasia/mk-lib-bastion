@@ -1,10 +1,10 @@
+use crate::{frame_tools::encoder::Decoder, Frame};
 use bytes::Bytes;
-use std::future::Future;
-use crate::{Frame, frame_tools::encoder::Decoder};
 use futures::StreamExt;
+use std::future::Future;
 use tokio_util::sync::CancellationToken;
 use tower::BoxError;
-use tracing::{error, info, trace, debug};
+use tracing::{debug, error, info, trace};
 
 pub async fn new_publish_subscriber<'a, T, O>(
     client: &'a async_nats::Client,
@@ -18,7 +18,7 @@ where
     T: std::fmt::Debug + Into<Bytes> + Send,
 {
     let mut subscription = client.clone().subscribe(subject.to_string()).await.unwrap();
-    let handle = tokio::spawn( {
+    let handle = tokio::spawn({
         // let client = client.clone();
         async move {
             let cancel_token = cancel_token.clone();
@@ -56,7 +56,7 @@ where
                                     error!("Error in Subscription Receiver -> {e:#?}");
                                 }
                             };
-                            
+
                     };
                     Ok::<(), BoxError>(())
                 } => {
@@ -79,9 +79,9 @@ mod tests {
 
     const NATS_ADDR: &str = "nats://10.2.4.106:4222";
 
-    async fn frame_funk(frame: Frame) -> Result<Frame, BoxError> { 
+    async fn frame_funk(frame: Frame) -> Result<Frame, BoxError> {
         eprintln!("Frame received : {:#?}", frame);
-        Ok::<_, BoxError> (Frame::Fin) 
+        Ok::<_, BoxError>(Frame::Fin)
     }
 
     #[tokio::test]

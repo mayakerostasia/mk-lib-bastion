@@ -1,10 +1,10 @@
-use std::str::FromStr;
-use crate::core::{make_publish, make_header_request, make_timeout_header_request, new_client};
+use crate::core::{make_header_request, make_publish, make_timeout_header_request, new_client};
 use crate::Error;
 use async_nats::{HeaderMap, HeaderName, HeaderValue};
 use bytes::Bytes;
 use petname::Generator;
 use rand::thread_rng;
+use std::str::FromStr;
 
 #[derive(Debug, Clone)]
 pub struct Monkey {
@@ -82,11 +82,7 @@ impl Monkey {
     }
 
     pub async fn publish(&self, payload: impl Into<Bytes>) -> Result<(), Error> {
-        Ok(make_publish(
-            self.client()?,
-            self.subject.to_string(),
-            payload.into(),
-        ).await?)
+        Ok(make_publish(self.client()?, self.subject.to_string(), payload.into()).await?)
     }
 
     pub async fn msg(&self, payload: impl Into<Bytes>) -> Result<async_nats::Message, Error> {

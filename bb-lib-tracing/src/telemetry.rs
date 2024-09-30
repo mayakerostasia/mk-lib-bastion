@@ -9,17 +9,27 @@ use opentelemetry::trace::{TraceError, Tracer, TracerProvider as _};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 // use tracing_opentelemetry::OpenTelemetryLayer;
+use crate::ServiceNames;
 use crate::{init_tracer, /* init_logger,*/ loki_logger};
 use tracing::debug;
 use tracing_subscriber::fmt::time::ChronoLocal;
-use crate::ServiceNames;
 
 // Initialize tracing-subscriber and return OtelGuard for opentelemetry-related termination processing
-fn mk_registry(endpoints: Endpoints, environment: String, service_name: String, service_version: String) -> anyhow::Result<OtelGuard> {
+fn mk_registry(
+    endpoints: Endpoints,
+    environment: String,
+    service_name: String,
+    service_version: String,
+) -> anyhow::Result<OtelGuard> {
     // let tracer = tracing::Subscriber
     let tracer_provider = init_tracer(endpoints.tracer)?;
     let tracer = tracer_provider.tracer("bb-trace");
-    let (loki_layer, log_task) = loki_logger(endpoints.loki.clone(), environment, service_name, service_version)?;
+    let (loki_layer, log_task) = loki_logger(
+        endpoints.loki.clone(),
+        environment,
+        service_name,
+        service_version,
+    )?;
     // let log_layer_provider = init_logger(dbg!(endpoints.logger))?
     // let log_layer = OpenTelemetryTracingBridge::new(&log_layer_provider);
     // let otel_trace_layer = OpenTelemetryLayer::new(tracer);
@@ -101,6 +111,11 @@ pub fn initialize() -> anyhow::Result<OtelGuard> {
         // metrics: metrics_endpoint,
     };
 
-    let _tel = mk_registry(endpoints, deployment_environment, service_name, service_version)?;
+    let _tel = mk_registry(
+        endpoints,
+        deployment_environment,
+        service_name,
+        service_version,
+    )?;
     Ok(_tel)
 }

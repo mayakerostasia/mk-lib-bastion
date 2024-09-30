@@ -5,7 +5,7 @@ use bytes::Bytes;
 use futures::StreamExt;
 use tokio_util::sync::CancellationToken;
 use tower::{BoxError, Service, ServiceExt};
-use tracing::{error, trace, debug};
+use tracing::{debug, error, trace};
 
 // #[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
 pub async fn new_tower_service_subscriber<'a, S>(

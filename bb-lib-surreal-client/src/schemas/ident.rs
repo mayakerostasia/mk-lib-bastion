@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::{Thing, Id};
+use surrealdb::sql::{Id, Thing};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SurrealId(pub Thing);
