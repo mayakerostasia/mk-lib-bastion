@@ -1,31 +1,29 @@
-use crate::{error::SurrealClientError, Storable};
+use crate::Error;
+use crate::{create_record, delete_record, select, update_record};
+use crate::error::SurrealClientError;
 use bb_lib_nats_streams::{Decoder, Encoder};
 use bytes::Bytes;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
-use surrealdb::sql::{Id, Thing};
+use surrealdb::{RecordId, RecordIdKey};
 use tracing::error;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Record<D: Send + Clone> {
-    // #[serde(skip_if_missing)]
-    // id: Option<SurrealId>,
+pub struct Record<T>
+where
+    T: Debug + Serialize + Clone + From<T>,
+{
     #[serde(skip)]
-    _id: Option<Id>,
-    #[serde(skip)]
-    _tb: String,
-    #[serde(flatten)]
-    _data: Option<Box<D>>,
-    _meta: Option<Box<D>>,
+    _id: Option<RecordId>,
+    _data: Option<T>,
 }
 
-impl<T> Encoder for Record<T> where T: Into<Bytes> + Clone + Send {}
-impl<'a, T> Decoder<'a, T> for Record<T> where T: Into<Bytes> + Clone + Send {}
+impl<T> Encoder for Record<T> where T: Debug + Serialize + Clone {}
+impl<'a, T> Decoder<'a, Record<T>> for Record<T> where T: Debug + Serialize + Clone {}
 
 impl<T> From<Record<T>> for Bytes
 where
-    T: Clone + Send + Debug + Serialize,
-    Record<T>: Encoder,
+    T: Debug + Serialize + Clone,
 {
     fn from(value: Record<T>) -> Self {
         value.encode().expect("Failed to encode Bytes").into()
@@ -34,7 +32,7 @@ where
 
 impl<T> From<Bytes> for Record<T>
 where
-    T: Clone + Send + Debug + for<'de> Deserialize<'de> + Serialize + Into<Bytes>,
+    T: Debug + Serialize + Clone + for<'a> Deserialize<'a>,
 {
     fn from(value: Bytes) -> Self {
         match Record::decode(&value) {
@@ -47,58 +45,54 @@ where
     }
 }
 
-impl<D: Send + Clone> Record<D> {
-    pub fn new(tb: &str, id: Option<Id>, data: Option<Box<D>>, meta: Option<Box<D>>) -> Self {
-        Self {
-            _tb: tb.to_string(),
-            _id: id,
-            _data: data,
-            _meta: meta,
+impl<T> Record<T>
+where
+    T: Debug + Serialize + Clone + 'static + for<'a> Deserialize<'a> + Into<Record<T>>,
+{
+    pub async fn save(&self) -> Result<Record<T>, Error> {
+        let record: Record<T> = self.clone();
+        create_record(record).await
+    }
+
+    pub async fn select(&mut self) -> Result<Record<T>, Error> {
+        select(self).await
+    }
+
+    pub async fn update(&mut self) -> Result<Record<T>, Error> {
+        update_record(self.clone()).await
+    }
+
+    pub async fn delete(self) -> Result<Option<Record<T>>, Error> {
+        delete_record(self).await
+    }
+
+    pub fn new(tb: &str, id: Option<RecordIdKey>, data: Option<T>) -> Self {
+        if let Some(_id) = id {
+            Self {
+                _id: Some(RecordId::from_table_key(tb, _id)),
+                _data: data,
+            }
+        } else {
+            Self {
+                _id: None,
+                _data: data,
+            }
         }
     }
 
-    pub fn set_id(&mut self, id: &str) -> Result<(), SurrealClientError> {
-        self._id = Some(Id::from(id));
+    pub fn set_data(&mut self, data: &T) -> Result<(), SurrealClientError> {
+        self._data = Some(data.clone());
         Ok(())
     }
 
-    pub fn set_data(&mut self, data: Box<D>) -> Result<(), SurrealClientError> {
-        self._data = Some(data);
-        Ok(())
-    }
-
-    pub fn set_meta(&mut self, meta: Box<D>) -> Result<(), SurrealClientError> {
-        self._meta = Some(meta);
-        Ok(())
-    }
-
-    pub fn random_id(&mut self) -> Result<(), SurrealClientError> {
-        self._id = Some(Id::rand());
-        Ok(())
-    }
-
-    pub fn id(&self) -> Result<Id, SurrealClientError> {
+    pub fn id(&self) -> Result<RecordId, SurrealClientError> {
         match &self._id {
             Some(id) => Ok(id.clone()),
             None => Err(SurrealClientError::NoID),
         }
     }
 
-    pub fn tb(&self) -> &str {
-        self._tb.as_str()
-    }
-
-    pub fn as_thing(&self) -> Result<Thing, SurrealClientError> {
-        Ok(Thing::from((self.tb(), self.id()?)))
-    }
-
-    pub fn data(&self) -> Box<D> {
+    pub fn data(&self) -> T {
         self._data.clone().expect("No Data!")
     }
-}
-
-// impl<D: DBThings + Send> DBThings for Record<D> {}
-impl<D> Storable<D> for Record<D> where
-    D: Debug + Serialize + DeserializeOwned + Sized + Clone + Send + Sync + 'static
-{
 }

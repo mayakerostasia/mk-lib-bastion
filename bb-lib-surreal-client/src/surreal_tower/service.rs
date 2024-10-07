@@ -1,13 +1,11 @@
-use crate::Error;
-use crate::Record;
-use crate::Storable;
-use crate::{connect, DbConfig, DbGuard};
+use crate::{connect, DbConfig, DbGuard, Error, Record};
 use anyhow::anyhow;
 use bb_lib_nats_streams::Frame;
-use bytes::Bytes;
+// use bytes::Bytes;
 use futures::executor;
 use pin_project_lite::pin_project;
 use serde::{Deserialize, Serialize};
+use std::fmt::{Debug, Display};
 use std::{future::Future, marker::PhantomData, pin::Pin, task::Poll};
 use tower::{BoxError, Service};
 use tracing::debug;
@@ -25,7 +23,7 @@ pin_project! {
         _phantom_request: PhantomData<T>,
     }
 }
-impl<T> std::fmt::Display for DbService<T>
+impl<T> Display for DbService<T>
 // where
 //     S: Service<Request>,
 //     Request: Clone + From<Bytes> + Into<Bytes>,
@@ -70,9 +68,12 @@ impl<T> Service<Record<T>> for DbService<T>
 where
     // S: Service<Request>,
     // Request: Into<Frame> + From<Frame> + Into<Bytes>,
-    T: Serialize + for<'de> Deserialize<'de> + std::fmt::Debug + Storable<T>,
+    T: Debug + Serialize + Clone + for<'a> Deserialize<'a>,
     T: Send + Sync + 'static,
-    T: From<Bytes>,
+    Record<T>: From<T> + for<'a> From<&'a Self>,
+    // T: Serialize + for<'de> Deserialize<'de> + std::fmt::Debug + Storable<T> + Clone,
+    // T: Send + Sync + 'static,
+    // T: From<Bytes> + Into<Record<T>>,
     // Record<T>: Send + Sync,
 {
     type Response = Frame;
@@ -107,7 +108,7 @@ where
         }
     }
 
-    fn call(&mut self, request: Record<T>) -> Self::Future {
+    fn call(&mut self, mut request: Record<T>) -> Self::Future {
         Box::pin(async move {
             let okee = request.update();
             let resp = executor::block_on(okee);

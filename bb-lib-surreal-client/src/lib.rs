@@ -45,26 +45,19 @@ pub use schemas::Record;
 pub use schemas::SurrealId;
 pub use storable::Storable;
 
-#[cfg(feature = "tower")]
-pub use surreal_tower::DbService;
-// use surrealdb::method::QueryStream;
-// use surrealdb::sql::statements::LiveStatement;
-// #[cfg(feature = "tower")]
-// pub use surreal_tower::DbServiceLayer;
-
-use core::panic;
 use error::SurrealClientError;
 use once_cell::sync::Lazy;
-use serde::{de::DeserializeOwned, Serialize};
-use serde_json::Value;
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt::Debug;
+#[cfg(feature = "tower")]
+pub use surreal_tower::DbService;
 use surrealdb::{
     engine::any::Any,
     opt::{auth::Root, PatchOp},
-    sql::{Id, Thing},
+    sql::Thing,
     Notification, Response, Surreal,
 };
-use tracing::{debug, error, instrument, warn};
+use tracing::{debug, error, instrument};
 
 mod config;
 mod creds;
@@ -130,28 +123,17 @@ pub async fn health_check() -> Result<(), Error> {
 /// # Examples
 ///
 #[instrument]
-pub async fn create_record<'a, T>(record: Record<T>) -> Result<Record<T>, Error>
+pub async fn create_record<T>(record: Record<T>) -> Result<Record<T>, Error>
 where
-    T: Debug + Serialize + DeserializeOwned + Sized + Clone,
-    T: Send + Sync + 'static,
+    T: Debug + Serialize + Clone + 'static + for<'a> Deserialize<'a> + Into<Record<T>>,
 {
     // let _id = record.thing();
     let data = record.data();
-    let id = match record.id() {
-        Ok(_id) => _id,
-        Err(e) => {
-            if let SurrealClientError::NoID = e {
-                warn!("No ID set, creating one");
-                surrealdb::sql::Id::rand()
-            } else {
-                panic!("Fuck!");
-            }
-        }
-    };
-    let created: Option<Record<T>> = DB.create((record.tb(), id)).content(data).await?;
+
+    let created: Option<T> = dbg!(DB.create(record.id()?).content(data).await?);
 
     match created {
-        Some(record) => Ok(record),
+        Some(record) => Ok(record.into()),
         None => {
             Err(SurrealClientError::NoDataStored("No data stored in record!".to_string()).into())
         }
@@ -164,48 +146,43 @@ where
 /// Uses the following query
 /// `select * from tb:id;`
 // #[instrument]
-#[instrument(skip(record), fields(db_id = %record.id().unwrap_or(Id::from(666)), db_tb = &record.tb()))]
-pub async fn update_record<'a, T>(record: Record<T>) -> Result<Record<Value>, Error>
+#[instrument(skip(record))]
+pub async fn update_record<T>(record: Record<T>) -> Result<Record<T>, Error>
 where
-    T: Debug + Serialize + DeserializeOwned + Sized + Clone,
-    T: Send + Sync + 'static,
+    T: Debug + Serialize + Clone + 'static + for<'a> Deserialize<'a> + Into<Record<T>>,
 {
     let data = record.data();
-    let updated: Option<Record<Value>> =
-        DB.update((record.tb(), record.id()?)).content(data).await?;
-    // let updated = None;
+    let updated: Option<T> = DB.update(record.id()?).content(data).await?;
 
     match updated {
-        Some(record) => Ok(record),
+        Some(record) => Ok(record.into()),
         None => Err(SurrealClientError::UpdateFailed.into()),
     }
 }
 
-pub async fn select<T: Send + Clone>(record: &mut Record<T>) -> Result<Record<Value>, Error> {
-    let selected: Option<Record<Value>> = DB.select((record.tb(), record.id()?)).await?;
-    // let bux = Box::new(selected);
-    // record.set_data(bux);
+pub async fn select<T>(record: &mut Record<T>) -> Result<Record<T>, Error>
+where
+    T: Debug + Serialize + Clone + 'static + for<'a> Deserialize<'a> + Into<Record<T>>,
+{
+    let selected: Option<T> = DB.select(record.id()?).await?;
     match selected {
-        Some(rec) => Ok(rec),
+        Some(rec) => Ok(rec.into()),
         None => Err(SurrealClientError::NoRecord.into()),
     }
 }
+
 /// Static function to get a record
 /// Returns only the ID as a Thing, does not return any Data or Meta (TODO)
 /// This function requires you to call the `connect` function before calling
-#[instrument(skip(record), fields(db_id = %record.id().unwrap_or(Id::from(666)), db_tb = &record.tb()))]
-pub async fn get_record<T>(record: Record<T>) -> Result<Value, Error>
+#[instrument(skip(record))]
+pub async fn get_record<T>(record: Record<T>) -> Result<Record<T>, Error>
 where
-    T: Debug + Serialize + DeserializeOwned + Sized + Clone,
-    T: Send + Sync + 'static,
+    T: Debug + Serialize + Clone + 'static + for<'a> Deserialize<'a> + Into<Record<T>>,
 {
-    let q_str = format!(
-        "select * from {};",
-        Thing::from((record.tb(), record.id()?))
-    );
+    let q_str = format!("select * from {};", record.id()?);
     debug!(q_str = %q_str);
     let mut q = query(q_str.as_str()).await?;
-    let ret: Option<Value> = q.take(0)?;
+    let ret: Option<Record<T>> = q.take(0)?;
     match ret {
         Some(val) => Ok(val),
         None => Err(SurrealClientError::NoRecord.into()),
@@ -215,40 +192,37 @@ where
 /// Static function to delete a record
 /// This function requires you to call the `connect` function before calling
 // #[instrument]
-#[instrument(skip(record), fields(db_id = %record.id().unwrap_or(Id::from(666)), db_tb = &record.tb()))]
-pub async fn delete_record<T>(record: Record<T>) -> Result<Option<T>, Error>
+#[instrument(skip(record))]
+pub async fn delete_record<T>(record: Record<T>) -> Result<Option<Record<T>>, Error>
 where
-    T: Debug + Serialize + DeserializeOwned + Sized + Clone,
-    T: Send + Sync + 'static,
+    T: Debug + Serialize + Clone + 'static + for<'a> Deserialize<'a> + Into<Record<T>>,
 {
-    let table = record.tb();
+    // let table = record.tb();
 
-    if table == "_" {
-        return Err(SurrealClientError::TableNameUnset.into());
-    }
+    // if table == "_" {
+    //     return Err(SurrealClientError::TableNameUnset.into());
+    // }
 
     let id = record.id()?;
-
-    Ok(DB.delete((table, id)).await?)
+    Ok(DB.delete(id).await?)
 }
 
 /// Static function to update a record
 /// This function is used automatically in the `Storable` trait
 // #[instrument]
-#[instrument(skip(record), fields(db_id = %record.id().unwrap_or(Id::from(666)), db_tb = &record.tb()))]
-pub async fn patch_record<T>(record: Record<T>, patch: PatchOp) -> Result<Option<T>, Error>
+#[instrument(skip(record, patch))]
+pub async fn patch_record<T>(record: Record<T>, patch: PatchOp) -> Result<Option<Record<T>>, Error>
 where
-    T: Debug + Serialize + DeserializeOwned + Sized + Clone,
-    T: Send + Sync + 'static,
+    T: Debug + Serialize + Clone + 'static + for<'a> Deserialize<'a> + Into<Record<T>>,
 {
-    let table = record.tb();
-    if table == "_" {
-        return Err(SurrealClientError::TableNameUnset.into());
-    }
+    // let table = record.tb();
+    // if table == "_" {
+    //     return Err(SurrealClientError::TableNameUnset.into());
+    // }
 
     let id = record.id()?;
 
-    let ret = DB.update((table, id.clone())).patch(patch).await?;
+    let ret = DB.update(id.clone()).patch(patch).await?;
     // .map_err(|_e| Error::UpdateFailed {
     //     id: id.to_string(),
     //     id_raw: id.to_raw(),
@@ -272,15 +246,18 @@ pub async fn query(query: &str) -> Result<Response, Error> {
 /// Static function to connect to the database
 /// This function is used automatically in the `Storable` trait
 pub async fn connect(config: &config::DbConfig) -> Result<DbGuard, Error> {
+    eprintln!("Connecting to DB");
     DB.connect(&config.path).await?;
+    eprintln!("Connected to DB");
     let _result = DB
         .signin(Root {
             username: &config.user,
             password: &config.pass,
         })
         .await?;
-
+    eprintln!("DB connected");
     DB.use_ns(&config.ns).use_db(&config.db).await?;
+    eprintln!("NS & DB Selected");
     Ok(DbGuard)
 }
 
@@ -292,10 +269,10 @@ pub async fn relate(edge_table: &str, from: Thing, to: Thing) -> Result<Response
 /// Static function to start a live select stream
 /// This function requires you to call the `connect` function before calling
 /// Unimplemented
-pub async fn live_select<'a, T>(
+pub async fn live_select<T>(
     table: &str,
     id: &str,
-) -> Result<surrealdb::method::Stream<'a, Any, Option<T>>, Error>
+) -> Result<surrealdb::method::Stream<Option<T>>, Error>
 where
     T: Debug + Serialize + DeserializeOwned + Sized + Clone,
     T: Send + Sync + 'static,
