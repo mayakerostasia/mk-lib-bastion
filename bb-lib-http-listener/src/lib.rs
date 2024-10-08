@@ -1,8 +1,11 @@
-use crate::handlers::{readyz_handler, healthz_handler};
+use crate::handlers::{healthz_handler, readyz_handler};
 use crate::shutdown::shutdown_signal;
 use crate::timer::TokioTimer;
 use anyhow::Error;
-use axum::{http::Request, routing::{Router, get}};
+use axum::{
+    http::Request,
+    routing::{get, Router},
+};
 use hyper::body::Incoming;
 use hyper_util::rt::TokioIo;
 use tokio::sync::watch;
@@ -31,12 +34,8 @@ impl Server {
             .route("/readyz", get(readyz_handler));
 
         let app = match router {
-            Some(route) =>{
-                 route.merge(heath_routes)
-            },
-            None => {
-                heath_routes
-            }
+            Some(route) => route.merge(heath_routes),
+            None => heath_routes,
         };
 
         let listener = tokio::net::TcpListener::bind(self._bind.clone())

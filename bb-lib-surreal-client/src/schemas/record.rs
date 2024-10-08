@@ -1,6 +1,6 @@
+use crate::error::SurrealClientError;
 use crate::Error;
 use crate::{create_record, delete_record, select, update_record};
-use crate::error::SurrealClientError;
 use bb_lib_nats_streams::{Decoder, Encoder};
 use bytes::Bytes;
 use serde::{Deserialize, Serialize};
