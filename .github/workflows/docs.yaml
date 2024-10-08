@@ -59,7 +59,7 @@ jobs:
         run: echo "$(ls -la target/${{ env.REPO_NAME }})"
 
       - name: Upload Docs artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.REPO_NAME }}-docs
           path: target/${{ env.REPO_NAME }}/doc/**
