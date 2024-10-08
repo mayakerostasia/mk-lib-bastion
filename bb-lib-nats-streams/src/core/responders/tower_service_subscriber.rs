@@ -3,7 +3,7 @@ use anyhow::anyhow;
 use bytes::Bytes;
 use futures::StreamExt;
 use tokio_util::sync::CancellationToken;
-use tower::{BoxError, Service, ServiceExt};
+use tower::{BoxError, Service, util::ServiceExt};
 use tracing::{debug, error, trace};
 
 // #[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
