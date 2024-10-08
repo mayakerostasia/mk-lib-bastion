@@ -1,16 +1,14 @@
-use crate::handlers::{healthz_handler, readyz_handler};
+use crate::handlers::{readyz_handler, healthz_handler};
+use crate::shutdown::shutdown_signal;
+use crate::timer::TokioTimer;
 use anyhow::Error;
-use axum::{
-    http::Request,
-    routing::{get, Router},
-};
+use axum::{http::Request, routing::{Router, get}};
 use hyper::body::Incoming;
 use hyper_util::rt::TokioIo;
-use shutdown::shutdown_signal;
-use timer::TokioTimer;
 use tokio::sync::watch;
 use tower::Service;
 use tracing::debug;
+
 mod handlers;
 mod shutdown;
 mod timer;
@@ -27,10 +25,20 @@ impl Server {
         }
     }
 
-    pub async fn listen(&self) -> Result<(), Error> {
-        let app = Router::new()
+    pub async fn listen(&self, router: Option<Router>) -> Result<(), Error> {
+        let heath_routes = Router::new()
             .route("/healthz", get(healthz_handler))
             .route("/readyz", get(readyz_handler));
+
+        let app = match router {
+            Some(route) =>{
+                 route.merge(heath_routes)
+            },
+            None => {
+                heath_routes
+            }
+        };
+
         let listener = tokio::net::TcpListener::bind(self._bind.clone())
             .await
             .unwrap();
