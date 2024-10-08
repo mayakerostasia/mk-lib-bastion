@@ -3,7 +3,7 @@ use anyhow::anyhow;
 use bytes::Bytes;
 use futures::StreamExt;
 use tokio_util::sync::CancellationToken;
-use tower::{BoxError, Service, util::ServiceExt};
+use tower::{BoxError, Service, ServiceExt};
 use tracing::{debug, error, trace};
 
 // #[instrument(skip_all, fields(health = "unset", kong_name = %name, kong_subject = %subject))]
@@ -118,7 +118,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::Decoder;
     use std::future::Future;
     use std::pin::Pin;
     use std::task::Context;
@@ -168,9 +167,7 @@ mod tests {
         )
         .await?;
         let monkey = Monkey::new("test-tower-service", NATS_ADDR).await;
-        let _pong = monkey.publish(Frame::ping()).await?;
-        // let pong_frame = Frame::decode(&pong.payload).unwrap();
-        // assert_eq!(Frame::ping(), pong_frame);
+        monkey.publish(Frame::ping()).await?;
         Ok(())
     }
 }
