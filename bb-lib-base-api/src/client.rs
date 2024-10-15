@@ -184,7 +184,6 @@ impl Rest {
         ))
     }
 
-    #[cfg(not(feature = "insecure"))]
     pub fn new(client: &impl RestClient) -> Self {
         Rest {
             client: reqwest::Client::builder()
@@ -194,8 +193,7 @@ impl Rest {
         }
     }
 
-    #[cfg(feature = "insecure")]
-    pub fn new(client: &impl RestClient) -> Self {
+    pub fn new_insecure(client: &impl RestClient) -> Self {
         Rest {
             client: reqwest::Client::builder()
                 .default_headers(Self::_build_headers(client.headers()))
