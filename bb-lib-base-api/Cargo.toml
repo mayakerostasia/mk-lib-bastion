@@ -25,6 +25,7 @@ tokio = { workspace = true, features = ["rt-multi-thread", "macros", "net"], opt
  
 [features]
 echoserver = ["dep:clap", "dep:hyper-util", "dep:tokio", "dep:http-body-util", "dep:hyper", "dep:server"]
+insecure = []
 
 [[bin]]
 name = "echo-server"

@@ -184,12 +184,24 @@ impl Rest {
         ))
     }
 
+    #[cfg(not(feature = "insecure"))]
     pub fn new(client: &impl RestClient) -> Self {
         Rest {
             client: reqwest::Client::builder()
                 .default_headers(Self::_build_headers(client.headers()))
                 .build()
                 .expect("Failed to create reqwest client"),
+        }
+    }
+
+    #[cfg(feature = "insecure")]
+    pub fn new(client: &impl RestClient) -> Self {
+        Rest {
+            client: reqwest::Client::builder()
+                .default_headers(Self::_build_headers(client.headers()))
+                .danger_accept_invalid_certs(true)
+                .build()
+                .expect("Failed to create insecure reqwest client")
         }
     }
 }
