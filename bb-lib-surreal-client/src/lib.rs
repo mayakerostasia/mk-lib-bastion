@@ -68,12 +68,11 @@ mod storable;
 mod surreal_tower;
 
 pub mod prelude {
-    pub use surrealdb::sql::Id;
-    pub use surrealdb::sql::Thing;
     pub use surrealdb::sql::Value;
     pub use surrealdb::Error as SDBError;
     pub use surrealdb::Notification;
     pub use surrealdb::Response;
+    pub use surrealdb::{RecordId, RecordIdKey};
 
     // pub use super::live::subscribe;
     // live_select
