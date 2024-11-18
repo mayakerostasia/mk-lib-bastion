@@ -218,7 +218,7 @@ impl KingKong {
                 Err(err) => Err(anyhow!("Unable to listen for shutdown signal: {}", err)),
             }
         };
-        let fut2 = async { self.http_listener.clone().listen(None).await };
+        let fut2 = async { self.http_listener.clone().listen(None, 200, false).await };
         let cancel_token = self.cancel_token.cancelled();
 
         let health_failure = async {
