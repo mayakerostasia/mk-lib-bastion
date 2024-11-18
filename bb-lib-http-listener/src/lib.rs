@@ -28,7 +28,7 @@ impl Server {
         }
     }
 
-    pub async fn listen(&self, router: Option<Router>) -> Result<(), Error> {
+    pub async fn listen(&self, router: Option<Router>, header_read_timeout: u64, keep_alive: bool) -> Result<(), Error> {
         let heath_routes = Router::new()
             .route("/healthz", get(healthz_handler))
             .route("/readyz", get(readyz_handler));
@@ -69,7 +69,8 @@ impl Server {
                     });
 
                 let conn = hyper::server::conn::http1::Builder::new()
-                    .header_read_timeout(tokio::time::Duration::from_millis(200))
+                    .keep_alive(keep_alive)
+                    .header_read_timeout(tokio::time::Duration::from_millis(header_read_timeout))
                     .timer(TokioTimer)
                     .serve_connection(socket, hyper_service)
                     .with_upgrades();
