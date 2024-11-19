@@ -113,6 +113,14 @@ impl Rest {
             req = req.form(&form);
         }
 
+        if let Some(data) = call.data() {
+            let mut _req = String::new();
+            for datum in data.iter() {
+                _req += datum
+            };
+            req = dbg!(req.body(_req));
+        }
+
         debug!("--> Request: {:#?}", req);
         let resp = req.send().await?;
         debug!("<-- Response Status: {:?}", resp.status());

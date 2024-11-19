@@ -18,6 +18,7 @@ where
     fn query(&self) -> Option<Value>;
     fn body(&self) -> Option<Value>;
     fn form(&self) -> Option<Value>;
+    fn data(&self) -> Option<Vec<String>>;
     fn paged(
         &self,
         response: IntermediateResponse,

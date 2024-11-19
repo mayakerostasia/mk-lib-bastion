@@ -49,6 +49,10 @@ impl RestCall for TestCall {
         None
     }
 
+    fn data(&self) -> Option<Vec<String>> {
+        None
+    }
+
     fn paged(
         &self,
         response: IntermediateResponse,
@@ -116,6 +120,10 @@ impl RestCall for TestEchoCall {
     }
 
     fn form(&self) -> Option<Value> {
+        None
+    }
+
+    fn data(&self) -> Option<Vec<String>> {
         None
     }
 
