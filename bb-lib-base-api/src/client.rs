@@ -116,8 +116,8 @@ impl Rest {
         if let Some(data) = call.data() {
             let mut _req = String::new();
             for datum in data.iter() {
-                _req += datum
-            };
+                _req += format!("&{}", datum).as_str()
+            }
             req = dbg!(req.body(_req));
         }
 
@@ -207,7 +207,7 @@ impl Rest {
                 .default_headers(Self::_build_headers(client.headers()))
                 .danger_accept_invalid_certs(true)
                 .build()
-                .expect("Failed to create insecure reqwest client")
+                .expect("Failed to create insecure reqwest client"),
         }
     }
 }

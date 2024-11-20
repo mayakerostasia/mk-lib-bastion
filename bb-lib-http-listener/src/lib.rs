@@ -28,7 +28,12 @@ impl Server {
         }
     }
 
-    pub async fn listen(&self, router: Option<Router>, header_read_timeout: u64, keep_alive: bool) -> Result<(), Error> {
+    pub async fn listen(
+        &self,
+        router: Option<Router>,
+        header_read_timeout: u64,
+        keep_alive: bool,
+    ) -> Result<(), Error> {
         let heath_routes = Router::new()
             .route("/healthz", get(healthz_handler))
             .route("/readyz", get(readyz_handler));
