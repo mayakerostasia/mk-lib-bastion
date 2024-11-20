@@ -129,7 +129,10 @@ impl Rest {
         if contentful_ok(&resp) {
             Ok(RestSvcResp(
                 resp.status(),
-                resp.json::<Value>().await.expect("Whoops!"),
+                match resp.json::<Value>().await {
+                    Ok(val) => val,
+                    Err(e) => return Err(RestSvcError::OtherError(e.to_string()))
+                }
             ))
         } else if contentless_ok(&resp) {
             Ok(RestSvcResp(resp.status(), Value::Null))
