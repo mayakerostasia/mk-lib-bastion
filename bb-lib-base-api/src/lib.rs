@@ -12,6 +12,12 @@ pub enum RestSvcError {
     #[error("serde error: {0}")]
     SerdeError(#[from] serde_json::Error),
 
+    #[error("Payload Decode Error")]
+    DecodeError {
+        source: serde_json::Error,
+        payload: String,
+    },
+
     #[error("other error: {0}")]
     OtherError(String),
 }

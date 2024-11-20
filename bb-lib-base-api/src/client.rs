@@ -127,12 +127,18 @@ impl Rest {
         debug!("<-- Response: {:#?}", &resp);
 
         if contentful_ok(&resp) {
+            let status = resp.status();
+            let text = resp.text().await?;
+            let json: Value = match serde_json::from_str::<Value>(&text) {
+                    Ok(val) => val.clone(),
+                    Err(e) => return Err(RestSvcError::DecodeError {
+                        source: e,
+                        payload: text
+                    })
+                };
             Ok(RestSvcResp(
-                resp.status(),
-                match resp.json::<Value>().await {
-                    Ok(val) => val,
-                    Err(e) => return Err(RestSvcError::OtherError(e.to_string()))
-                }
+                status,
+                json
             ))
         } else if contentless_ok(&resp) {
             Ok(RestSvcResp(resp.status(), Value::Null))
