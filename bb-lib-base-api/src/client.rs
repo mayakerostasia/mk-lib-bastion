@@ -65,6 +65,7 @@ fn rest_ok(response: &reqwest::Response) -> bool {
 }
 
 fn has_content(response: &reqwest::Response) -> bool {
+    eprintln!("Response Headers: \n {:#?}", response.headers);
     let content_length = dbg!(response.content_length());
 
     if let Some(content_length) = content_length {
