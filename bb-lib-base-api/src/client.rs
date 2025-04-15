@@ -64,15 +64,14 @@ fn rest_ok(response: &reqwest::Response) -> bool {
     response.status().is_success()
 }
 
-fn has_content(_response: &reqwest::Response) -> bool {
-    true
-    // let content_length = dbg!(response.content_length());
+fn has_content(response: &reqwest::Response) -> bool {
+    let content_length = dbg!(response.content_length());
 
-    // if let Some(content_length) = content_length {
-    //     content_length > 0
-    // } else {
-    //     false
-    // }
+    if let Some(content_length) = content_length {
+        content_length > 0
+    } else {
+        false
+    }
 }
 
 fn contentless_ok(response: &reqwest::Response) -> bool {
