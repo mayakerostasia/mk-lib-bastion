@@ -74,3 +74,73 @@ impl<T: Transport> BastionAgent<T> {
         self.transport.subscribe(&self.id).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use async_trait::async_trait;
+    use futures::StreamExt;
+    use std::sync::{Arc, Mutex};
+
+    #[derive(Clone, Default)]
+    struct MockTransport {
+        published: Arc<Mutex<Vec<AcpMessage>>>,
+    }
+
+    #[async_trait]
+    impl Transport for MockTransport {
+        async fn publish(&self, message: AcpMessage) -> Result<()> {
+            self.published.lock().unwrap().push(message);
+            Ok(())
+        }
+        async fn subscribe(&self, _agent_id: &AgentId) -> Result<BoxStream<'static, AcpMessage>> {
+            Ok(futures::stream::empty().boxed())
+        }
+        async fn is_connected(&self) -> bool { true }
+    }
+
+    #[tokio::test]
+    async fn test_agent_request() {
+        let transport = MockTransport::default();
+        let agent = BastionAgent::new(AgentId::new("sender"), transport.clone());
+        let target = AgentId::new("receiver");
+        
+        let conv_id = agent.request(target.clone(), "test", Bytes::from("hello")).await.unwrap();
+        
+        let published = transport.published.lock().unwrap();
+        assert_eq!(published.len(), 1);
+        let msg = &published[0];
+        assert_eq!(msg.source.0, "sender");
+        assert_eq!(msg.target.as_ref().unwrap().0, "receiver");
+        assert_eq!(msg.performative, Performative::Request);
+        assert_eq!(msg.conversation_id, conv_id);
+    }
+
+    #[tokio::test]
+    async fn test_agent_reply() {
+        let transport = MockTransport::default();
+        let agent = BastionAgent::new(AgentId::new("responder"), transport.clone());
+        
+        let original_msg = AcpMessage {
+            message_id: Uuid::new_v4(),
+            source: AgentId::new("requester"),
+            target: Some(AgentId::new("responder")),
+            performative: Performative::Request,
+            subject: "hello".to_string(),
+            conversation_id: Uuid::new_v4(),
+            payload: Bytes::from("ping"),
+            timestamp: Utc::now().timestamp(),
+        };
+
+        agent.reply(&original_msg, Performative::Agree, Bytes::from("pong")).await.unwrap();
+
+        let published = transport.published.lock().unwrap();
+        assert_eq!(published.len(), 1);
+        let msg = &published[0];
+        assert_eq!(msg.source.0, "responder");
+        assert_eq!(msg.target.as_ref().unwrap().0, "requester");
+        assert_eq!(msg.performative, Performative::Agree);
+        assert_eq!(msg.conversation_id, original_msg.conversation_id);
+        assert_eq!(msg.subject, "hello.reply");
+    }
+}
