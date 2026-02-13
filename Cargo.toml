@@ -11,28 +11,45 @@ members = [
   "bb-lib-tracing",
   "bb-lib-event",
   "bb-lib-metrics",
-]
-exclude = [
-  "bb-lib-reactor"
+  "bb-lib-reactor",
+  "bb-lib-iggy-streams",
 ]
 
 [workspace.dependencies]
 anyhow = "1.0.86"
+async-nats = "0.35.1"
 async-trait = "0.1.80"
+async_once = "0.2.6"
+aws-lc-sys = { version = "0.21.2", features = ["bindgen", "ssl"] }
+axum = "0.7.5"
+bytes = "1.6.0"
+cargo-make = "0.37.11"
+chrono = { version = "0.4.38", features = ["serde"] }
 clap = { version = "4.5.4", features = ["derive"]}
+config = "0.14.0"
 futures = "0.3.30"
+futures-lite = "2.2.0"
+geo-types = "0.7.13"
+http-body-util = "0.1.1"
 hyper = { version = "1.2.0", features = ["server"]}
 hyper-util = { version = "0.1.3"}
+iggy = "0.4.0"
+lazy_static = "1.4.0"
+metrics = "0.23.0"
+metrics-exporter-prometheus = { version = "0.15.1", default-features = false, features = ["http-listener", "push-gateway"] }
+one_cell = "1.20.0"
+opentelemetry = "0.24.0"
+petname = "2.0.2"
+pin-project-lite = "0.2.13"
+rand = "0.8.5"
+reqwest = { version = "0.12.4", features = ["json"]}
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.115"
-# server = { version = "0.1.0"}
+serde_with = "3.11.0"
+surrealdb = "2.0.4"
 thiserror = "1.0.58"
 tokio = { version = "1.37.0", features = ["rt-multi-thread", "macros", "net", "signal"] }
-tracing = { version = "0.1.40" }
 tower = { version = "0.5.1", features = ["buffer"] }
-cargo-make = "0.37.11"
-pin-project-lite = "0.2.13"
-lazy_static = "1.4.0"
-rand = "0.8.5"
-bytes = "1.6.0"
+tracing = { version = "0.1.40" }
+tracing-opentelemetry = "0.24.0"
 uuid = { version = "1.8.0", features = ["v4", "serde"] }
