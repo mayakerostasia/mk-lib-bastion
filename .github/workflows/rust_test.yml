@@ -1,0 +1,26 @@
+name: Rust Tests
+
+on:
+  push:
+    branches: [ "master", "feature/agent-transport-acp" ]
+  pull_request:
+    branches: [ "master", "feature/agent-transport-acp" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Run Rust Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run cargo test
+        run: cargo test --verbose
