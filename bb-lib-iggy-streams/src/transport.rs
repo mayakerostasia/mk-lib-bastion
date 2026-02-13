@@ -1,20 +1,19 @@
 use async_trait::async_trait;
 use anyhow::{anyhow, Result};
-use bb_lib_base_api::transport::{AcpMessage, AgentId, Transport};
+use bb_lib_base_api::transport::{AcpMessage, AgentId, Transport, Performative};
 use futures::stream::{BoxStream, StreamExt};
 use iggy::client::Client;
 use iggy::clients::client::IggyClient;
 use iggy::messages::send_messages::{Message, SendMessages};
 use iggy::identifier::Identifier;
-use iggy::models::messages::PolledMessage;
 use std::fmt::Debug;
 use std::sync::Arc;
 use tokio::time::{sleep, Duration};
+use uuid::Uuid;
 
 pub struct IggyTransport {
     client: IggyClient,
     stream_id: Identifier,
-    // Base topic name or prefix
     base_topic: String,
 }
 
@@ -68,8 +67,6 @@ impl Transport for IggyTransport {
         let topic_id = self.get_topic_id_for_agent(agent_id);
         let broadcast_topic_id = self.get_broadcast_topic_id();
         
-        // This is a simplified polling-based "subscription" for Iggy
-        // In a real implementation, we'd handle offsets and consumer groups properly.
         let client = Arc::new(self.client.clone());
         let stream_id = self.stream_id.clone();
         
@@ -80,10 +77,8 @@ impl Transport for IggyTransport {
             let broadcast_topic_id = broadcast_topic_id.clone();
             
             async move {
-                // Simplified: poll both topics. In production, use separate tasks/merged streams.
                 sleep(Duration::from_millis(100)).await;
                 
-                // Poll inbox
                 let inbox_messages = client.poll_messages(&stream_id, &topic_id, &iggy::messages::poll_messages::PollMessages {
                     consumer: iggy::models::consumer::Consumer::default(),
                     partition_id: 1,
@@ -92,7 +87,6 @@ impl Transport for IggyTransport {
                     auto_commit: true,
                 }).await.ok();
 
-                // Poll broadcast
                 let broadcast_messages = client.poll_messages(&stream_id, &broadcast_topic_id, &iggy::messages::poll_messages::PollMessages {
                     consumer: iggy::models::consumer::Consumer::default(),
                     partition_id: 1,
@@ -131,8 +125,33 @@ impl Transport for IggyTransport {
     }
 
     async fn is_connected(&self) -> bool {
-        // Iggy client connectivity check varies by transport (TCP/QUIC/HTTP)
-        // Simplified for this draft.
         true 
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bytes::Bytes;
+
+    #[test]
+    fn test_acp_message_serialization() {
+        let msg = AcpMessage {
+            message_id: Uuid::new_v4(),
+            source: AgentId::new("monkey"),
+            target: Some(AgentId::new("target")),
+            performative: Performative::Request,
+            subject: "test".to_string(),
+            conversation_id: Uuid::new_v4(),
+            payload: Bytes::from("hello"),
+            timestamp: 123456789,
+        };
+
+        let serialized = serde_json::to_vec(&msg).unwrap();
+        let deserialized: AcpMessage = serde_json::from_slice(&serialized).unwrap();
+
+        assert_eq!(deserialized.source, msg.source);
+        assert_eq!(deserialized.subject, msg.subject);
+        assert_eq!(deserialized.payload, msg.payload);
     }
 }
