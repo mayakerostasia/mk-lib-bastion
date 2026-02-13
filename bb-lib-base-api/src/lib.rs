@@ -2,6 +2,8 @@ use std::fmt::Display;
 pub mod client;
 pub mod paged;
 pub mod traits;
+pub mod transport;
+pub mod agent;
 
 use thiserror::Error;
 #[derive(Error, Debug)]
@@ -32,7 +34,7 @@ impl Display for RestSvcExpandedError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             RestSvcExpandedError::SerdeExpandedError { source, extra } => {
-                write!(f, "SerdeExpandedError: {} \n {}", source, extra)
+                write!(f, "SerdeExpandedError: {} \n {{}}", source, extra)
             }
             RestSvcExpandedError::OtherError(extra) => {
                 write!(f, "OtherError: {}", extra)
