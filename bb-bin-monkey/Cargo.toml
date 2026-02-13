@@ -6,10 +6,15 @@ edition = "2021"
 [dependencies]
 clap = { workspace = true, features = ["derive"] }
 bb-lib-nats-streams = { path = "../bb-lib-nats-streams" }
+bb-lib-iggy-streams = { path = "../bb-lib-iggy-streams" }
+bb-lib-base-api = { path = "../bb-lib-base-api" }
 bb-lib-tracing = { path = "../bb-lib-tracing" }
-tokio = { workspace = true, features = ["macros", "rt"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 tower = "0.4.13"
 anyhow.workspace = true
 serde_json.workspace = true
 bytes.workspace = true
 tracing.workspace = true
+futures.workspace = true
+iggy = "0.4.0"
+uuid = { workspace = true }
