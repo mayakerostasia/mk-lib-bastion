@@ -1,6 +1,4 @@
 # bb-lib-bastion  
-[![Docker](https://github.com/BlueBastion/DEV-bb-lib-bastion/actions/workflows/docker_build.yaml/badge.svg)](https://github.com/BlueBastion/DEV-bb-lib-bastion/actions/workflows/docker_build.yaml)  
-[![Rust Build](https://github.com/BlueBastion/DEV-bb-lib-bastion/actions/workflows/rust_build.yaml/badge.svg)](https://github.com/BlueBastion/DEV-bb-lib-bastion/actions/workflows/rust_build.yaml)  
 
 This project is a collection of Rust libraries and binaries for building robust agent-based systems.
 
@@ -30,27 +28,4 @@ agent.request(AgentId::new("target"), "ping", Bytes::from("hello")).await?;
 // Listen for messages
 let mut stream = agent.listen().await?;
 while let Some(msg) = stream.next().await {
-    println!("Received: {:?}", msg);
-}
-```
-
-## bb-bin-monkey
-A versatile CLI tool to interact with ACP agents over NATS or Iggy.
-[Monkey Readme](./bb-bin-monkey/README.md)
-
-## bb-lib-nats-streams
-Provides `NatsTransport` for ACP.
-[Cargo](./bb-lib-nats-streams/Cargo.toml)
-
-## bb-lib-iggy-streams
-Provides `IggyTransport` for ACP, leveraging Iggy's high-performance streaming capabilities.
-[Cargo](./bb-lib-iggy-streams/Cargo.toml)
-
-## bb-lib-tracing
-Tracing instrumentation.
-```rust
-#[tokio::main]
-async fn main() {
-    let _otel_guard = bb_lib_tracing::initialize()?;
-}
-```
+    println!("Received: {:?}
