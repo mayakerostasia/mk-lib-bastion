@@ -1,0 +1,17 @@
+[package]
+name = "bb-lib-iggy-streams"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+bb-lib-base-api = { path = "../bb-lib-base-api" }
+bytes = { workspace = true }
+futures = { workspace = true }
+iggy = "0.4.0"
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
