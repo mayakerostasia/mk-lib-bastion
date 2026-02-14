@@ -16,7 +16,7 @@ jobs:
     # strategy:
     #   matrix:
     #     rust_bins: 
-    #       - name: "bb-bin-monkey"
+    #       - name: "simian-bin-monkey"
     #       - name: "log_emitter"
           # - third: "Dockerfile"
     steps:

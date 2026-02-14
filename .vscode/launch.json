@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'bb-bin-monkey'",
+            "name": "Debug executable 'simian-bin-monkey'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=bb-bin-monkey",
-                    "--package=bb-bin-monkey"
+                    "--bin=simian-bin-monkey",
+                    "--package=simian-bin-monkey"
                 ],
                 "filter": {
-                    "name": "bb-bin-monkey",
+                    "name": "simian-bin-monkey",
                     "kind": "bin"
                 }
             },
@@ -25,16 +25,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'bb-bin-monkey'",
+            "name": "Debug unit tests in executable 'simian-bin-monkey'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=bb-bin-monkey",
-                    "--package=bb-bin-monkey"
+                    "--bin=simian-bin-monkey",
+                    "--package=simian-bin-monkey"
                 ],
                 "filter": {
-                    "name": "bb-bin-monkey",
+                    "name": "simian-bin-monkey",
                     "kind": "bin"
                 }
             },
@@ -44,16 +44,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'bb-lib-nats-streams'",
+            "name": "Debug unit tests in library 'simian-nats-streams'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=bb-lib-nats-streams"
+                    "--package=simian-nats-streams"
                 ],
                 "filter": {
-                    "name": "bb-lib-nats-streams",
+                    "name": "simian-nats-streams",
                     "kind": "lib"
                 }
             },
@@ -68,7 +68,7 @@
                 "args": [
                     "build",
                     "--example=tower",
-                    "--package=bb-lib-nats-streams"
+                    "--package=simian-nats-streams"
                 ],
                 "filter": {
                     "name": "tower",
@@ -87,7 +87,7 @@
                     "test",
                     "--no-run",
                     "--example=tower",
-                    "--package=bb-lib-nats-streams"
+                    "--package=simian-nats-streams"
                 ],
                 "filter": {
                     "name": "tower",
@@ -105,7 +105,7 @@
                 "args": [
                     "build",
                     "--example=tower_two",
-                    "--package=bb-lib-nats-streams"
+                    "--package=simian-nats-streams"
                 ],
                 "filter": {
                     "name": "tower_two",
@@ -124,7 +124,7 @@
                     "test",
                     "--no-run",
                     "--example=tower_two",
-                    "--package=bb-lib-nats-streams"
+                    "--package=simian-nats-streams"
                 ],
                 "filter": {
                     "name": "tower_two",
@@ -142,7 +142,7 @@
                 "args": [
                     "build",
                     "--example=world_time_api",
-                    "--package=bb-lib-nats-streams"
+                    "--package=simian-nats-streams"
                 ],
                 "filter": {
                     "name": "world_time_api",
@@ -161,7 +161,7 @@
                     "test",
                     "--no-run",
                     "--example=world_time_api",
-                    "--package=bb-lib-nats-streams"
+                    "--package=simian-nats-streams"
                 ],
                 "filter": {
                     "name": "world_time_api",
@@ -179,7 +179,7 @@
                 "args": [
                     "build",
                     "--example=wtapi-client",
-                    "--package=bb-lib-nats-streams"
+                    "--package=simian-nats-streams"
                 ],
                 "filter": {
                     "name": "wtapi-client",
@@ -198,7 +198,7 @@
                     "test",
                     "--no-run",
                     "--example=wtapi-client",
-                    "--package=bb-lib-nats-streams"
+                    "--package=simian-nats-streams"
                 ],
                 "filter": {
                     "name": "wtapi-client",
@@ -216,7 +216,7 @@
                 "args": [
                     "build",
                     "--example=wtapi-server",
-                    "--package=bb-lib-nats-streams"
+                    "--package=simian-nats-streams"
                 ],
                 "filter": {
                     "name": "wtapi-server",
@@ -235,7 +235,7 @@
                     "test",
                     "--no-run",
                     "--example=wtapi-server",
-                    "--package=bb-lib-nats-streams"
+                    "--package=simian-nats-streams"
                 ],
                 "filter": {
                     "name": "wtapi-server",
@@ -248,16 +248,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'bb-lib-http-listener'",
+            "name": "Debug unit tests in library 'simian-http-listener'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=bb-lib-http-listener"
+                    "--package=simian-http-listener"
                 ],
                 "filter": {
-                    "name": "bb-lib-http-listener",
+                    "name": "simian-http-listener",
                     "kind": "lib"
                 }
             },
@@ -267,16 +267,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'bb-lib-tracing'",
+            "name": "Debug unit tests in library 'simian-tracing'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=bb-lib-tracing"
+                    "--package=simian-tracing"
                 ],
                 "filter": {
-                    "name": "bb-lib-tracing",
+                    "name": "simian-tracing",
                     "kind": "lib"
                 }
             },
@@ -286,12 +286,12 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'cfg_creator'",
+            "name": "Debug executable 'simian-bin-cfg-creator'",
             "cargo": {
                 "args": [
                     "build",
                     "--bin=cfg_creator",
-                    "--package=cfg_creator"
+                    "--package=simian-bin-cfg-creator"
                 ],
                 "filter": {
                     "name": "cfg_creator",
@@ -304,13 +304,13 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'cfg_creator'",
+            "name": "Debug unit tests in executable 'simian-bin-cfg-creator'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--bin=cfg_creator",
-                    "--package=cfg_creator"
+                    "--package=simian-bin-cfg-creator"
                 ],
                 "filter": {
                     "name": "cfg_creator",
@@ -323,16 +323,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'bb-lib-config'",
+            "name": "Debug unit tests in library 'simian-config'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=bb-lib-config"
+                    "--package=simian-config"
                 ],
                 "filter": {
-                    "name": "bb-lib-config",
+                    "name": "simian-config",
                     "kind": "lib"
                 }
             },
@@ -342,16 +342,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'bb_lib_base_api'",
+            "name": "Debug unit tests in library 'simian_base_api'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=bb-lib-base-api"
+                    "--package=simian-base-api"
                 ],
                 "filter": {
-                    "name": "bb_lib_base_api",
+                    "name": "simian_base_api",
                     "kind": "lib"
                 }
             },
@@ -366,7 +366,7 @@
                 "args": [
                     "build",
                     "--bin=echo-server",
-                    "--package=bb-lib-base-api"
+                    "--package=simian-base-api"
                 ],
                 "filter": {
                     "name": "echo-server",
@@ -385,7 +385,7 @@
                     "test",
                     "--no-run",
                     "--bin=echo-server",
-                    "--package=bb-lib-base-api"
+                    "--package=simian-base-api"
                 ],
                 "filter": {
                     "name": "echo-server",
@@ -404,7 +404,7 @@
                     "test",
                     "--no-run",
                     "--test=tests",
-                    "--package=bb-lib-base-api"
+                    "--package=simian-base-api"
                 ],
                 "filter": {
                     "name": "tests",
@@ -417,16 +417,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'bb-lib-surreal-client'",
+            "name": "Debug unit tests in library 'simian-surreal-client'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=bb-lib-surreal-client"
+                    "--package=simian-surreal-client"
                 ],
                 "filter": {
-                    "name": "bb-lib-surreal-client",
+                    "name": "simian-surreal-client",
                     "kind": "lib"
                 }
             },
@@ -436,16 +436,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'bb-lib-event'",
+            "name": "Debug unit tests in library 'simian-event'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=bb-lib-event"
+                    "--package=simian-event"
                 ],
                 "filter": {
-                    "name": "bb-lib-event",
+                    "name": "simian-event",
                     "kind": "lib"
                 }
             },
@@ -460,7 +460,7 @@
                 "args": [
                     "build",
                     "--bin=emitter",
-                    "--package=bb-lib-event"
+                    "--package=simian-event"
                 ],
                 "filter": {
                     "name": "emitter",
@@ -479,7 +479,7 @@
                     "test",
                     "--no-run",
                     "--bin=emitter",
-                    "--package=bb-lib-event"
+                    "--package=simian-event"
                 ],
                 "filter": {
                     "name": "emitter",
@@ -497,7 +497,7 @@
                 "args": [
                     "build",
                     "--bin=receiver",
-                    "--package=bb-lib-event"
+                    "--package=simian-event"
                 ],
                 "filter": {
                     "name": "receiver",
@@ -516,7 +516,7 @@
                     "test",
                     "--no-run",
                     "--bin=receiver",
-                    "--package=bb-lib-event"
+                    "--package=simian-event"
                 ],
                 "filter": {
                     "name": "receiver",
@@ -534,7 +534,7 @@
                 "args": [
                     "build",
                     "--example=start_collector",
-                    "--package=bb-lib-event"
+                    "--package=simian-event"
                 ],
                 "filter": {
                     "name": "start_collector",
@@ -553,7 +553,7 @@
                     "test",
                     "--no-run",
                     "--example=start_collector",
-                    "--package=bb-lib-event"
+                    "--package=simian-event"
                 ],
                 "filter": {
                     "name": "start_collector",
@@ -571,7 +571,7 @@
                 "args": [
                     "build",
                     "--example=start_emitter",
-                    "--package=bb-lib-event"
+                    "--package=simian-event"
                 ],
                 "filter": {
                     "name": "start_emitter",
@@ -590,7 +590,7 @@
                     "test",
                     "--no-run",
                     "--example=start_emitter",
-                    "--package=bb-lib-event"
+                    "--package=simian-event"
                 ],
                 "filter": {
                     "name": "start_emitter",
@@ -608,7 +608,7 @@
                 "args": [
                     "build",
                     "--example=start_future_emitter",
-                    "--package=bb-lib-event"
+                    "--package=simian-event"
                 ],
                 "filter": {
                     "name": "start_future_emitter",
@@ -627,7 +627,7 @@
                     "test",
                     "--no-run",
                     "--example=start_future_emitter",
-                    "--package=bb-lib-event"
+                    "--package=simian-event"
                 ],
                 "filter": {
                     "name": "start_future_emitter",

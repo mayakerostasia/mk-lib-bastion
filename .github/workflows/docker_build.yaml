@@ -24,8 +24,8 @@ jobs:
       matrix:
         containers:
           - dockerfile: "docker/Dockerfile"
-            name: "bluebastion/bb-monkey"
-            rust_bin: bb-bin-monkey
+            name: "bluebastion/simian-monkey"
+            rust_bin: simian-bin-monkey
           - dockerfile: "docker/Dockerfile.log_emitter"
             name: "bluebastion/bb-log-emitter"
             rust_bin: log_emitter

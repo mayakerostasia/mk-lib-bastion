@@ -1,0 +1,25 @@
+[package]
+name = "simian-reactor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow.workspace = true
+async_once = "0.2.6"
+simian-nats-streams = { path = "../simian-nats-streams" }
+bytes = "1.6.0"
+chrono = "0.4.38"
+metrics = "0.22.3"
+petname = "2.0.2"
+pin-project-lite.workspace = true
+rand.workspace = true
+tokio = { workspace = true, features = ["sync"] }
+tower = { version = "0.4.13", features = ["limit"] }
+
+[dev-dependencies]
+lazy_static.workspace = true
+reqwest = { version = "0.12.4", features = ["json"] }
+serde_json.workspace = true
+simian-tracing = { path = "../simian-tracing" }
+tower = "0.4.13"
+async-nats = "0.35.1"

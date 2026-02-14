@@ -1,18 +1,19 @@
 [workspace]
 resolver = "2"
 members = [
-  "bb-bin-monkey",
-  "bb-bin-cfg-creator",
-  "bb-lib-base-api",
-  "bb-lib-config",
-  "bb-lib-http-listener",
-  "bb-lib-nats-streams", 
-  "bb-lib-surreal-client",
-  "bb-lib-tracing",
-  "bb-lib-event",
-  "bb-lib-metrics",
-  "bb-lib-reactor",
-  "bb-lib-iggy-streams",
+  "simian-bin-monkey",
+  "simian-bin-cfg-creator",
+  "simian-base-api",
+  "simian-config",
+  "simian-http-listener",
+  "simian-nats-streams", 
+  "simian-surreal-client",
+  "simian-tracing",
+  "simian-event",
+  "simian-metrics",
+  "simian-reactor",
+  "simian-iggy-streams",
+  "simian-llm",
 ]
 
 [workspace.dependencies]
@@ -22,7 +23,7 @@ async-trait = "0.1.80"
 async_once = "0.2.6"
 aws-lc-sys = { version = "0.21.2", features = ["bindgen", "ssl"] }
 axum = "0.7.5"
-bytes = "1.6.0"
+bytes = { version = "1.6.0", features = ["serde"] }
 cargo-make = "0.37.11"
 chrono = { version = "0.4.38", features = ["serde"] }
 clap = { version = "4.5.4", features = ["derive"]}
