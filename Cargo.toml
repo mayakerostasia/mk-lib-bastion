@@ -14,6 +14,7 @@ members = [
   "simian-reactor",
   "simian-iggy-streams",
   "simian-llm",
+  "simian-mcp",
 ]
 
 [workspace.dependencies]

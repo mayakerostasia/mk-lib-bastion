@@ -1,0 +1,20 @@
+[package]
+name = "simian-mcp"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+chrono = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+tracing = { version = "0.1", features = ["log"] }
+
+simian-base-api = { path = "../simian-base-api" }
+simian-llm = { path = "../simian-llm" }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }

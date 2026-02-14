@@ -1,0 +1,86 @@
+    Checking serde_json v1.0.149
+    Checking tokio v1.49.0
+    Checking aho-corasick v1.1.4
+    Checking crypto-common v0.1.7
+    Checking axum-core v0.4.5
+    Checking serde_path_to_error v0.1.20
+    Checking base64ct v1.8.3
+    Checking deranged v0.5.6
+   Compiling bindgen v0.69.5
+    Checking anstyle-wincon v3.0.11
+    Checking anstyle-query v1.1.5
+    Checking either v1.15.0
+    Checking rustls-native-certs v0.7.3
+    Checking rustls-webpki v0.102.8
+    Checking nuid v0.5.0
+    Checking serde_nanos v0.1.4
+    Checking digest v0.10.7
+    Checking bincode v1.3.3
+    Checking anstream v0.6.21
+    Checking itertools v0.14.0
+    Checking signature v2.2.0
+    Checking pem-rfc7468 v0.7.0
+    Checking sha2 v0.10.9
+    Checking curve25519-dalek v4.1.3
+    Checking ed25519 v2.2.3
+    Checking clap_builder v4.5.58
+    Checking der v0.7.10
+    Checking regex-automata v0.4.14
+    Checking ed25519-dalek v2.2.0
+    Checking time v0.3.47
+    Checking spki v0.7.3
+    Checking pkcs8 v0.10.2
+    Checking signatory v0.27.1
+    Checking nkeys v0.4.5
+    Checking clap v4.5.58
+    Checking petname v2.0.2
+    Checking matchers v0.2.0
+    Checking regex v1.12.3
+    Checking tracing-subscriber v0.3.22
+    Checking tokio-util v0.7.18
+    Checking tokio-rustls v0.26.4
+    Checking tokio-stream v0.1.18
+    Checking tokio-native-tls v0.3.1
+    Checking tryhard v0.5.2
+    Checking opentelemetry_sdk v0.24.1
+    Checking h2 v0.4.13
+    Checking tower v0.5.3
+    Checking tower v0.4.13
+    Checking async-nats v0.37.0
+    Checking opentelemetry-appender-tracing v0.5.0
+    Checking tracing-appender v0.2.4
+   Compiling aws-lc-sys v0.21.2
+    Checking tower-http v0.6.8
+    Checking tracing-opentelemetry v0.25.0
+    Checking opentelemetry-stdout v0.5.0
+    Checking hyper v1.8.1
+    Checking hyper-util v0.1.20
+    Checking axum v0.7.9
+    Checking hyper-tls v0.6.0
+    Checking hyper-timeout v0.5.2
+    Checking hyper-rustls v0.27.7
+    Checking reqwest v0.12.28
+    Checking metrics-exporter-prometheus v0.15.3
+    Checking tracing-loki v0.2.6
+    Checking simian-base-api v2.0.2 (C:\Users\njtwi\work_repos\rust_testing\mk-lib-bastion\simian-base-api)
+    Checking tonic v0.12.3
+    Checking simian-http-listener v2.0.2 (C:\Users\njtwi\work_repos\rust_testing\mk-lib-bastion\simian-http-listener)
+    Checking simian-nats-streams v2.0.2 (C:\Users\njtwi\work_repos\rust_testing\mk-lib-bastion\simian-nats-streams)
+    Checking opentelemetry-proto v0.7.0
+    Checking opentelemetry-otlp v0.17.0
+    Checking simian-tracing v2.0.2 (C:\Users\njtwi\work_repos\rust_testing\mk-lib-bastion\simian-tracing)
+    Checking simian-metrics v2.0.2 (C:\Users\njtwi\work_repos\rust_testing\mk-lib-bastion\simian-metrics)
+    Checking simian-llm v2.0.2 (C:\Users\njtwi\work_repos\rust_testing\mk-lib-bastion\simian-llm)
+error: unexpected closing delimiter: `}`
+   --> simian-llm\examples\agent_autonomy.rs:528:1
+    |
+514 |     if let Some((subject, count)) = subject_counts.iter().max_by_key(|&(_, c)| c) {
+    |                                                                                   - this opening brace...
+515 |         println!("Most subscribed subject: '{}' ({} agents)", subject, count);
+516 |     }
+    |     - ...matches this closing brace
+...
+528 | }
+    | ^ unexpected closing delimiter
+
+error: could not compile `simian-llm` (example "agent_autonomy") due to 1 previous error
