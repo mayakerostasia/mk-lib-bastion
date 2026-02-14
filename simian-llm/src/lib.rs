@@ -1,3 +1,4 @@
+pub mod agent;
 pub mod client;
 pub mod error;
 pub mod protocol;
@@ -5,6 +6,7 @@ pub mod registry;
 pub mod spawner;
 pub mod types;
 
+pub use agent::LlmAgent;
 pub use client::LlmClient;
 pub use error::LlmError;
 pub use protocol::{LlmChatRequest, LlmChatResponse, LlmReasonRequest, LlmReasonResponse};
