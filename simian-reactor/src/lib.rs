@@ -7,6 +7,7 @@ mod error;
 mod future;
 mod reactor;
 
+#[cfg(feature = "nats")]
 mod proc_service;
 
 // pub type PinnedFuture<O> = Pin<Box<dyn Future<Output = Result<O, Error>> + Send + Sync + 'static>>;

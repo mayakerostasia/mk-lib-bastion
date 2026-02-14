@@ -6,9 +6,11 @@ use core::future::Future;
 use petname::Generator;
 use rand::thread_rng;
 use std::{collections::HashMap, time::Duration};
+use std::task::{Context, Poll};
+use std::pin::Pin;
 use tokio::task::{AbortHandle, JoinHandle, JoinSet};
 use tokio_util::sync::CancellationToken;
-use tower::BoxError;
+use tower::{BoxError, Service};
 use tracing::{debug, error, info, instrument};
 
 type Error = NSLibError;
@@ -244,5 +246,24 @@ impl KingKong {
             }
         };
         Ok(())
+    }
+}
+
+impl Service<Frame> for KingKong {
+    type Response = Frame;
+    type Error = BoxError;
+    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
+
+    fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        Poll::Ready(Ok(()))
+    }
+
+    fn call(&mut self, req: Frame) -> Self::Future {
+        let monkey = self.monkey.clone();
+        Box::pin(async move {
+            let resp = monkey.msg(req).await.map_err(|e| anyhow!(e))?;
+            let frame = Frame::decode(&resp.payload).map_err(|e| anyhow!(e))?;
+            Ok(frame)
+        })
     }
 }

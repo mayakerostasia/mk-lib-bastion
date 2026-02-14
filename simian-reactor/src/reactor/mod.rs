@@ -1,3 +1,4 @@
+#[cfg(feature = "nats")]
 pub use simian_nats_streams::{Frame, Proc};
 pub use mako_battery::MakoBattery;
 pub use mako_layer::MakoLayer;
@@ -10,20 +11,6 @@ mod mako_layer;
 mod mako_reactor;
 mod mako_service;
 mod reactor_core;
-
-// pub enum Frame {
-//     Ping,
-//     Pong,
-//     Proc(Proc),
-//     Fin,
-//     Msg(String),
-//     Frame(Box<Frame>),
-// }
-
-// pub struct Proc {
-//     cmd: String,
-//     args: Vec<String>
-// }
 
 use tower::BoxError;
 

@@ -13,7 +13,10 @@ thiserror = { workspace = true }
 tracing = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
+metrics = { workspace = true }
 simian-base-api = { path = "../simian-base-api" }
+simian-tracing = { path = "../simian-tracing" }
+simian-metrics = { path = "../simian-metrics" }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
