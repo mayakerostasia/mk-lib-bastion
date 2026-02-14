@@ -4,5 +4,3 @@
 /logs
 .env
 .env.**
-/observability/loki-wal
-/observability/loki-data
