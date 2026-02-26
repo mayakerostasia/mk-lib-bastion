@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 clap = { workspace = true, features = ["derive"] }
 simian-nats-streams = { path = "../simian-nats-streams" }
-simian-iggy-streams = { path = "../simian-iggy-streams" }
 simian-base-api = { path = "../simian-base-api" }
 simian-tracing = { path = "../simian-tracing" }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
@@ -16,5 +15,4 @@ serde_json.workspace = true
 bytes.workspace = true
 tracing.workspace = true
 futures.workspace = true
-iggy = "0.4.0"
 uuid = { workspace = true }

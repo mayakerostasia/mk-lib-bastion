@@ -45,8 +45,9 @@ pub async fn handle_ret_frame(frame: bytes::Bytes) -> Result<Frame, Error> {
             let val: serde_json::Value = serde_json::from_slice(&byte)?;
             serde_json::to_writer_pretty(std::io::stdout(), &val)?;
         }
-        Frame::Json(val) => {
+        Frame::Json(json_val) => {
             eprintln!("Ret frame = Json");
+            let val: serde_json::Value = json_val.into();
             serde_json::to_writer_pretty(std::io::stdout(), &val)?;
         }
         _ => {

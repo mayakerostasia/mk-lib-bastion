@@ -6,8 +6,7 @@ use std::ops::{Add, AddAssign};
 use futures::stream::FuturesOrdered;
 use futures::StreamExt;
 use reqwest::header::{self, HeaderMap};
-use reqwest::StatusCode;
-use serde::{self, Deserialize, Serialize};
+use reqwest::StatusCode; use serde::{self, Deserialize, Serialize};
 use serde_json::Value;
 use tracing::{debug, error, instrument, warn};
 

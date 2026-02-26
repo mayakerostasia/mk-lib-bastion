@@ -1,5 +1,5 @@
 [build]
-rustflags = ["-C", "target-cpu=native"]
+# rustflags = ["-C", "target-cpu=native"]
 
 [env]
-CMAKE_GENERATOR = "Visual Studio 17 2022"
+# CMAKE_GENERATOR = "Visual Studio 17 2022"

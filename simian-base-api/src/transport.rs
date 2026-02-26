@@ -10,6 +10,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct AgentId(pub String);
 
+
 impl AgentId {
     pub fn new(id: &str) -> Self {
         Self(id.to_string())

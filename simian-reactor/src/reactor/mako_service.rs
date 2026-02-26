@@ -1,4 +1,5 @@
 use crate::FrameFuture;
+use crate::protocol::Frame;
 
 use super::BoxError;
 use super::MakoReactor;
@@ -8,8 +9,6 @@ use std::{future::Future, pin::Pin};
 use futures::FutureExt;
 use tower::Service;
 // use tracing::error;
-
-use simian_nats_streams::{Decoder, Frame};
 
 type Error = tower::BoxError;
 
@@ -39,7 +38,7 @@ where
         Future = Pin<Box<dyn Future<Output = Result<Frame, BoxError>> + Send + Sync>>,
         Response = Frame,
         Error = BoxError,
-    > + Sync + Send + 'static,
+    > + Sync + Send + Clone + 'static,
     T: Into<Bytes>,
     // F: S::Future,
     // E: Into<BoxError> + Send + Sync,
@@ -49,22 +48,22 @@ where
     type Future = S::Future;
 
     fn call(&mut self, req: T) -> Self::Future {
-        let me = self;
         let byt: Bytes = req.into();
-        let frame: Frame = Frame::decode(&byt);
-        // async {
+        let frame: Frame = Frame::from(byt);
+        let reactor = self.clone();
+        
+        Box::pin(async move {
             let response_frame = match frame {
-                Frame::Exec(proc) => me.call_registered_function(proc),
-                _ => {
-                    panic!("Fuck!")
+                Frame::Exec(proc) => reactor.call_registered_function(proc).await?,
+                Frame::Error(e) => {
+                    // Decode error already converted to Frame::Error
+                    Frame::Error(e)
                 }
+                _ => Frame::Error("Expected Frame::Exec".to_string()),
             };
-
-            // Box::pin( async { Ok::<_, BoxError>(response_frame.await.map_err(|e| Error::from(e))?) } )
-        // }
-
-        // let response = self.call_registered_function(frame);
-        Box::pin(async { Ok::<_, BoxError>( me.service.call(response_frame).await? ) })
+            
+            Ok::<_, BoxError>(response_frame)
+        })
     }
 
     fn poll_ready(

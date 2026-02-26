@@ -1,5 +1,7 @@
 # simian-llm
 
+Maya: this is where the magic happens of hooking these Reactors and streams into Large Language models
+
 LLM integration library for the simian-bastion agent framework. Provides core traits, types, and an ACP message protocol for routing LLM requests and responses between agents.
 
 ## What's Inside

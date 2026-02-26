@@ -67,7 +67,7 @@ fn frame_handler(
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     // Init o11y
-    bb_lib_metrics::init_metrics().await?;
+    simian_metrics::init_metrics().await?;
     let _otel = simian_tracing::initialize()?;
 
     //  Get Configureation

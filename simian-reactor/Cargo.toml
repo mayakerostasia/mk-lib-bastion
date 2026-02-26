@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 anyhow.workspace = true
 async_once = "0.2.6"
-simian-nats-streams = { path = "../simian-nats-streams" }
 bytes = "1.6.0"
 chrono = "0.4.38"
 metrics = "0.22.3"
@@ -15,6 +14,13 @@ pin-project-lite.workspace = true
 rand.workspace = true
 tokio = { workspace = true, features = ["sync"] }
 tower = { version = "0.4.13", features = ["limit"] }
+serde = { workspace = true }
+rkyv = { version = "0.8.15", features = ["bytecheck"] }
+futures.workspace = true
+async-trait.workspace = true
+tracing.workspace = true
+serde_json.workspace = true
+rkyv_dyn = "0.7.46"
 
 [dev-dependencies]
 lazy_static.workspace = true

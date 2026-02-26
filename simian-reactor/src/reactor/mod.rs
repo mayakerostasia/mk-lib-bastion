@@ -1,5 +1,4 @@
-#[cfg(feature = "nats")]
-pub use simian_nats_streams::{Frame, Proc};
+pub use crate::protocol::{Frame, Proc};
 pub use mako_battery::MakoBattery;
 pub use mako_layer::MakoLayer;
 pub use mako_reactor::MakoReactor;

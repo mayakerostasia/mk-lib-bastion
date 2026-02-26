@@ -1,6 +1,0 @@
-version: "2.2"
-dependencies: ./definition.yaml
-build:
-  - project: bluebastion/dev-rs-jira-api
-    build-command:
-      current: ls -la

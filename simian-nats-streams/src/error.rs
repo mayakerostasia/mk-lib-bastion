@@ -18,4 +18,10 @@ pub enum NSLibError {
 
     #[error("Failed Framed -> {0:#?}")]
     FrameDecodeError(String),
+    
+    #[error("Header Name Parse Error: {0:#?}")]
+    HeaderNameError(#[from] async_nats::header::ParseHeaderNameError),
+    
+    #[error("Header Value Parse Error: {0:#?}")]
+    HeaderValueError(#[from] async_nats::header::ParseHeaderValueError),
 }

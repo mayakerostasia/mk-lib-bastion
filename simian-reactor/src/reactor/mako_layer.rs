@@ -21,7 +21,7 @@ impl<T> MakoLayer<T> {
 
 impl<S, T> Layer<S> for MakoLayer<T>
 where
-    S: Service<T>,
+    S: Service<T> + Clone,
     S::Future: Future<Output = Result<S::Response, S::Error>>,
     S::Response: Into<Bytes>,
     S::Error: Into<BoxError>,

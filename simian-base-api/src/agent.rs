@@ -82,7 +82,8 @@ mod tests {
     use futures::StreamExt;
     use std::sync::{Arc, Mutex};
 
-    #[derive(Clone, Default)]
+
+    #[derive(Clone, Default, Debug)]
     struct MockTransport {
         published: Arc<Mutex<Vec<AcpMessage>>>,
     }
@@ -105,7 +106,7 @@ mod tests {
         let agent = SimianAgent::new(AgentId::new("sender"), transport.clone());
         let target = AgentId::new("receiver");
         
-        let conv_id = agent.request(target.clone(), "test", Bytes::from("hello")).await.unwrap();
+        let conv_id = agent.request(target.clone(), "test_subject", Bytes::from("hello")).await.unwrap();
         
         let published = transport.published.lock().unwrap();
         assert_eq!(published.len(), 1);

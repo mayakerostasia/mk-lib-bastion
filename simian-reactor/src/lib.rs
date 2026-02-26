@@ -6,8 +6,7 @@ pub use error::ReactorError;
 mod error;
 mod future;
 mod reactor;
+pub mod protocol;
 
-#[cfg(feature = "nats")]
-mod proc_service;
 
 // pub type PinnedFuture<O> = Pin<Box<dyn Future<Output = Result<O, Error>> + Send + Sync + 'static>>;

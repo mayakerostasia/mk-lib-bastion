@@ -9,8 +9,20 @@ use tracing::error;
 pub enum SimianEventType {
     Info(String),
 }
+
+impl SimianEventType {
+    pub fn encode(&self) -> Result<Vec<u8>, Error> {
+        Ok(bincode::serialize(self)?)
+    }
+    
+    pub fn decode(data: &[u8]) -> Result<Self, Error> {
+        Ok(bincode::deserialize(data)?)
+    }
+}
+
 impl Encoder for SimianEventType {}
-impl Decoder<'_, SimianEventType> for SimianEventType {}
+impl Decoder for SimianEventType {}
+
 impl From<SimianEventType> for Bytes {
     fn from(value: SimianEventType) -> Self {
         match value.encode() {
@@ -36,8 +48,20 @@ pub struct SimianEvent {
     name: String,
     _type: SimianEventType,
 }
+
+impl SimianEvent {
+    pub fn encode(&self) -> Result<Vec<u8>, Error> {
+        Ok(bincode::serialize(self)?)
+    }
+    
+    pub fn decode(data: &[u8]) -> Result<Self, Error> {
+        Ok(bincode::deserialize(data)?)
+    }
+}
+
 impl Encoder for SimianEvent {}
-impl Decoder<'_, SimianEvent> for SimianEvent {}
+impl Decoder for SimianEvent {}
+
 impl From<SimianEvent> for Bytes {
     fn from(value: SimianEvent) -> Self {
         match value.encode() {

@@ -19,7 +19,23 @@ where
 }
 
 impl<T> Encoder for Record<T> where T: Debug + Serialize + Clone {}
-impl<'a, T> Decoder<'a, Record<T>> for Record<T> where T: Debug + Serialize + Clone {}
+impl<T> Decoder for Record<T> where T: Debug + Serialize + Clone {}
+
+impl<T> Record<T>
+where
+    T: Debug + Serialize + Clone,
+{
+    pub fn encode(&self) -> Result<Vec<u8>, Error> {
+        Ok(bincode::serialize(self)?)
+    }
+    
+    pub fn decode(data: &[u8]) -> Result<Self, Error>
+    where
+        T: for<'a> Deserialize<'a>,
+    {
+        Ok(bincode::deserialize(data)?)
+    }
+}
 
 impl<T> From<Record<T>> for Bytes
 where

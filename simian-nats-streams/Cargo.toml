@@ -12,6 +12,7 @@ bytes = "1.6.0"
 futures = { workspace = true }
 simian-http-listener = { path = "../simian-http-listener" }
 simian-base-api = { path = "../simian-base-api" }
+simian-reactor = { path = "../simian-reactor" }
 petname = "2.0.2"
 rand = { workspace = true }
 serde = {  workspace = true, features = ["derive"] }

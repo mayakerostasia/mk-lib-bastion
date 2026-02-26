@@ -1,21 +1,32 @@
+use serde::{Serialize, Deserialize};
+use iggy::prelude::Identifier;
+use iggy::prelude::Consumer;
+use iggy::prelude::PollMessages;
+use iggy::prelude::PollingStrategy;
+use iggy::prelude::MessageClient;
 use async_trait::async_trait;
 use anyhow::{anyhow, Result};
-use simian_base_api::transport::{AcpMessage, AgentId, Transport, Performative};
+use simian_base_api::transport::{AcpMessage, AgentId, Transport};
 use futures::stream::{BoxStream, StreamExt};
-use iggy::client::Client;
 use iggy::clients::client::IggyClient;
-use iggy::messages::send_messages::{Message, SendMessages};
-use iggy::identifier::Identifier;
 use std::fmt::Debug;
 use std::sync::Arc;
 use tokio::time::{sleep, Duration};
-use uuid::Uuid;
 
 pub struct IggyTransport {
     client: IggyClient,
     stream_id: Identifier,
     base_topic: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct IggyStreamId(pub u32);
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct IggyTopicId(pub u32);
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct IggyPartition(pub u32);
 
 impl IggyTransport {
     pub async fn new(client: IggyClient, stream_id: Identifier, base_topic: &str) -> Result<Self> {
@@ -27,11 +38,11 @@ impl IggyTransport {
     }
 
     fn get_topic_id_for_agent(&self, agent_id: &AgentId) -> Identifier {
-        Identifier::from_str_identifier(&format!("{}_{}", self.base_topic, agent_id.0)).unwrap()
+        Identifier::from_str_value(&format!("{}_{}", self.base_topic, agent_id.0)).unwrap()
     }
 
     fn get_broadcast_topic_id(&self) -> Identifier {
-        Identifier::from_str_identifier(&format!("{}_broadcast", self.base_topic)).unwrap()
+        Identifier::from_str_value(&format!("{}_broadcast", self.base_topic)).unwrap()
     }
 }
 
@@ -46,19 +57,18 @@ impl Debug for IggyTransport {
 #[async_trait]
 impl Transport for IggyTransport {
     async fn publish(&self, message: AcpMessage) -> Result<()> {
+        // Target Topic
         let target_topic = if let Some(ref target) = message.target {
             self.get_topic_id_for_agent(target)
         } else {
             self.get_broadcast_topic_id()
         };
 
-        let payload = serde_json::to_vec(&message)?;
-        let iggy_message = Message::from_payload(payload.into());
 
-        self.client.send_messages(&self.stream_id, &target_topic, &mut SendMessages {
-            messages: vec![iggy_message],
-            partitioning: iggy::messages::send_messages::Partitioning::default(),
-        }).await.map_err(|e| anyhow!("Iggy send error: {}", e))?;
+        let payload = serde_json::to_vec(&message)?;
+        let iggy_message = IggyMessage::from_str(payload.into());
+
+        self.client.send_messages(&self.stream_id, &target_topic, IggyMessage::message.payload, vec![iggy_message]).await.map_err(|e| anyhow!("Iggy send error: {}", e))?;
 
         Ok(())
     }
@@ -79,18 +89,20 @@ impl Transport for IggyTransport {
             async move {
                 sleep(Duration::from_millis(100)).await;
                 
-                let inbox_messages = client.poll_messages(&stream_id, &topic_id, &iggy::messages::poll_messages::PollMessages {
-                    consumer: iggy::models::consumer::Consumer::default(),
-                    partition_id: 1,
-                    strategy: iggy::messages::poll_messages::PollingStrategy::offset(inbox_offset),
+                let inbox_messages = client.poll_messages(&stream_id, &topic_id, &PollMessages {
+                    consumer: Consumer::default(),
+                    partition_id: Some(1),
+                    strategy: PollingStrategy::offset(inbox_offset),
                     count: 10,
                     auto_commit: true,
                 }).await.ok();
 
-                let broadcast_messages = client.poll_messages(&stream_id, &broadcast_topic_id, &iggy::messages::poll_messages::PollMessages {
-                    consumer: iggy::models::consumer::Consumer::default(),
-                    partition_id: 1,
-                    strategy: iggy::messages::poll_messages::PollingStrategy::offset(broadcast_offset),
+                let broadcast_messages: Vec<IggyMessage> = client.poll_messages(&stream_id, &broadcast_topic_id, &PollMessages {
+                    consumer: Consumer::default(),
+                    stream_id: Identifier::from_str_value("example_stream_id").unwrap(),
+                    topic_id:  Identifier::from_str_value("example_topic_id").unwrap(),
+                    partition_id: Some(1),
+                    strategy: PollingStrategy::offset(broadcast_offset),
                     count: 10,
                     auto_commit: true,
                 }).await.ok();
@@ -131,8 +143,13 @@ impl Transport for IggyTransport {
 
 #[cfg(test)]
 mod tests {
+    use simian_base_api::transport::Performative;
     use super::*;
+    use uuid::Uuid;
     use bytes::Bytes;
+
+    const STREAM_ID: u32 = 1; 
+    const PARTITION_ID: u32 = 1; 
 
     #[test]
     fn test_acp_message_serialization() {

@@ -45,7 +45,7 @@ where
                 Frame::Exec(proc) => funk(proc).await?,
                 Frame::Json(val) => {
                     debug!("Frame Handler received JSON");
-                    Frame::json(val)
+                    Frame::Json(val)
                 }
                 Frame::Error(stri) => {
                     error!(stri);

@@ -1,5 +1,8 @@
 # simian-bin-cfg-creator
 
+Maya: I don't know if I like the way this works. This seems harder to manage, but it should be making it easier to manage
+
+
 ## Example cfg_creator help
 ```sh
 Usage: simian-bin-cfg-creator.exe <COMMAND>

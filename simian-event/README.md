@@ -1,0 +1,1 @@
+Maya: this is meant to be an observability hook, layer, that would need very little configuration but could be placed anywhere in the comms pipeline we're building so that data could be reviewed in flight, or reviewed after a problem, or a large success.

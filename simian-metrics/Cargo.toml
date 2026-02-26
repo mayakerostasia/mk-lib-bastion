@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 metrics = "0.23.0"
 metrics-exporter-prometheus = { version = "0.15.1", default-features = false, features = ["http-listener", "push-gateway"] }
-aws-lc-sys = { version = "0.21.2", features = ["bindgen", "ssl"] }
+# aws-lc-sys = { workspace = true }
 tokio = { workspace = true }
 anyhow = { workspace = true }
 hyper = { workspace = true }
