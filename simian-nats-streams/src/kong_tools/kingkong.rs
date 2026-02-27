@@ -1,4 +1,4 @@
-use crate::{Decoder, Frame, Kong, Monkey, NSLibError};
+use crate::{Frame, Kong, Monkey, NSLibError};
 use anyhow::anyhow;
 use simian_http_listener::Server;
 use bytes::Bytes;

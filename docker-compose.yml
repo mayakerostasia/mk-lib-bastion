@@ -1,4 +1,6 @@
 services:
+  # TODO:
+  # MCP Server with 
   # NATS message broker
   nats:
     image: nats:2-alpine
@@ -22,58 +24,91 @@ services:
   agent-generator:
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.agent
       args:
-        RUST_BIN: simian-bin-monkey
+        BINARY_NAME: "simian-agent"
+    env_file: .env.docker
     environment:
       - RUST_LOG=info
+      - COLLECTOR_ENDPOINT=http://otelcol:4317
+      - LOKI_ENDPOINT=http://loki:3100
       - NATS_URL=nats://nats:4222
       - AGENT_ID=generator-001
       - AGENT_ROLE=generator
+      - AGENT_SUBJECT=agents
+      - HEALTH_BIND=0.0.0.0:6660
     depends_on:
       nats:
         condition: service_healthy
     networks:
       - simian-network
+      - o11y_default
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:6660/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   # Agent 2: Processor
   agent-processor:
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.agent
       args:
-        RUST_BIN: simian-bin-monkey
+        BINARY_NAME: "simian-agent"
+    env_file: .env.docker
     environment:
       - RUST_LOG=info
+      - COLLECTOR_ENDPOINT=http://otelcol:4317
+      - LOKI_ENDPOINT=http://loki:3100
       - NATS_URL=nats://nats:4222
       - AGENT_ID=processor-001
       - AGENT_ROLE=processor
+      - AGENT_SUBJECT=agents
+      - HEALTH_BIND=0.0.0.0:6660
     depends_on:
       nats:
         condition: service_healthy
     networks:
       - simian-network
+      - o11y_default
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:6660/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   # Agent 3: Verifier
   agent-verifier:
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.agent
       args:
-        RUST_BIN: simian-bin-monkey
+        BINARY_NAME: "simian-agent"
+    env_file: .env.docker
     environment:
       - RUST_LOG=info
+      - COLLECTOR_ENDPOINT=http://otelcol:4317
+      - LOKI_ENDPOINT=http://loki:3100
       - NATS_URL=nats://nats:4222
       - AGENT_ID=verifier-001
       - AGENT_ROLE=verifier
+      - AGENT_SUBJECT=agents
+      - HEALTH_BIND=0.0.0.0:6660
     depends_on:
       nats:
         condition: service_healthy
     networks:
       - simian-network
+      - o11y_default
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:6660/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   # Visualization Bridge: NATS → WebSocket
   viz-bridge:
@@ -82,8 +117,11 @@ services:
       dockerfile: docker/Dockerfile.viz-bridge
     ports:
       - "3030:3030"  # WebSocket server
+    env_file: .env.docker
     environment:
       - RUST_LOG=info
+      - COLLECTOR_ENDPOINT=http://otelcol:4317
+      - LOKI_ENDPOINT=http://loki:3100
       - NATS_URL=nats://nats:4222
       - WS_PORT=3030
     depends_on:
@@ -91,6 +129,7 @@ services:
         condition: service_healthy
     networks:
       - simian-network
+      - o11y_default
     restart: unless-stopped
 
   # React Dashboard
@@ -100,12 +139,16 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5173:5173"  # Vite dev server
+    env_file: .env.docker
     environment:
-      - VITE_WS_URL=ws://localhost:3030
+      - VITE_WS_URL=ws://viz-bridge:3030
+      - COLLECTOR_ENDPOINT=http://otelcol:4317
+      - LOKI_ENDPOINT=http://loki:3100
     depends_on:
       - viz-bridge
     networks:
       - simian-network
+      - o11y_default
     volumes:
       - ./viz-dashboard/src:/app/src:ro
     restart: unless-stopped
@@ -113,6 +156,9 @@ services:
 networks:
   simian-network:
     driver: bridge
+  o11y_default:
+    external: true
+
 
 volumes:
   nats-data:

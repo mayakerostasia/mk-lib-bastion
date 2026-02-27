@@ -11,14 +11,14 @@ path = "src/main.rs"
 # Core dependencies
 simian-nats-streams = { path = "../simian-nats-streams" }
 simian-base-api = { path = "../simian-base-api" }
-simian-reactor = { path = "../simian-reactor" }
+# simian-reactor = { path = "../simian-reactor" }
 simian-tracing = { path = "../simian-tracing" }
 
 # Async runtime
 tokio = { workspace = true, features = ["macros", "rt-multi-thread", "signal"] }
 
 # Tower ecosystem
-tower = { workspace = true }
+tower = { workspace = true, features = ["buffer", "limit", "timeout"] }
 
 # Error handling
 anyhow = { workspace = true }

@@ -1,9 +1,10 @@
-// use anyhow::Error;
 
 #[derive(thiserror::Error, Debug)]
 pub enum NSLibError {
     #[error("Anyhow!: {0:#?}")]
     Anyhow(#[source] anyhow::Error),
+    #[error("ErrorFromAnyhow: {0:#?}")]
+    ErrorFromAnyhow(#[from] anyhow::Error),
     #[error("Nats Error: {0:#?}")]
     NatsError(#[from] async_nats::Error),
     #[error("Publish Error: {0:#?}")]

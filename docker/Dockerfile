@@ -1,13 +1,15 @@
 # Build stage
 FROM rust:alpine as builder
 
+ARG BINARY_NAME=simian-bin-agent
+
 RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static pkgconfig
 
 WORKDIR /build
 COPY . .
 
 # Build the simian-bin-monkey binary
-RUN cargo build --release --bin simian-bin-monkey
+RUN cargo build --release --bin simian-bin-agent
 
 # Runtime stage
 FROM alpine:latest

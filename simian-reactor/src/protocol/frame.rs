@@ -2,6 +2,7 @@ use super::proc::Proc;
 use super::SimianFrame;
 use bytes::Bytes;
 use rkyv::{Archive, Deserialize as RkyvDeserialize, Serialize as RkyvSerialize};
+use rkyv::rancor::Error as RankError;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::convert::From;
@@ -109,8 +110,7 @@ impl Frame {
 
     /// Decode Frame from bytes using rkyv
     pub fn decode(data: &[u8]) -> Result<Self, BoxError> {
-        let archived = rkyv::access::<ArchivedFrame, rkyv::rancor::Error>(data)?;
-        let frame: Frame = rkyv::deserialize::<Frame, rkyv::rancor::Error>(archived)?;
+        let frame: Frame = rkyv::from_bytes::<Frame, RankError>(&data)?;
         Ok(frame)
     }
 }

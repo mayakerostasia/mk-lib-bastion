@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
   "simian-bin-monkey",
+  "simian-bin-agent",
   "simian-bin-cfg-creator",
   "simian-base-api",
   "simian-config",

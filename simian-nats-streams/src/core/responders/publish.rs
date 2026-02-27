@@ -1,4 +1,4 @@
-use crate::{Decoder, Frame};
+use crate::Frame;
 use bytes::Bytes;
 use futures::StreamExt;
 use std::future::Future;
