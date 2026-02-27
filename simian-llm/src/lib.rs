@@ -1,9 +1,11 @@
+pub mod agent;
 pub mod backends;
 pub mod client;
 pub mod error;
 pub mod protocol;
 pub mod types;
 
+pub use agent::{AgentAnnouncement, LlmAgent};
 pub use backends::LmStudioClient;
 pub use error::LlmError;
 pub use protocol::{LlmChatRequest, LlmChatResponse, LlmReasonRequest, LlmReasonResponse};

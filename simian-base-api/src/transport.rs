@@ -48,6 +48,29 @@ pub struct AcpMessage {
     pub timestamp: i64,
 }
 
+/// Returns `true` if `subject` matches `pattern`.
+///
+/// - **Exact**: `"a.b"` matches only `"a.b"`
+/// - **Single-level wildcard**: `"a.*"` matches `"a.foo"` but **not** `"a.foo.bar"`
+///
+/// ```
+/// use simian_base_api::transport::match_subject;
+/// assert!(match_subject("data.*", "data.import"));
+/// assert!(!match_subject("data.*", "data.import.csv"));
+/// assert!(match_subject("llm.request", "llm.request"));
+/// assert!(!match_subject("llm.request", "llm.response"));
+/// ```
+pub fn match_subject(pattern: &str, subject: &str) -> bool {
+    if let Some(prefix) = pattern.strip_suffix(".*") {
+        subject.starts_with(prefix)
+            && subject.len() > prefix.len() + 1
+            && subject.as_bytes()[prefix.len()] == b'.'
+            && !subject[prefix.len() + 1..].contains('.')
+    } else {
+        pattern == subject
+    }
+}
+
 /// The core trait that any messaging backend (NATS, Iggy, etc.) must implement.
 #[async_trait]
 pub trait Transport: Send + Sync + Debug {
@@ -59,4 +82,31 @@ pub trait Transport: Send + Sync + Debug {
 
     /// Checks if the transport is currently connected.
     async fn is_connected(&self) -> bool;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_match_subject_exact() {
+        assert!(match_subject("llm.request", "llm.request"));
+        assert!(!match_subject("llm.request", "llm.response"));
+        assert!(!match_subject("llm.request", "llm.request.extra"));
+    }
+
+    #[test]
+    fn test_match_subject_wildcard() {
+        assert!(match_subject("data.*", "data.import"));
+        assert!(match_subject("data.*", "data.export"));
+        assert!(!match_subject("data.*", "data.import.csv"));
+        assert!(!match_subject("data.*", "data"));
+        assert!(!match_subject("data.*", "other.import"));
+    }
+
+    #[test]
+    fn test_match_subject_wildcard_no_prefix_bleed() {
+        // "dataX.import" should not match "data.*"
+        assert!(!match_subject("data.*", "dataX.import"));
+    }
 }

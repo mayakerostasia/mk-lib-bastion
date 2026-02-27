@@ -20,6 +20,32 @@ impl<T: Transport> SimianAgent<T> {
         &self.id
     }
 
+    /// Returns a reference to the underlying transport.
+    pub fn transport(&self) -> &T {
+        &self.transport
+    }
+
+    /// Sends a message with an explicit performative and optional target.
+    pub async fn send(
+        &self,
+        target: Option<AgentId>,
+        subject: &str,
+        performative: Performative,
+        payload: Bytes,
+    ) -> Result<()> {
+        let message = AcpMessage {
+            message_id: Uuid::new_v4(),
+            source: self.id.clone(),
+            target,
+            performative,
+            subject: subject.to_string(),
+            conversation_id: Uuid::new_v4(),
+            payload,
+            timestamp: Utc::now().timestamp(),
+        };
+        self.transport.publish(message).await
+    }
+
     /// Sends a request to a specific agent.
     pub async fn request(&self, target: AgentId, subject: &str, payload: Bytes) -> Result<Uuid> {
         let conversation_id = Uuid::new_v4();

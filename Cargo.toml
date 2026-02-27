@@ -4,6 +4,7 @@ members = [
   "simian-bin-monkey",
   "simian-bin-agent",
   "simian-bin-cfg-creator",
+  "simian-agent-registry",
   "simian-base-api",
   "simian-config",
   "simian-http-listener",
