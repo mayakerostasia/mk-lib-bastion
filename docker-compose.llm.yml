@@ -1,0 +1,189 @@
+version: '3.8'
+
+services:
+  # ============================================================
+  # Infrastructure
+  # ============================================================
+  
+  # NATS message broker
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"  # Client connections
+      - "8222:8222"  # HTTP monitoring
+    command: 
+      - "--http_port"
+      - "8222"
+      - "--js"       # Enable JetStream
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - simian-network
+
+  # LMStudio (or any OpenAI-compatible LLM server)
+  # Run this externally: LMStudio, Ollama, etc.
+  # Or use this placeholder that connects to your local LMStudio
+  # lmstudio:
+  #   image: your-llm-image:latest
+  #   ports:
+  #     - "1234:1234"
+  #   networks:
+  #     - simian-network
+
+  # ============================================================
+  # LLM Agents (Using simian-llm)
+  # ============================================================
+  
+  # LLM Agent 1: Researcher
+  llm-agent-researcher:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.llm-agent
+    environment:
+      - RUST_LOG=debug
+      - NATS_URL=nats://nats:4222
+      - AGENT_ID=researcher-001
+      - AGENT_ROLE=researcher
+      - AGENT_SUBJECTS=research.*,analyze.*
+      - SYSTEM_PROMPT=You are a research agent. Analyze topics and provide detailed insights.
+      # LMStudio config (adjust to your setup)
+      - LMSTUDIO_BASE_URL=http://192.168.1.7:1234/v1
+      - LMSTUDIO_MODEL=local-model
+      - LMSTUDIO_TEMPERATURE=0.7
+      - LMSTUDIO_MAX_TOKENS=2000
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - simian-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Access host's LMStudio
+    restart: unless-stopped
+
+  # LLM Agent 2: Summarizer
+  llm-agent-summarizer:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.llm-agent
+    environment:
+      - RUST_LOG=debug
+      - NATS_URL=nats://nats:4222
+      - AGENT_ID=summarizer-001
+      - AGENT_ROLE=summarizer
+      - AGENT_SUBJECTS=summarize.*
+      - SYSTEM_PROMPT=You are a summarization agent. Create concise summaries of long texts.
+      - LMSTUDIO_BASE_URL=http://192.168.1.7:1234/v1
+      - LMSTUDIO_MODEL=local-model
+      - LMSTUDIO_TEMPERATURE=0.3
+      - LMSTUDIO_MAX_TOKENS=500
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - simian-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  # LLM Agent 3: Creative Writer
+  llm-agent-writer:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.llm-agent
+    environment:
+      - RUST_LOG=debug
+      - NATS_URL=nats://nats:4222
+      - AGENT_ID=writer-001
+      - AGENT_ROLE=writer
+      - AGENT_SUBJECTS=write.*,create.*
+      - SYSTEM_PROMPT=You are a creative writing agent. Generate engaging content.
+      - LMSTUDIO_BASE_URL=http://192.168.1.7:1234/v1
+      - LMSTUDIO_MODEL=local-model
+      - LMSTUDIO_TEMPERATURE=0.9
+      - LMSTUDIO_MAX_TOKENS=1500
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - simian-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  # ============================================================
+  # Orchestrator Agent (Coordinates LLM agents)
+  # ============================================================
+  
+  orchestrator:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.llm-agent
+    environment:
+      - RUST_LOG=debug
+      - NATS_URL=nats://nats:4222
+      - AGENT_ID=orchestrator-001
+      - AGENT_ROLE=orchestrator
+      - AGENT_SUBJECTS=orchestrate.*,task.*
+      - SYSTEM_PROMPT=You are an orchestrator. Coordinate between researcher, summarizer, and writer agents.
+      - LMSTUDIO_BASE_URL=http://192.168.1.7:1234/v1
+      - LMSTUDIO_MODEL=local-model
+      - LMSTUDIO_TEMPERATURE=0.5
+      - LMSTUDIO_MAX_TOKENS=1000
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - simian-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  # ============================================================
+  # Visualization
+  # ============================================================
+  
+  # Visualization Bridge: Transport → WebSocket
+  viz-bridge:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.viz-bridge
+    ports:
+      - "3030:3030"  # WebSocket server
+    environment:
+      - RUST_LOG=info
+      - NATS_URL=nats://nats:4222
+      - WS_PORT=3030
+      - BASE_SUBJECT=agents
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - simian-network
+    restart: unless-stopped
+
+  # React Dashboard
+  viz-dashboard:
+    build:
+      context: ./viz-dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"  # Vite dev server
+    environment:
+      - VITE_WS_URL=ws://localhost:3030/ws
+    depends_on:
+      - viz-bridge
+    networks:
+      - simian-network
+    volumes:
+      - ./viz-dashboard/src:/app/src:ro
+    restart: unless-stopped
+
+networks:
+  simian-network:
+    driver: bridge
+
+volumes:
+  nats-data:

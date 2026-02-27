@@ -7,18 +7,24 @@ edition = "2021"
 anyhow = { workspace = true }
 async-trait = { workspace = true }
 bytes = { workspace = true }
+futures = { workspace = true }
+reqwest = { workspace = true, features = ["json"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 tracing = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { workspace = true }
 chrono = { workspace = true }
 metrics = { workspace = true }
 simian-base-api = { path = "../simian-base-api" }
+simian-nats-streams = { path = "../simian-nats-streams" }
 simian-tracing = { path = "../simian-tracing" }
 simian-metrics = { path = "../simian-metrics" }
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
-futures = { workspace = true }
-simian-nats-streams = { path = "../simian-nats-streams" }
+
+[[bin]]
+name = "llm-agent"
+path = "src/bin/llm-agent.rs"

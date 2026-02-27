@@ -1,0 +1,118 @@
+services:
+  # NATS message broker
+  nats:
+    image: nats:2-alpine
+    ports:
+      - "4222:4222"  # Client connections
+      - "8222:8222"  # HTTP monitoring
+      - "6222:6222"  # Cluster connections
+    command: 
+      - "--http_port"
+      - "8222"
+      - "--js"        # Enable JetStream
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - simian-network
+
+  # Agent 1: Request Generator
+  agent-generator:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        RUST_BIN: simian-bin-monkey
+    environment:
+      - RUST_LOG=info
+      - NATS_URL=nats://nats:4222
+      - AGENT_ID=generator-001
+      - AGENT_ROLE=generator
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - simian-network
+    restart: unless-stopped
+
+  # Agent 2: Processor
+  agent-processor:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        RUST_BIN: simian-bin-monkey
+    environment:
+      - RUST_LOG=info
+      - NATS_URL=nats://nats:4222
+      - AGENT_ID=processor-001
+      - AGENT_ROLE=processor
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - simian-network
+    restart: unless-stopped
+
+  # Agent 3: Verifier
+  agent-verifier:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        RUST_BIN: simian-bin-monkey
+    environment:
+      - RUST_LOG=info
+      - NATS_URL=nats://nats:4222
+      - AGENT_ID=verifier-001
+      - AGENT_ROLE=verifier
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - simian-network
+    restart: unless-stopped
+
+  # Visualization Bridge: NATS → WebSocket
+  viz-bridge:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.viz-bridge
+    ports:
+      - "3030:3030"  # WebSocket server
+    environment:
+      - RUST_LOG=info
+      - NATS_URL=nats://nats:4222
+      - WS_PORT=3030
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - simian-network
+    restart: unless-stopped
+
+  # React Dashboard
+  viz-dashboard:
+    build:
+      context: ./viz-dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"  # Vite dev server
+    environment:
+      - VITE_WS_URL=ws://localhost:3030
+    depends_on:
+      - viz-bridge
+    networks:
+      - simian-network
+    volumes:
+      - ./viz-dashboard/src:/app/src:ro
+    restart: unless-stopped
+
+networks:
+  simian-network:
+    driver: bridge
+
+volumes:
+  nats-data:

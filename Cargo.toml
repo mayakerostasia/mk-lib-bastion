@@ -13,7 +13,7 @@ members = [
   "simian-metrics",
   "simian-reactor",
   # "simian-iggy-streams",
-  "simian-llm",
+  "simian-llm", "simian-viz-bridge",
 ]
 
 [workspace.dependencies]

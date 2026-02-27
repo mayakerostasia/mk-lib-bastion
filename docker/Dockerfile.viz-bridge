@@ -1,0 +1,25 @@
+FROM rust:alpine as builder
+
+RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static pkgconfig
+
+WORKDIR /build
+COPY . .
+
+RUN cargo build --release -p simian-viz-bridge
+
+FROM alpine:latest
+
+RUN apk add --no-cache ca-certificates
+
+COPY --from=builder /build/target/release/simian-viz-bridge /usr/local/bin/
+
+EXPOSE 3030
+
+ENV RUST_LOG=info
+ENV NATS_URL=nats://nats:4222
+ENV WS_PORT=3030
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+  CMD wget --spider -q http://localhost:3030/health || exit 1
+
+ENTRYPOINT ["/usr/local/bin/simian-viz-bridge"]

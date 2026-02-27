@@ -1,0 +1,39 @@
+[package]
+name = "simian-bin-agent"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "simian-agent"
+path = "src/main.rs"
+
+[dependencies]
+# Core dependencies
+simian-nats-streams = { path = "../simian-nats-streams" }
+simian-base-api = { path = "../simian-base-api" }
+simian-reactor = { path = "../simian-reactor" }
+simian-tracing = { path = "../simian-tracing" }
+
+# Async runtime
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "signal"] }
+
+# Tower ecosystem
+tower = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+
+# Serialization
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+
+# Utilities
+bytes = { workspace = true }
+tracing = { workspace = true }
+futures = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+rand = { workspace = true }
+
+# CLI
+clap = { workspace = true, features = ["derive", "env"] }

@@ -1,0 +1,44 @@
+# Generic Dockerfile for building any simian agent binary
+# Usage: docker build --build-arg BINARY_NAME=simian-bin-monkey -f docker/Dockerfile.agent -t my-agent .
+
+# Build stage
+FROM rust:alpine as builder
+
+ARG BINARY_NAME=simian-bin-monkey
+
+RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static pkgconfig
+
+WORKDIR /build
+COPY . .
+
+# Build the specified binary
+RUN cargo build --release --bin ${BINARY_NAME}
+
+# Runtime stage
+FROM alpine:latest
+
+ARG BINARY_NAME=simian-bin-monkey
+
+RUN apk add --no-cache ca-certificates curl bash
+
+# Create app user/group
+RUN addgroup -g 10001 appuser && \
+    adduser -D -u 10001 -G appuser appuser
+
+# Create directories
+RUN install -d -o 10001 -g 10001 /app && \
+    install -d -o 10001 -g 10001 /app/logs
+
+# Copy binary
+COPY --from=builder --chown=10001:10001 /build/target/release/${BINARY_NAME} /usr/local/bin/agent
+
+WORKDIR /app
+USER 10001
+
+ENV RUST_LOG=info
+
+# Health check (basic process check)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD ps aux | grep agent || exit 1
+
+ENTRYPOINT ["/usr/local/bin/agent"]

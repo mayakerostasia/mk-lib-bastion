@@ -54,6 +54,8 @@
 //! consider use: pub trait Source: Debug
 
 mod configs;
+pub mod types;
+mod loader;
 
 #[cfg(not(feature = "dev"))]
 pub mod configuration;

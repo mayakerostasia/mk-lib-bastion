@@ -1,0 +1,42 @@
+# Ignore build artifacts
+target/
+**/target/
+.cargo/
+
+# Ignore development files
+.git/
+.gitignore
+.env
+.env.local
+*.log
+logs/
+
+# Ignore test files
+**/tests/
+**/*_test.rs
+**/*.test.*
+
+# Ignore documentation
+docs/
+*.md
+!README.md
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore node_modules except where needed
+node_modules/
+**/node_modules/
+
+# Keep specific files needed for docker builds
+!viz-dashboard/node_modules/
+!viz-dashboard/package*.json
+!Dockerfile
+!docker/Dockerfile*
+
+# Ignore session state
+.copilot/
